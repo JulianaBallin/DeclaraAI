@@ -1,3 +1,10 @@
+# DeclaraAI — runtime data (não versionar)
+data/uploads/*
+!data/uploads/.gitkeep
+data/chroma_db/*
+!data/chroma_db/.gitkeep
+data/*.db
+
 # Byte-compiled / optimized / DLL files
 __pycache__/
 *.py[codz]
