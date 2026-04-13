@@ -1,0 +1,95 @@
+version: "3.8"
+
+# ============================================================
+# DeclaraAI — Docker Compose
+#
+# Serviços:
+#   - backend  : API FastAPI com pipeline RAG (porta 8000)
+#   - frontend : Interface Streamlit (porta 8501)
+#   - ollama   : Servidor de LLM local (porta 11434)
+#
+# Volumes persistentes:
+#   - ./data   → dados de uploads, base de conhecimento e ChromaDB
+#   - ollama_models → modelos do Ollama baixados
+# ============================================================
+
+services:
+
+  # ----------------------------------------------------------
+  # Backend — FastAPI + RAG
+  # ----------------------------------------------------------
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    container_name: declaraai-backend
+    ports:
+      - "8000:8000"
+    environment:
+      - DATABASE_URL=sqlite:///./data/declaraai.db
+      - OLLAMA_BASE_URL=http://ollama:11434
+      - OLLAMA_MODELO=mistral
+      - MODELO_EMBEDDINGS=sentence-transformers/paraphrase-multilingual-MiniLM-L12-v2
+      - CAMINHO_CHROMA=./data/chroma_db
+      - CAMINHO_BASE_CONHECIMENTO=./data/knowledge_base
+      - CAMINHO_UPLOADS=./data/uploads
+      - CHUNK_SIZE=600
+      - CHUNK_OVERLAP=80
+      - TOP_K_RESULTADOS=5
+      - DEBUG=false
+    volumes:
+      # Monta o diretório de dados do host no container
+      - ./data:/app/data
+    depends_on:
+      ollama:
+        condition: service_started
+    restart: unless-stopped
+    networks:
+      - declaraai-net
+
+  # ----------------------------------------------------------
+  # Frontend — Streamlit
+  # ----------------------------------------------------------
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+    container_name: declaraai-frontend
+    ports:
+      - "8501:8501"
+    environment:
+      - API_URL=http://backend:8000
+    depends_on:
+      - backend
+    restart: unless-stopped
+    networks:
+      - declaraai-net
+
+  # ----------------------------------------------------------
+  # Ollama — Servidor de LLM local
+  # ----------------------------------------------------------
+  ollama:
+    image: ollama/ollama:latest
+    container_name: declaraai-ollama
+    ports:
+      - "11434:11434"
+    volumes:
+      # Persiste modelos baixados entre reinicializações
+      - ollama_models:/root/.ollama
+    restart: unless-stopped
+    networks:
+      - declaraai-net
+
+# ----------------------------------------------------------
+# Rede interna
+# ----------------------------------------------------------
+networks:
+  declaraai-net:
+    driver: bridge
+
+# ----------------------------------------------------------
+# Volumes nomeados
+# ----------------------------------------------------------
+volumes:
+  ollama_models:
+    driver: local
