@@ -1,0 +1,357 @@
+GUIA COMPLETO DO IMPOSTO DE RENDA PESSOA FÍSICA - BRASIL
+Versão de Referência para a Base de Conhecimento do DeclaraAI
+
+=============================================================
+1. O QUE É O IMPOSTO DE RENDA PESSOA FÍSICA (IRPF)?
+=============================================================
+
+O Imposto de Renda da Pessoa Física (IRPF) é um tributo federal brasileiro
+que incide sobre os rendimentos auferidos por pessoas físicas durante o
+ano-calendário. É administrado pela Receita Federal do Brasil e tem sua
+entrega anual geralmente entre março e maio do ano seguinte.
+
+=============================================================
+2. QUEM DEVE DECLARAR O IRPF?
+=============================================================
+
+Deve entregar a Declaração de Ajuste Anual (DAA) toda pessoa física que,
+no ano-calendário anterior:
+
+- Recebeu rendimentos tributáveis (salários, aluguéis, etc.) acima de
+  R$ 30.639,90 (valor de referência — confirme o limite atual na Receita Federal);
+
+- Recebeu rendimentos isentos, não tributáveis ou tributados exclusivamente
+  na fonte em valor superior a R$ 200.000,00;
+
+- Obteve ganho de capital na alienação de bens ou direitos sujeito à
+  incidência do imposto;
+
+- Realizou operações em bolsas de valores, de mercadorias, de futuros
+  e assemelhadas;
+
+- Tinha posse ou propriedade de bens e direitos com valor total superior
+  a R$ 800.000,00 em 31 de dezembro;
+
+- Obteve receita bruta da atividade rural superior a R$ 153.199,50;
+
+- Passou à condição de residente no Brasil em qualquer mês do ano.
+
+=============================================================
+3. PRINCIPAIS DEDUÇÕES PERMITIDAS
+=============================================================
+
+---------------------------------
+3.1. DESPESAS MÉDICAS E DE SAÚDE
+---------------------------------
+
+Dedução integral, sem limite de valor, desde que comprovadas com recibos
+ou notas fiscais em nome do declarante ou de seus dependentes.
+
+Despesas dedutíveis:
+- Médicos de todas as especialidades (clínico geral, cardiologista, etc.)
+- Dentistas e ortodontistas
+- Psicólogos e psiquiatras
+- Fisioterapeutas e terapeutas ocupacionais
+- Fonoaudiólogos e nutricionistas
+- Hospitais, clínicas e laboratórios de análises clínicas
+- Planos e seguros de saúde (titular e dependentes)
+- Exames diagnósticos por imagem (raio-X, ressonância, tomografia)
+- Cirurgias e procedimentos médicos
+- Internações hospitalares
+
+NÃO são dedutíveis:
+- Medicamentos (exceto quando incluídos na conta hospitalar)
+- Óculos e lentes de contato
+- Aparelhos ortopédicos não prescritos por médico
+
+---------------------------------
+3.2. DESPESAS COM EDUCAÇÃO
+---------------------------------
+
+Dedução limitada a R$ 3.561,50 por pessoa (titular e cada dependente).
+
+Tipos de despesas educacionais dedutíveis:
+- Educação infantil: creche e pré-escola
+- Ensino fundamental
+- Ensino médio
+- Ensino superior: graduação, pós-graduação, mestrado e doutorado
+- Curso técnico e tecnológico reconhecido pelo MEC
+
+NÃO são dedutíveis:
+- Cursos livres (inglês, informática, música, etc.)
+- Material escolar e uniforme
+- Transporte escolar
+- Atividades extracurriculares
+
+---------------------------------
+3.3. CONTRIBUIÇÕES PREVIDENCIÁRIAS
+---------------------------------
+
+- INSS: contribuição ao Instituto Nacional do Seguro Social — dedução integral
+- INSS doméstico: contribuições como empregador doméstico
+- PGBL (Plano Gerador de Benefício Livre): até 12% da renda bruta tributável
+
+Nota: O VGBL não é dedutível no modelo completo (apenas no simplificado há
+a dedução padrão de 20%).
+
+---------------------------------
+3.4. DEPENDENTES
+---------------------------------
+
+Dedução de R$ 2.275,08 por dependente ao ano.
+
+Podem ser dependentes:
+- Filho(s) até 21 anos, ou até 24 anos se estudante universitário
+- Cônjuge ou companheiro(a)
+- Pais, avós e bisavós com rendimentos inferiores ao limite de isenção
+- Irmão, neto ou bisneto menor de 21 anos sob tutela
+
+---------------------------------
+3.5. PENSÃO ALIMENTÍCIA
+---------------------------------
+
+Valores pagos a título de pensão alimentícia judicial ou em acordo
+homologado pelo juiz são integralmente dedutíveis.
+
+---------------------------------
+3.6. LIVRO CAIXA (AUTÔNOMOS)
+---------------------------------
+
+Profissionais autônomos e liberais podem deduzir despesas necessárias
+à manutenção da fonte produtora de renda, como:
+- Aluguel de consultório ou escritório
+- Material de escritório
+- Salário de funcionários
+- Contribuições ao sindicato da categoria
+
+=============================================================
+4. DOCUMENTOS NECESSÁRIOS PARA A DECLARAÇÃO
+=============================================================
+
+---------------------------------
+4.1. DOCUMENTOS PESSOAIS
+---------------------------------
+- CPF do declarante e de todos os dependentes
+- Título de eleitor
+- Comprovante de endereço atualizado
+
+---------------------------------
+4.2. INFORMES DE RENDIMENTOS
+---------------------------------
+- Informe de rendimentos do empregador (DIRF) — emitido até fevereiro
+- Informe do INSS (aposentados e pensionistas)
+- Informe de rendimentos de bancos e corretoras
+- Informe de fundos de investimento
+- Informe de planos de previdência privada
+
+---------------------------------
+4.3. COMPROVANTES DE DESPESAS MÉDICAS
+---------------------------------
+- Recibos de consultas médicas e dentistas
+- Notas fiscais de laboratórios e clínicas
+- Comprovantes mensais de plano de saúde
+- Recibos de fisioterapia e psicologia
+- Notas de procedimentos hospitalares
+
+---------------------------------
+4.4. COMPROVANTES DE DESPESAS EDUCACIONAIS
+---------------------------------
+- Comprovantes de mensalidades escolares (janeiro a dezembro)
+- Recibos de universidades e faculdades
+- Comprovantes de cursos técnicos reconhecidos
+
+---------------------------------
+4.5. COMPROVANTES DE BENS E DIREITOS
+---------------------------------
+- Escritura de compra/venda de imóveis
+- CRLV do veículo (documento do carro)
+- Extratos de aplicações financeiras
+- Notas de compra e venda de ações
+- Contratos de compra de bens (valores acima de R$ 5.000,00)
+
+---------------------------------
+4.6. OUTROS DOCUMENTOS
+---------------------------------
+- Recibos de aluguel recebido ou pago
+- Contratos de financiamento imobiliário (FGTS utilizado)
+- Comprovante de rescisão trabalhista
+- Decisões judiciais de pensão alimentícia
+- Doações feitas a entidades qualificadas
+
+=============================================================
+5. MODELOS DE DECLARAÇÃO
+=============================================================
+
+---------------------------------
+5.1. DECLARAÇÃO SIMPLIFICADA
+---------------------------------
+- Aplica desconto padrão de 20% sobre os rendimentos tributáveis
+- Limite máximo de dedução: R$ 16.754,34 (verifique o valor atual)
+- Mais simples: não exige comprovação de despesas
+- Indicada para quem tem poucas deduções
+
+---------------------------------
+5.2. DECLARAÇÃO COMPLETA
+---------------------------------
+- Permite informar todas as deduções legais
+- Exige comprovação com documentos (recibos, notas fiscais)
+- Indicada quando as deduções superam o desconto simplificado
+- Mais trabalhosa, mas pode gerar maior restituição
+
+Dica: O próprio programa gerador da Receita Federal calcula qual modelo
+é mais vantajoso para cada contribuinte.
+
+=============================================================
+6. TRIBUTAÇÃO DE RENDIMENTOS
+=============================================================
+
+---------------------------------
+6.1. TABELA PROGRESSIVA (2024)
+---------------------------------
+
+Faixa de Renda Mensal       | Alíquota | Parcela a Deduzir
+--------------------------- | -------- | ----------------
+Até R$ 2.259,20             |   0%     | R$ 0,00
+R$ 2.259,21 a R$ 2.826,65   |  7,5%    | R$ 169,44
+R$ 2.826,66 a R$ 3.751,05   |  15%     | R$ 381,44
+R$ 3.751,06 a R$ 4.664,68   |  22,5%   | R$ 662,77
+Acima de R$ 4.664,68        |  27,5%   | R$ 896,00
+
+Nota: A tabela é atualizada anualmente — consulte sempre a versão vigente
+no site da Receita Federal (receita.fazenda.gov.br).
+
+---------------------------------
+6.2. RENDIMENTOS ISENTOS (não tributáveis)
+---------------------------------
+- Indenização por rescisão do contrato de trabalho (FGTS)
+- Seguro-desemprego
+- Ganho de capital na venda do único imóvel até R$ 440.000,00
+- Lucros e dividendos recebidos de empresas (legislação vigente)
+- Herança e doação recebidas
+- Bolsas de estudo oficiais (CAPES, CNPq, etc.)
+- Aposentadoria para maiores de 65 anos — parcela isenta
+
+=============================================================
+7. RENDIMENTOS ESPECIAIS
+=============================================================
+
+---------------------------------
+7.1. ALUGUÉIS RECEBIDOS
+---------------------------------
+- Pessoa física: tributado na tabela progressiva (carnê-leão mensal)
+- CNPJ/PJ: IRRF retido na fonte pelo pagador
+- Despesas dedutíveis: IPTU, condomínio, reparos (com comprovante)
+
+---------------------------------
+7.2. GANHO DE CAPITAL
+---------------------------------
+Venda de bens com lucro:
+- Alíquota: 15% até R$ 5 milhões / 17,5% até R$ 10 mi / 20% até R$ 30 mi / 22,5% acima
+- Prazo: GCAP deve ser pago até o último dia útil do mês seguinte à venda
+- Isenção: venda do único imóvel por até R$ 440.000,00 sem outra venda nos 5 anos anteriores
+
+---------------------------------
+7.3. AUTÔNOMOS E MEI
+---------------------------------
+
+Profissional Autônomo:
+- Deve pagar carnê-leão mensalmente sobre rendimentos de pessoas físicas
+- Pode deduzir despesas no Livro Caixa
+- Rendimentos de PJ: IRRF retido na fonte
+
+MEI (Microempreendedor Individual):
+- O MEI declara como pessoa física, não como empresa
+- Pro-labore é rendimento tributável
+- Lucro isento do MEI: 8% (comércio/indústria) ou 32% (serviços)
+- Distribuição de lucros isenta até o limite
+
+=============================================================
+8. RESTITUIÇÃO E IMPOSTO A PAGAR
+=============================================================
+
+Restituição:
+- Ocorre quando o IR retido na fonte é MAIOR que o devido
+- O valor é devolvido pela Receita Federal após processamento
+- Restituição em lotes (geralmente junho a dezembro)
+- Prioridade: idosos, portadores de doença grave e professores
+
+Imposto a pagar:
+- Ocorre quando o IR retido é MENOR que o calculado
+- Pode ser pago em até 8 quotas mensais (mínimo R$ 50,00)
+- 1ª quota: vencimento no prazo da declaração
+- Quotas subsequentes: juros de 1% ao mês (SELIC)
+
+=============================================================
+9. MULTAS E PENALIDADES
+=============================================================
+
+- Atraso na entrega: multa de 1% ao mês sobre o imposto devido
+  (mínimo R$ 165,74 — máximo 20% do imposto)
+- Omissão de rendimentos: multa de 75% sobre o imposto não declarado
+- Declaração com erros graves: multa de 150% em casos de fraude
+- Não recolhimento do carnê-leão: multa + juros SELIC
+
+=============================================================
+10. DICAS PRÁTICAS
+=============================================================
+
+1. GUARDE TODOS OS RECIBOS durante o ano, mesmo que pequenos.
+   Organize por categoria: saúde, educação, outros.
+
+2. UTILIZE A DECLARAÇÃO PRÉ-PREENCHIDA disponível no e-CAC da Receita
+   Federal. Ela já contém dados de bancos, planos de saúde e empregadores.
+
+3. INFORME DEPENDENTES CORRETAMENTE — incluindo todos os gastos
+   com saúde e educação de cada dependente.
+
+4. COMPARE OS DOIS MODELOS (simplificado x completo) antes de enviar.
+   O programa gerador faz o cálculo automaticamente.
+
+5. ENTREGUE DENTRO DO PRAZO (normalmente até 31 de maio) para evitar multa.
+
+6. GUARDE A DECLARAÇÃO por 5 anos após o prazo de entrega — a Receita
+   pode questionar declarações dentro desse período.
+
+7. CONSULTE UM CONTADOR para casos complexos: venda de imóvel, herança,
+   empresa, investimentos no exterior, ganhos em bolsa.
+
+=============================================================
+11. CATEGORIA ESPECIAL: DOCUMENTOS PARA DECLARAÇÃO
+=============================================================
+
+Para facilitar a declaração, organize seus documentos nestas categorias:
+
+SAÚDE (dedução integral):
+- Recibos de médicos, dentistas, psicólogos
+- Comprovantes de plano de saúde
+- Notas de laboratório e hospitais
+
+EDUCAÇÃO (dedução limitada):
+- Comprovantes de mensalidade escolar/universitária
+- Notas de cursos técnicos reconhecidos
+
+RENDIMENTOS (obrigatório informar):
+- Informe de rendimentos do empregador
+- Extratos bancários e de investimentos
+- Recibos de aluguel
+
+BENS E DIREITOS:
+- Escrituras de imóveis
+- Documentos de veículos
+- Extratos de investimentos
+
+PENSÃO E DOAÇÕES:
+- Sentenças judiciais de pensão alimentícia
+- Recibos de doações a entidades qualificadas
+
+=============================================================
+AVISO IMPORTANTE
+=============================================================
+
+Este guia é apenas informativo e educativo. As alíquotas, limites e
+regras fiscais são atualizadas anualmente pela Receita Federal do Brasil.
+Consulte sempre o site oficial da Receita Federal (receita.fazenda.gov.br)
+ou um profissional contador para informações atualizadas e orientação
+personalizada para sua situação específica.
+
+O DeclaraAI não substitui a consultoria de um contador ou advogado tributarista.
