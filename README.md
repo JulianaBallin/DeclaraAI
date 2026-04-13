@@ -157,8 +157,3 @@ O sistema será avaliado com base em:
 <h3 align="center">UEA • Projeto de RAG • DeclaraAI</h3>
 
 ---
-
-Se quiser, posso agora:
-
-* montar o **Dockerfile + docker-compose já prontos**
-* ou gerar **diagramas C4 (PlantUML)** pra você já colocar em `docs/diagrams` (isso dá MUITA nota)
