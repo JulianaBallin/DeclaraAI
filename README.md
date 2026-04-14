@@ -37,6 +37,7 @@ O **DeclaraAI** é um Micro SaaS com pipeline **RAG (Retrieval-Augmented Generat
 | **Chat RAG** | Perguntas em linguagem natural respondidas com base na base de conhecimento tributário |
 | **Upload de documentos** | Processamento de PDF, TXT e HTML com extração automática de dados |
 | **Classificação tributária** | Categorização inteligente por tipo de documento fiscal (8 categorias) |
+| **Base de Conhecimento** | Gerenciamento dos documentos de referência do assistente diretamente pela interface |
 | **Histórico** | Armazenamento e consulta com filtros por categoria, nome e período |
 | **Resumo anual** | Organização por categoria para facilitar o preenchimento da declaração |
 | **Avaliação RAG** | Métricas quantitativas de qualidade da recuperação e das respostas |
@@ -92,49 +93,65 @@ DeclaraAI/
 │   │   │   ├── routes_chat.py            # POST /chat, POST /ingest, GET /status
 │   │   │   ├── routes_documents.py       # POST /documents/upload, /save
 │   │   │   ├── routes_history.py         # GET /history, /history/summary
-│   │   │   └── routes_evaluation.py      # POST /evaluation/recuperacao, /completa
+│   │   │   ├── routes_evaluation.py      # POST /evaluation/recuperacao, /completa
+│   │   │   └── routes_knowledge.py       # GET /knowledge/files, POST /knowledge/upload
 │   │   ├── core/
-│   │   │   ├── config.py                 # Configuracoes via pydantic-settings
+│   │   │   ├── config.py                 # Configurações via pydantic-settings
 │   │   │   └── database.py               # SQLAlchemy + SQLite
 │   │   ├── models/document.py            # ORM: tabela documentos
 │   │   ├── schemas/document.py           # Schemas Pydantic (request/response)
 │   │   ├── services/
-│   │   │   ├── extraction_service.py     # Extracao de texto e metadados (regex)
-│   │   │   ├── classification_service.py # Classificacao tributaria (8 categorias)
-│   │   │   ├── history_service.py        # CRUD historico + resumo anual
+│   │   │   ├── extraction_service.py     # Extração de texto e metadados (regex)
+│   │   │   ├── classification_service.py # Classificação tributária (8 categorias)
+│   │   │   ├── history_service.py        # CRUD histórico + resumo anual
 │   │   │   ├── rag_service.py            # Orquestrador do pipeline RAG
-│   │   │   └── evaluation_service.py     # Metricas de avaliacao do pipeline
+│   │   │   └── evaluation_service.py     # Métricas de avaliação do pipeline
 │   │   ├── rag/
 │   │   │   ├── loader.py                 # Carregamento de documentos
-│   │   │   ├── chunker.py                # Fragmentacao 600 chars / overlap 80
+│   │   │   ├── chunker.py                # Fragmentação 600 chars / overlap 80
 │   │   │   ├── embeddings.py             # Singleton paraphrase-multilingual-MiniLM
 │   │   │   ├── vector_store.py           # ChromaDB (cosine similarity)
-│   │   │   ├── retriever.py              # Busca semantica + estrutura re-ranking
-│   │   │   └── generator.py              # Geracao de resposta via Ollama
+│   │   │   ├── retriever.py              # Busca semântica + estrutura re-ranking
+│   │   │   └── generator.py              # Geração de resposta via Ollama
 │   │   └── utils/file_parsers.py         # Parsers PDF/TXT/HTML
 │   ├── requirements.txt
 │   └── Dockerfile
 ├── frontend/
-│   ├── app.py                            # Streamlit: 5 abas (laranja/preto)
+│   ├── app.py                            # Streamlit: 6 abas (laranja/preto)
 │   ├── .streamlit/config.toml            # Tema: laranja, preto, branco
 │   ├── requirements.txt
 │   └── Dockerfile
 ├── data/
-│   ├── uploads/                          # Documentos enviados pelos usuarios
+│   ├── uploads/                          # Documentos enviados pelos usuários
 │   ├── knowledge_base/
-│   │   └── guia_imposto_renda.txt        # Base de conhecimento IRPF incluida
+│   │   └── guia_imposto_renda.txt        # Base de conhecimento IRPF incluída
 │   └── chroma_db/                        # Banco vetorial persistente
 ├── docs/
 │   └── diagrams/
-│       ├── logo.svg                      # Logo do sistema (leao + IA)
+│       ├── logo.svg                      # Logo do sistema (leão + IA)
 │       ├── pipeline_rag.svg              # Diagrama do pipeline RAG
 │       ├── c4_contexto.svg               # Diagrama C4 - Contexto
-│       └── c4_containers.svg             # Diagrama C4 - Conteineres
+│       └── c4_containers.svg             # Diagrama C4 - Contêineres
 ├── Makefile                              # Comandos de gerenciamento da stack
 ├── docker-compose.yml
 ├── .env.example
 └── README.md
 ```
+
+---
+
+<h2 align="center">🖥️ Interface — Abas do Sistema</h2>
+
+A interface é construída com **Streamlit** na paleta laranja (`#FF6B35`), amarelo (`#FFD700`), preto e branco, com alto contraste em todas as mensagens de estado.
+
+| Aba | Ícone | Descrição |
+|---|---|---|
+| **Chat** | 💬 | Perguntas em linguagem natural respondidas pelo pipeline RAG com exibição das fontes consultadas |
+| **Upload** | 📄 | Envio de documentos pessoais (recibos, notas, informes) com extração automática de categoria, data, valor e emitente |
+| **Base de Conhecimento** | 🗂️ | Adição e remoção de documentos de referência (guias, instruções da Receita Federal) com re-indexação automática no ChromaDB |
+| **Histórico** | 📚 | Consulta e filtragem dos documentos salvos por categoria, nome e período, com opção de exclusão |
+| **Resumo Anual** | 📊 | Visão consolidada dos documentos agrupados por categoria tributária para apoio ao preenchimento da declaração |
+| **Avaliação** | 🔬 | Métricas quantitativas do pipeline RAG (taxa de recuperação, score de contexto, cobertura de palavras-chave) com 8 casos de teste do domínio IRPF |
 
 ---
 
@@ -147,7 +164,7 @@ git clone https://github.com/JulianaBallin/DeclaraAI.git
 cd DeclaraAI
 ```
 
-### 2. Subir os containers
+### 2. Subir os contêineres
 
 ```bash
 # Com Docker Compose diretamente
@@ -188,55 +205,55 @@ O projeto inclui um `Makefile` com atalhos para todas as operações comuns:
 ### Ciclo da Stack
 
 ```bash
-make up             # sobe todos os servicos em background
-make up-build       # reconstroi imagens e sobe os servicos
-make down           # para e remove containers
-make down-v         # para containers e remove volumes
-make restart        # reinicia todos os servicos
+make up             # sobe todos os serviços em background
+make up-build       # reconstrói imagens e sobe os serviços
+make down           # para e remove contêineres
+make down-v         # para contêineres e remove volumes
+make restart        # reinicia todos os serviços
 make restart-backend   # reinicia apenas o backend
 make restart-frontend  # reinicia apenas o frontend
 make restart-ollama    # reinicia apenas o Ollama
 ```
 
-### Diagnostico e Logs
+### Diagnóstico e Logs
 
 ```bash
-make ps             # lista containers em execucao
-make logs           # acompanha logs de todos os servicos
+make ps             # lista contêineres em execução
+make logs           # acompanha logs de todos os serviços
 make logs-backend   # logs do backend
 make logs-frontend  # logs do frontend
 make logs-ollama    # logs do Ollama
 make health         # checa o endpoint raiz da API
-make status         # exibe metricas do pipeline RAG
+make status         # exibe métricas do pipeline RAG
 ```
 
-### Modelo e Ingestao
+### Modelo e Ingestão
 
 ```bash
 make modelo         # baixa o Mistral 7B no Ollama
 make ingest         # re-indexa a base de conhecimento via API
 ```
 
-### Qualidade de Codigo
+### Qualidade de Código
 
 ```bash
 make lint           # verifica com flake8
 make format         # formata com black e isort
-make check          # verifica formatacao sem alterar arquivos
+make check          # verifica formatação sem alterar arquivos
 make test           # executa testes com pytest
-make test-cov       # testes com relatorio de cobertura
+make test-cov       # testes com relatório de cobertura
 make clean          # remove cache Python
 ```
 
 ```bash
-make help           # lista todos os comandos disponiveis
+make help           # lista todos os comandos disponíveis
 ```
 
 ---
 
 <h2 align="center">🖥️ Como Executar Localmente (sem Docker)</h2>
 
-### Pre-requisitos
+### Pré-requisitos
 - Python 3.11+
 - [Ollama](https://ollama.ai) instalado
 
@@ -250,7 +267,7 @@ source .venv/bin/activate        # Linux/Mac
 
 pip install -r requirements.txt
 
-# Configurar variaveis
+# Configurar variáveis
 cp ../.env.example ../.env
 # Edite: OLLAMA_BASE_URL=http://localhost:11434
 
@@ -277,37 +294,45 @@ ollama pull mistral   # Terminal 2
 
 <h2 align="center">🔌 API REST</h2>
 
-A documentacao interativa completa esta disponivel em `http://localhost:8000/docs` (Swagger UI).
+A documentação interativa completa está disponível em `http://localhost:8000/docs` (Swagger UI).
 
 ### Chat RAG
 
-| Metodo | Endpoint | Descricao |
+| Método | Endpoint | Descrição |
 |---|---|---|
 | `POST` | `/chat` | Enviar pergunta ao assistente |
 | `POST` | `/ingest` | Re-indexar base de conhecimento |
-| `GET` | `/status` | Status e metricas do sistema RAG |
+| `GET` | `/status` | Status e métricas do sistema RAG |
 
 ### Documentos
 
-| Metodo | Endpoint | Descricao |
+| Método | Endpoint | Descrição |
 |---|---|---|
-| `POST` | `/documents/upload` | Upload e processamento de documento |
-| `POST` | `/documents/save` | Salvar documento no historico |
-| `GET` | `/documents/categorias` | Listar categorias tributarias |
+| `POST` | `/documents/upload` | Upload e processamento de documento pessoal |
+| `POST` | `/documents/save` | Salvar documento no histórico |
+| `GET` | `/documents/categorias` | Listar categorias tributárias |
 
-### Historico
+### Base de Conhecimento
 
-| Metodo | Endpoint | Descricao |
+| Método | Endpoint | Descrição |
 |---|---|---|
-| `GET` | `/history` | Listar historico (filtros: categoria, nome, periodo) |
+| `GET` | `/knowledge/files` | Listar arquivos e total de chunks indexados |
+| `POST` | `/knowledge/upload` | Adicionar arquivo e re-indexar o ChromaDB |
+| `DELETE` | `/knowledge/files/{nome}` | Remover arquivo e re-indexar o ChromaDB |
+
+### Histórico
+
+| Método | Endpoint | Descrição |
+|---|---|---|
+| `GET` | `/history` | Listar histórico (filtros: categoria, nome, período) |
 | `GET` | `/history/summary` | Resumo anual por categoria |
-| `DELETE` | `/history/{id}` | Excluir documento do historico |
+| `DELETE` | `/history/{id}` | Excluir documento do histórico |
 
-### Avaliacao
+### Avaliação
 
-| Metodo | Endpoint | Descricao |
+| Método | Endpoint | Descrição |
 |---|---|---|
-| `POST` | `/evaluation/recuperacao` | Avaliar etapa de recuperacao (sem LLM) |
+| `POST` | `/evaluation/recuperacao` | Avaliar etapa de recuperação (sem LLM) |
 | `POST` | `/evaluation/completa` | Avaliar pipeline completo (com LLM) |
 | `GET` | `/evaluation/casos-teste` | Listar casos de teste |
 
@@ -317,13 +342,17 @@ A documentacao interativa completa esta disponivel em `http://localhost:8000/doc
 # Chat
 curl -X POST http://localhost:8000/chat \
   -H "Content-Type: application/json" \
-  -d '{"pergunta": "Quais despesas medicas posso deduzir no IR?"}'
+  -d '{"pergunta": "Quais despesas médicas posso deduzir no IR?"}'
 
-# Upload
+# Upload de documento pessoal
 curl -X POST http://localhost:8000/documents/upload \
   -F "arquivo=@recibo.pdf"
 
-# Avaliacao de recuperacao
+# Adicionar arquivo à base de conhecimento
+curl -X POST http://localhost:8000/knowledge/upload \
+  -F "arquivo=@guia_receita_federal.pdf"
+
+# Avaliação de recuperação
 curl -X POST http://localhost:8000/evaluation/recuperacao
 
 # Ou com Makefile
@@ -333,42 +362,42 @@ make status
 
 ---
 
-<h2 align="center">📊 Avaliacao da Solucao</h2>
+<h2 align="center">📊 Avaliação da Solução</h2>
 
-O sistema implementa metricas quantitativas inspiradas no **RAGAS** (Es et al., 2023), adaptadas para execucao autossuficiente sem LLM-juiz externo.
+O sistema implementa métricas quantitativas inspiradas no **RAGAS** (Es et al., 2023), adaptadas para execução autossuficiente sem LLM-juiz externo.
 
-### Metricas implementadas
+### Métricas implementadas
 
-| Metrica | Descricao | Endpoint |
+| Métrica | Descrição | Endpoint |
 |---|---|---|
-| **Taxa de Recuperacao** | % de perguntas com ao menos 1 chunk recuperado | `/evaluation/recuperacao` |
-| **Score Medio de Contexto** | Similaridade cosseno media (ChromaDB) dos chunks retornados | `/evaluation/recuperacao` |
+| **Taxa de Recuperação** | % de perguntas com ao menos 1 chunk recuperado | `/evaluation/recuperacao` |
+| **Score Médio de Contexto** | Similaridade cosseno média (ChromaDB) dos chunks retornados | `/evaluation/recuperacao` |
 | **Cobertura de Keywords** | % de termos esperados encontrados na resposta gerada | `/evaluation/completa` |
-| **Analise de Falhas** | Casos com cobertura abaixo de 50%, indica lacunas na base | ambos |
+| **Análise de Falhas** | Casos com cobertura abaixo de 50%, indica lacunas na base | ambos |
 
 ### Casos de teste
 
-8 perguntas sobre o dominio IRPF cobrindo:
-obrigatoriedade, deducoes medicas, deducoes educacionais, modalidades de declaracao,
-previdencia privada, penalidades, autonomos (carne-leao) e dependentes.
+8 perguntas sobre o domínio IRPF cobrindo:
+obrigatoriedade, deduções médicas, deduções educacionais, modalidades de declaração,
+previdência privada, penalidades, autônomos (carnê-leão) e dependentes.
 
 ### Como avaliar
 
 ```bash
-# Avaliacao rapida de recuperacao (nao requer Ollama)
+# Avaliação rápida de recuperação (não requer Ollama)
 curl -X POST http://localhost:8000/evaluation/recuperacao
 
-# Avaliacao completa com LLM
+# Avaliação completa com LLM
 curl -X POST http://localhost:8000/evaluation/completa
 ```
 
-Ou use a aba **Avaliacao** na interface Streamlit.
+Ou use a aba **Avaliação** na interface Streamlit.
 
 ---
 
 <h2 align="center">🧩 Modelagem C4</h2>
 
-O projeto segue o modelo **C4** para representacao arquitetural:
+O projeto segue o modelo **C4** para representação arquitetural:
 
 ### C1 - Contexto
 
@@ -376,25 +405,25 @@ O projeto segue o modelo **C4** para representacao arquitetural:
   <img src="docs/diagrams/c4_contexto.svg" alt="C4 Contexto" width="820">
 </p>
 
-### C2 - Conteineres
+### C2 - Contêineres
 
 <p align="center">
-  <img src="docs/diagrams/c4_containers.svg" alt="C4 Conteineres" width="900">
+  <img src="docs/diagrams/c4_containers.svg" alt="C4 Contêineres" width="900">
 </p>
 
-- **C1 - Contexto:** usuario interage com DeclaraAI via browser
-- **C2 - Conteineres:** Frontend (Streamlit), Backend (FastAPI), Banco Vetorial (ChromaDB), Banco Relacional (SQLite), LLM (Ollama)
-- **C3 - Componentes:** pipeline RAG (loader, chunker, embeddings, retriever, generator), servicos de classificacao e extracao, API REST
+- **C1 - Contexto:** usuário interage com DeclaraAI via browser
+- **C2 - Contêineres:** Frontend (Streamlit), Backend (FastAPI), Banco Vetorial (ChromaDB), Banco Relacional (SQLite), LLM (Ollama)
+- **C3 - Componentes:** pipeline RAG (loader, chunker, embeddings, retriever, generator), serviços de classificação e extração, API REST
 
 ---
 
-<h2 align="center">⚠️ Limitacoes</h2>
+<h2 align="center">⚠️ Limitações</h2>
 
-- Não substitui contador ou validacao oficial da Receita Federal
+- Não substitui contador ou validação oficial da Receita Federal
 - A qualidade das respostas depende do modelo Ollama configurado
-- Extração de metadados por heuristicas pode falhar em documentos nao padronizados
+- Extração de metadados por heurísticas pode falhar em documentos não padronizados
 - Base de conhecimento deve ser atualizada manualmente com novas regras fiscais
-- PDFs baseados em imagem (scan) não tem texto extraivel sem OCR
+- PDFs baseados em imagem (scan) não têm texto extraível sem OCR
 
 ---
 
@@ -402,7 +431,7 @@ O projeto segue o modelo **C4** para representacao arquitetural:
 
 <p align="center">
 
-| Nome | Matricula |
+| Nome | Matrícula |
 |---|---|
 | Juliana Ballin Lima | 2315310011 |
 | Fernando Luiz Da Silva Freire | 2315310007 |
