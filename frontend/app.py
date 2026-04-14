@@ -299,8 +299,8 @@ st.divider()
 # Abas principais
 # ---------------------------------------------------------------------------
 
-aba_chat, aba_upload, aba_historico, aba_resumo, aba_avaliacao = st.tabs(
-    ["💬 Chat", "📄 Upload", "📚 Histórico", "📊 Resumo Anual", "🔬 Avaliação"]
+aba_chat, aba_upload, aba_base, aba_historico, aba_resumo, aba_avaliacao = st.tabs(
+    ["💬 Chat", "📄 Upload", "🗂️ Base de Conhecimento", "📚 Histórico", "📊 Resumo Anual", "🔬 Avaliação"]
 )
 
 
@@ -508,6 +508,177 @@ with aba_upload:
             if st.button("Descartar", use_container_width=True):
                 st.session_state.documento_processado = None
                 st.rerun()
+
+
+# ===========================================================================
+# ABA BASE DE CONHECIMENTO
+# ===========================================================================
+
+def _listar_arquivos_base() -> dict | None:
+    """Consulta a API para listar os arquivos da base de conhecimento."""
+    try:
+        resposta = requests.get(f"{API_URL}/knowledge/files", timeout=TIMEOUT_PADRAO)
+        if resposta.status_code == 200:
+            return resposta.json()
+        msg_erro(f"Erro ao listar arquivos: {resposta.status_code}")
+    except requests.exceptions.ConnectionError:
+        msg_erro("Backend indisponível.")
+    except Exception as erro:
+        msg_erro(f"Erro: {erro}")
+    return None
+
+
+def _enviar_para_base(arquivo) -> dict | None:
+    """Envia arquivo para a base de conhecimento via API."""
+    try:
+        resposta = requests.post(
+            f"{API_URL}/knowledge/upload",
+            files={
+                "arquivo": (
+                    arquivo.name,
+                    arquivo.getvalue(),
+                    arquivo.type or "application/octet-stream",
+                )
+            },
+            timeout=TIMEOUT_UPLOAD,
+        )
+        if resposta.status_code == 200:
+            return resposta.json()
+        msg_erro(f"Erro no upload: {resposta.status_code} — {resposta.text}")
+    except requests.exceptions.ConnectionError:
+        msg_erro("Backend indisponível.")
+    except requests.exceptions.Timeout:
+        msg_aviso("O servidor demorou demais. Tente novamente.")
+    except Exception as erro:
+        msg_erro(f"Erro inesperado: {erro}")
+    return None
+
+
+def _remover_arquivo_base(nome_arquivo: str) -> bool:
+    """Remove um arquivo da base de conhecimento via API."""
+    try:
+        resposta = requests.delete(
+            f"{API_URL}/knowledge/files/{nome_arquivo}",
+            timeout=TIMEOUT_PADRAO,
+        )
+        if resposta.status_code == 200:
+            return True
+        msg_erro(f"Erro ao remover: {resposta.status_code} — {resposta.text}")
+    except Exception as erro:
+        msg_erro(f"Erro: {erro}")
+    return False
+
+
+with aba_base:
+    st.header("Base de Conhecimento")
+    msg_info(
+        "Gerencie os documentos de referência que o assistente usa para responder perguntas. "
+        "Adicione PDFs, TXTs ou HTMLs com conteúdo fiscal (guias, instruções, tabelas da Receita Federal)."
+    )
+
+    # -----------------------------------------------------------------------
+    # Seção: upload de novo documento
+    # -----------------------------------------------------------------------
+    st.subheader("Adicionar Documento à Base")
+
+    arquivo_base = st.file_uploader(
+        "Selecione o arquivo de referência",
+        type=["pdf", "txt", "html"],
+        key="uploader_base",
+        help="Formatos aceitos: PDF, TXT, HTML. Ex: guia da Receita Federal, tabela de alíquotas.",
+    )
+
+    if arquivo_base:
+        col_btn_base, col_info_base = st.columns([1, 3])
+        with col_btn_base:
+            enviar = st.button(
+                "Adicionar à Base",
+                type="primary",
+                use_container_width=True,
+                key="btn_enviar_base",
+            )
+        with col_info_base:
+            st.caption(
+                f"Arquivo selecionado: **{arquivo_base.name}** "
+                f"({round(arquivo_base.size / 1024, 1)} KB)"
+            )
+
+        if enviar:
+            with st.spinner("Salvando e re-indexando a base de conhecimento..."):
+                resultado = _enviar_para_base(arquivo_base)
+
+            if resultado:
+                msg_sucesso(
+                    f"'{resultado['arquivo']}' adicionado! "
+                    f"Base re-indexada com {resultado['chunks_indexados']} trechos."
+                )
+                # Invalida o cache da listagem para forçar recarga
+                if "dados_base" in st.session_state:
+                    del st.session_state["dados_base"]
+                st.rerun()
+
+    st.divider()
+
+    # -----------------------------------------------------------------------
+    # Seção: arquivos já na base
+    # -----------------------------------------------------------------------
+    st.subheader("Arquivos na Base de Conhecimento")
+
+    col_refresh, _ = st.columns([1, 4])
+    with col_refresh:
+        if st.button("🔄 Atualizar lista", key="btn_refresh_base"):
+            if "dados_base" in st.session_state:
+                del st.session_state["dados_base"]
+            st.rerun()
+
+    if "dados_base" not in st.session_state:
+        with st.spinner("Carregando lista de arquivos..."):
+            st.session_state.dados_base = _listar_arquivos_base()
+
+    dados_base = st.session_state.get("dados_base")
+
+    if dados_base:
+        col_m1, col_m2 = st.columns(2)
+        col_m1.metric("Arquivos na Base", dados_base.get("total_arquivos", 0))
+        col_m2.metric("Trechos Indexados (chunks)", dados_base.get("chunks_indexados", 0))
+
+        st.write("")
+
+        arquivos_base = dados_base.get("arquivos", [])
+        if not arquivos_base:
+            msg_aviso(
+                "Nenhum arquivo encontrado na base de conhecimento. "
+                "Use o formulário acima para adicionar o primeiro documento."
+            )
+        else:
+            icones_tipo = {"pdf": "📕", "txt": "📄", "html": "🌐", "htm": "🌐"}
+
+            for arq in arquivos_base:
+                icone = icones_tipo.get(arq["tipo"], "📁")
+                col_nome, col_tipo, col_tam, col_del = st.columns([4, 1, 1, 1])
+
+                with col_nome:
+                    st.markdown(f"{icone} **{arq['nome']}**")
+                with col_tipo:
+                    st.caption(arq["tipo"].upper())
+                with col_tam:
+                    st.caption(f"{arq['tamanho_kb']} KB")
+                with col_del:
+                    if st.button(
+                        "Remover",
+                        key=f"del_base_{arq['nome']}",
+                        type="secondary",
+                    ):
+                        with st.spinner(f"Removendo '{arq['nome']}'..."):
+                            removido = _remover_arquivo_base(arq["nome"])
+                        if removido:
+                            msg_sucesso(f"'{arq['nome']}' removido da base.")
+                            if "dados_base" in st.session_state:
+                                del st.session_state["dados_base"]
+                            st.rerun()
+
+    elif dados_base is not None:
+        msg_aviso("Nenhum arquivo na base de conhecimento.")
 
 
 # ===========================================================================

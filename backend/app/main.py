@@ -18,6 +18,7 @@ from app.api.routes_chat import roteador as roteador_chat
 from app.api.routes_documents import roteador as roteador_documentos
 from app.api.routes_history import roteador as roteador_historico
 from app.api.routes_evaluation import roteador as roteador_avaliacao
+from app.api.routes_knowledge import roteador as roteador_base
 
 # ---------------------------------------------------------------------------
 # Configuração de logging
@@ -132,6 +133,11 @@ app.include_router(
 )
 app.include_router(roteador_historico, tags=["Histórico"])
 app.include_router(roteador_avaliacao, tags=["Avaliação"])
+app.include_router(
+    roteador_base,
+    prefix="/knowledge",
+    tags=["Base de Conhecimento"],
+)
 
 
 # ---------------------------------------------------------------------------
