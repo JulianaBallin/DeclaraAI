@@ -17,6 +17,7 @@ from app.core.database import criar_tabelas
 from app.api.routes_chat import roteador as roteador_chat
 from app.api.routes_documents import roteador as roteador_documentos
 from app.api.routes_history import roteador as roteador_historico
+from app.api.routes_evaluation import roteador as roteador_avaliacao
 
 # ---------------------------------------------------------------------------
 # Configuração de logging
@@ -130,6 +131,7 @@ app.include_router(
     tags=["Documentos"],
 )
 app.include_router(roteador_historico, tags=["Histórico"])
+app.include_router(roteador_avaliacao, tags=["Avaliação"])
 
 
 # ---------------------------------------------------------------------------
