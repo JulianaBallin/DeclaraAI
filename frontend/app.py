@@ -1,11 +1,12 @@
 """
 Interface web do DeclaraAI construída com Streamlit.
 
-Organizada em 4 abas:
+Organizada em 5 abas:
 - Chat: perguntas em linguagem natural respondidas pelo pipeline RAG
 - Upload: envio e processamento de documentos fiscais
 - Histórico: consulta e filtragem dos documentos salvos
 - Resumo: visão anual agrupada por categoria tributária
+- Avaliação: métricas quantitativas do pipeline RAG
 """
 
 import os
@@ -59,8 +60,8 @@ st.divider()
 # Abas principais
 # ---------------------------------------------------------------------------
 
-aba_chat, aba_upload, aba_historico, aba_resumo = st.tabs(
-    ["💬 Chat", "📄 Upload", "📚 Histórico", "📊 Resumo Anual"]
+aba_chat, aba_upload, aba_historico, aba_resumo, aba_avaliacao = st.tabs(
+    ["💬 Chat", "📄 Upload", "📚 Histórico", "📊 Resumo Anual", "🔬 Avaliação"]
 )
 
 
@@ -477,6 +478,197 @@ with aba_resumo:
 
         elif resposta:
             st.error(f"Erro ao gerar resumo: {resposta.status_code}")
+
+# ===========================================================================
+# ABA AVALIAÇÃO
+# ===========================================================================
+
+def _exibir_gauge(label: str, valor: float, maximo: float = 100.0) -> None:
+    """Exibe uma barra de progresso rotulada como gauge de métrica."""
+    pct = min(valor / maximo, 1.0)
+    cor = "green" if pct >= 0.7 else ("orange" if pct >= 0.4 else "red")
+    st.markdown(
+        f"**{label}:** `{valor:.1f}` / `{maximo:.0f}`"
+        f"  {'🟢' if pct >= 0.7 else ('🟡' if pct >= 0.4 else '🔴')}"
+    )
+    st.progress(pct)
+
+
+with aba_avaliacao:
+    st.header("Avaliação do Pipeline RAG")
+    st.write(
+        "Métricas quantitativas para validar a qualidade da recuperação semântica "
+        "e das respostas geradas pelo DeclaraAI."
+    )
+
+    with st.expander("ℹ️ Como funciona a avaliação?", expanded=False):
+        st.markdown(
+            """
+**Métricas implementadas (inspiradas no RAGAS):**
+
+| Métrica | Descrição |
+|---|---|
+| **Taxa de Recuperação** | % de perguntas com ao menos 1 chunk recuperado |
+| **Score Médio de Contexto** | Similaridade cosseno média dos chunks retornados (0–1) |
+| **Cobertura de Keywords** | % de termos esperados presentes na resposta gerada |
+
+**Modos de avaliação:**
+- **Recuperação (rápido):** testa apenas o retriever, sem chamar o LLM
+- **Pipeline completo:** testa recuperação + geração via Ollama (mais lento)
+
+8 perguntas cobrindo: obrigatoriedade, deduções médicas, educação, modalidades,
+previdência, penalidades, autônomos e dependentes.
+            """
+        )
+
+    # Visualiza casos de teste
+    if st.button("Ver Casos de Teste", key="btn_casos"):
+        try:
+            resp = requests.get(f"{API_URL}/evaluation/casos-teste", timeout=TIMEOUT_PADRAO)
+            if resp.status_code == 200:
+                dados = resp.json()
+                st.write(f"**{dados['total']} casos de teste disponíveis:**")
+                for caso in dados["casos_teste"]:
+                    st.write(
+                        f"**{caso['id']}.** [{caso['categoria']}] {caso['pergunta']} "
+                        f"*(keywords: {caso['total_keywords']})*"
+                    )
+        except Exception as e:
+            st.error(f"Erro: {e}")
+
+    st.divider()
+
+    col_rec, col_full = st.columns(2)
+
+    # --- Avaliação de Recuperação ---
+    with col_rec:
+        st.subheader("Recuperação Semântica")
+        st.caption("Rápido · Não requer Ollama")
+        if st.button("Avaliar Recuperação", type="primary", use_container_width=True):
+            with st.spinner("Avaliando recuperação..."):
+                try:
+                    resp = requests.post(
+                        f"{API_URL}/evaluation/recuperacao", timeout=120
+                    )
+                except requests.exceptions.ConnectionError:
+                    st.error("Backend indisponível.")
+                    resp = None
+
+            if resp and resp.status_code == 200:
+                dados = resp.json()
+                st.session_state.resultado_recuperacao = dados
+
+        if "resultado_recuperacao" in st.session_state:
+            dados = st.session_state.resultado_recuperacao
+            st.success("Avaliação concluída!")
+
+            _exibir_gauge(
+                "Taxa de Recuperação (%)",
+                dados.get("taxa_recuperacao_pct", 0),
+            )
+            st.metric(
+                "Score Médio de Contexto",
+                f"{dados.get('score_medio_contexto', 0):.4f}",
+                help="Similaridade cosseno média (0–1). Quanto maior, mais relevantes os chunks.",
+            )
+            st.metric("Chunks Indexados", dados.get("chunks_indexados", 0))
+            st.metric(
+                "Casos sem Contexto",
+                dados.get("casos_sem_contexto", 0),
+                delta=f"-{dados.get('casos_sem_contexto', 0)} falhas",
+                delta_color="inverse",
+            )
+
+            st.info(f"**Interpretação:** {dados.get('interpretacao', '')}")
+
+            if dados.get("analise_falhas"):
+                with st.expander("Casos de Falha"):
+                    for falha in dados["analise_falhas"]:
+                        st.write(
+                            f"- **{falha['categoria']}:** {falha['pergunta']}"
+                        )
+
+            with st.expander("Resultados Detalhados"):
+                for r in dados.get("resultados", []):
+                    st.markdown(
+                        f"**{r['id']}. {r['pergunta']}**  \n"
+                        f"Chunks: `{r['chunks_recuperados']}` | "
+                        f"Score: `{r['score_medio_contexto']:.4f}` | "
+                        f"{'✅' if r['contexto_encontrado'] else '❌'}"
+                    )
+
+    # --- Avaliação Completa ---
+    with col_full:
+        st.subheader("Pipeline Completo")
+        st.caption("Requer Ollama ativo · Pode demorar")
+        if st.button(
+            "Avaliar Pipeline Completo", type="secondary", use_container_width=True
+        ):
+            with st.spinner(
+                "Executando avaliação completa (recuperação + LLM)... "
+                "Isso pode levar alguns minutos."
+            ):
+                try:
+                    resp = requests.post(
+                        f"{API_URL}/evaluation/completa", timeout=600
+                    )
+                except requests.exceptions.ConnectionError:
+                    st.error("Backend indisponível.")
+                    resp = None
+                except requests.exceptions.Timeout:
+                    st.error("Timeout — tente novamente ou verifique o Ollama.")
+                    resp = None
+
+            if resp and resp.status_code == 200:
+                st.session_state.resultado_completo = resp.json()
+            elif resp:
+                st.error(f"Erro {resp.status_code}: {resp.text[:200]}")
+
+        if "resultado_completo" in st.session_state:
+            dados = st.session_state.resultado_completo
+            st.success("Avaliação concluída!")
+
+            _exibir_gauge(
+                "Taxa de Recuperação (%)",
+                dados.get("taxa_recuperacao_pct", 0),
+            )
+            _exibir_gauge(
+                "Cobertura de Keywords (%)",
+                dados.get("media_cobertura_keywords_pct", 0),
+            )
+            st.metric(
+                "Score Médio de Contexto",
+                f"{dados.get('score_medio_contexto', 0):.4f}",
+            )
+            st.metric(
+                "Casos com Falha",
+                dados.get("casos_com_falha", 0),
+                delta_color="inverse",
+            )
+
+            st.info(f"**Interpretação:** {dados.get('interpretacao', '')}")
+
+            if dados.get("analise_falhas"):
+                with st.expander("Análise de Falhas (cobertura < 50%)"):
+                    for falha in dados["analise_falhas"]:
+                        st.write(
+                            f"- **{falha['categoria']}** — {falha['pergunta']}  \n"
+                            f"  Cobertura: `{falha['cobertura_pct']:.1f}%`"
+                        )
+
+            with st.expander("Resultados Detalhados por Pergunta"):
+                for r in dados.get("resultados", []):
+                    status = "✅" if not r.get("falha") else "⚠️"
+                    st.markdown(
+                        f"**{status} {r['id']}. [{r['categoria']}]** {r['pergunta']}  \n"
+                        f"Score: `{r['score_medio_contexto']:.4f}` | "
+                        f"Cobertura: `{r['cobertura_keywords_pct']:.1f}%` | "
+                        f"Chunks: `{r['chunks_recuperados']}`"
+                    )
+                    if r.get("resposta_preview"):
+                        st.caption(f"Resposta: {r['resposta_preview']}...")
+                    st.divider()
+
 
 # ---------------------------------------------------------------------------
 # Rodapé
