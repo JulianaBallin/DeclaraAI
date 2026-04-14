@@ -5,6 +5,7 @@ Rotas da API para consulta ao histórico de documentos e geração de resumo anu
 from typing import List, Optional
 
 from fastapi import APIRouter, HTTPException, Depends, Query
+from fastapi.responses import Response
 from sqlalchemy.orm import Session
 
 from app.core.database import obter_db
@@ -109,3 +110,33 @@ async def excluir_documento(
         )
 
     return {"mensagem": f"Documento ID {documento_id} removido com sucesso."}
+
+
+@roteador.get(
+    "/history/{documento_id}/download",
+    summary="Baixar texto extraído de um documento",
+    description="Retorna o texto extraído do documento como arquivo .txt para download.",
+)
+async def baixar_documento(
+    documento_id: int,
+    db: Session = Depends(obter_db),
+):
+    """Retorna o conteúdo de texto do documento para download pelo navegador."""
+    servico = ServicoHistorico()
+    documento = servico.buscar_por_id(db, documento_id)
+
+    if not documento:
+        raise HTTPException(
+            status_code=404,
+            detail=f"Documento ID {documento_id} não encontrado.",
+        )
+
+    conteudo = documento.texto_extraido or "(sem conteúdo extraído)"
+    nome_base = documento.nome_arquivo.rsplit(".", 1)[0]
+    nome_download = f"{nome_base}_extraido.txt"
+
+    return Response(
+        content=conteudo.encode("utf-8"),
+        media_type="text/plain; charset=utf-8",
+        headers={"Content-Disposition": f'attachment; filename="{nome_download}"'},
+    )

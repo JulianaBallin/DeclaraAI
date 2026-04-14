@@ -168,6 +168,19 @@ class ServicoHistorico:
         )
         return resumo
 
+    def buscar_por_id(self, db: Session, documento_id: int) -> Optional[Documento]:
+        """
+        Busca um documento específico pelo ID.
+
+        Args:
+            db: Sessão do banco de dados.
+            documento_id: ID do documento.
+
+        Returns:
+            Instância do Documento ou None se não encontrado.
+        """
+        return db.query(Documento).filter(Documento.id == documento_id).first()
+
     def excluir_documento(self, db: Session, documento_id: int) -> bool:
         """
         Remove um documento específico do histórico.

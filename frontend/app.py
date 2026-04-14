@@ -9,6 +9,7 @@ Organizada em 5 abas:
 - Avaliação: métricas quantitativas do pipeline RAG
 """
 
+import base64
 import os
 from datetime import datetime
 
@@ -39,56 +40,77 @@ st.markdown(
     """
     <style>
     /* ================================================================
-       BASE — fundo branco, texto escuro
+       FUNDO — branco com degradê suave
     ================================================================ */
-    .stApp { background-color: #FFFFFF; color: #1A1A1A; }
+    .stApp {
+        background: linear-gradient(180deg, #FFFFFF 0%, #FDF5EE 100%);
+        color: #1A1A1A;
+    }
 
-    [data-testid="stSidebar"]        { background-color: #F5F5F5; }
-    [data-testid="stSidebarContent"] { background-color: #F5F5F5; }
+    [data-testid="stSidebar"]        { background-color: #F7F0EA; }
+    [data-testid="stSidebarContent"] { background-color: #F7F0EA; }
 
     /* ================================================================
-       MARGENS LATERAIS — 2x maior que o padrão do Streamlit
+       NAVBAR FIXA — fundo escuro com degradê (logo + abas)
     ================================================================ */
+    .navbar-bg {
+        position: fixed;
+        top: 0; left: 0; right: 0;
+        height: 66px;
+        background: linear-gradient(90deg, #1A1A1A 0%, #3D1800 55%, #1A1A1A 100%);
+        z-index: 9997;
+        border-bottom: 2px solid #FF6B35;
+    }
+
+    /* Empurra conteúdo abaixo da navbar */
     .main .block-container {
-        padding-top: 1.5rem !important;
-        padding-left: 5rem !important;
-        padding-right: 5rem !important;
+        padding-top: 84px !important;
+        padding-left: 6.5rem !important;
+        padding-right: 6.5rem !important;
         max-width: 100% !important;
     }
 
     /* ================================================================
-       ABAS — underline laranja, alinhadas à direita
+       ABAS — fixas no canto superior direito dentro da navbar
     ================================================================ */
     .stTabs [data-baseweb="tab-list"] {
-        background-color: transparent;
-        border-radius: 0;
-        padding: 0;
-        gap: 0;
-        border-bottom: 2px solid #E8E8E8;
-        justify-content: flex-end;
+        position: fixed !important;
+        top: 0 !important;
+        right: 1.5rem !important;
+        height: 66px !important;
+        background: transparent !important;
+        border: none !important;
+        z-index: 9999 !important;
+        display: flex !important;
+        align-items: center !important;
+        padding: 0 !important;
+        gap: 2px !important;
     }
 
     .stTabs [data-baseweb="tab"] {
-        font-size: 0.95rem;
-        font-weight: 600;
-        color: #555555;
-        border-radius: 0;
-        padding: 0.65rem 1.2rem;
-        background-color: transparent;
-        border-bottom: 3px solid transparent;
-        margin-bottom: -2px;
-        transition: color 0.18s ease;
+        height: 66px !important;
+        border-radius: 0 !important;
+        border-bottom: 3px solid transparent !important;
+        padding: 0 0.85rem !important;
+        font-size: 0.88rem !important;
+        font-weight: 600 !important;
+        color: #DDDDDD !important;
+        background: transparent !important;
+        transition: color 0.15s ease, background-color 0.15s ease;
     }
 
+    /* Aba selecionada — fundo diferenciado com contraste */
     .stTabs [aria-selected="true"] {
-        background-color: transparent !important;
-        color: #C04A00 !important;
-        border-bottom: 3px solid #C04A00 !important;
+        color: #FFD700 !important;
+        background-color: rgba(255, 107, 53, 0.25) !important;
+        border-radius: 6px !important;
+        border-bottom: 3px solid #FF6B35 !important;
     }
 
     .stTabs [data-baseweb="tab"]:hover {
-        color: #C04A00 !important;
-        background-color: #FFF5F0 !important;
+        color: #FF6B35 !important;
+        background: rgba(255, 107, 53, 0.12) !important;
+        border-radius: 6px !important;
     }
 
     /* ================================================================
@@ -96,50 +118,49 @@ st.markdown(
     ================================================================ */
     h1, h2, h3, h4 {
         color: #1A1A1A !important;
-        margin-top: 1.5rem !important;
-        margin-bottom: 0.8rem !important;
+        margin-top: 1.6rem !important;
+        margin-bottom: 0.85rem !important;
     }
 
     p, li, .stMarkdown p {
         color: #2A2A2A !important;
-        font-size: 1.07rem !important;
-        line-height: 1.75 !important;
+        font-size: 1.1rem !important;
+        line-height: 1.8 !important;
     }
 
     label, .stSelectbox label, .stTextInput label,
     .stFileUploader label, .stDateInput label {
         color: #333333 !important;
-        font-size: 1rem !important;
+        font-size: 1.02rem !important;
     }
 
-    .stCaption, caption { color: #666666 !important; }
+    .stCaption, caption { color: #666666 !important; font-size: 0.9rem !important; }
 
     /* ================================================================
-       BOTÕES
+       BOTÕES — degradê suave
     ================================================================ */
     .stButton > button[kind="primary"] {
-        background-color: #C04A00;
-        color: #ffffff;
+        background: linear-gradient(135deg, #D05000 0%, #A03800 100%);
+        color: #FFFFFF;
         border: none;
         border-radius: 8px;
         font-weight: 700;
-        padding: 0.5rem 1.4rem;
-        transition: background-color 0.2s ease;
+        font-size: 1rem;
+        padding: 0.52rem 1.5rem;
+        transition: opacity 0.2s ease;
     }
-    .stButton > button[kind="primary"]:hover { background-color: #A03A00; }
+    .stButton > button[kind="primary"]:hover { opacity: 0.88; }
 
     .stButton > button[kind="secondary"] {
-        background-color: #FFFFFF;
-        color: #C04A00;
-        border: 1.5px solid #C04A00;
+        background: linear-gradient(135deg, #FFD700 0%, #FFC000 100%);
+        color: #333333;
+        border: none;
         border-radius: 8px;
         font-weight: 600;
-        transition: all 0.2s ease;
+        font-size: 1rem;
+        transition: opacity 0.2s ease;
     }
-    .stButton > button[kind="secondary"]:hover {
-        background-color: #FFF0E8;
-        color: #A03A00;
-    }
+    .stButton > button[kind="secondary"]:hover { opacity: 0.85; }
 
     /* ================================================================
        COMPONENTES
@@ -149,16 +170,16 @@ st.markdown(
         border: 1px solid #E5E5E5;
         border-radius: 10px;
     }
-    div[data-testid="stExpander"] summary { color: #C04A00; font-weight: 600; }
+    div[data-testid="stExpander"] summary { color: #C04A00; font-weight: 600; font-size: 1rem; }
 
     [data-testid="stMetric"] {
-        background-color: #F8F8F8;
-        border: 1px solid #E5E5E5;
+        background-color: #FFF8F4;
+        border: 1px solid #F0D5C0;
         border-radius: 10px;
-        padding: 0.8rem;
+        padding: 0.85rem;
     }
-    [data-testid="stMetricLabel"] { color: #555555 !important; font-size: 0.87rem; }
-    [data-testid="stMetricValue"] { color: #C04A00 !important; font-weight: 700; font-size: 1.3rem; }
+    [data-testid="stMetricLabel"] { color: #555555 !important; font-size: 0.9rem; }
+    [data-testid="stMetricValue"] { color: #C04A00 !important; font-weight: 700; font-size: 1.4rem !important; }
 
     .stTextInput > div > div > input,
     .stTextArea textarea,
@@ -167,6 +188,7 @@ st.markdown(
         border: 1px solid #DDDDDD !important;
         color: #1A1A1A !important;
         border-radius: 8px;
+        font-size: 1rem !important;
     }
     .stTextInput > div > div > input:focus,
     .stTextArea textarea:focus {
@@ -175,7 +197,7 @@ st.markdown(
     }
 
     [data-testid="stChatMessage"] {
-        background-color: #F8F8F8;
+        background-color: #F9F9F9;
         border-radius: 12px;
         border: 1px solid #EEEEEE;
         margin-bottom: 8px;
@@ -186,6 +208,7 @@ st.markdown(
         color: #1A1A1A !important;
         border: 1.5px solid #C04A00 !important;
         border-radius: 12px;
+        font-size: 1rem !important;
     }
 
     .stProgress > div > div > div { background-color: #C04A00; }
@@ -200,71 +223,52 @@ st.markdown(
     }
 
     /* ================================================================
-       MENSAGENS DE ESTADO — verde / vermelho / amarelo
+       MENSAGENS — verde / vinho / amarelo
     ================================================================ */
     .msg-success {
-        background-color: #E8F5E9;
-        border-left: 4px solid #2E7D32;
-        color: #1B5E20;
-        padding: 0.75rem 1rem;
-        border-radius: 0 8px 8px 0;
-        font-weight: 500;
-        font-size: 1.02rem;
-        margin: 0.5rem 0;
+        background-color: #E8F5E9; border-left: 4px solid #2E7D32;
+        color: #1B5E20; padding: 0.75rem 1.1rem;
+        border-radius: 0 8px 8px 0; font-weight: 500;
+        font-size: 1.05rem; margin: 0.5rem 0;
     }
     .msg-error {
-        background-color: #FFEBEE;
-        border-left: 4px solid #C62828;
-        color: #7B0000;
-        padding: 0.75rem 1rem;
-        border-radius: 0 8px 8px 0;
-        font-weight: 500;
-        font-size: 1.02rem;
-        margin: 0.5rem 0;
+        background-color: #FFEBEE; border-left: 4px solid #C62828;
+        color: #7B0000; padding: 0.75rem 1.1rem;
+        border-radius: 0 8px 8px 0; font-weight: 500;
+        font-size: 1.05rem; margin: 0.5rem 0;
     }
     .msg-warning {
-        background-color: #FFFDE7;
-        border-left: 4px solid #F9A825;
-        color: #424242;
-        padding: 0.75rem 1rem;
-        border-radius: 0 8px 8px 0;
-        font-weight: 500;
-        font-size: 1.02rem;
-        margin: 0.5rem 0;
+        background-color: #FFFDE7; border-left: 4px solid #F9A825;
+        color: #3E3000; padding: 0.75rem 1.1rem;
+        border-radius: 0 8px 8px 0; font-weight: 500;
+        font-size: 1.05rem; margin: 0.5rem 0;
     }
     .msg-info {
-        background-color: #FFF3E0;
-        border-left: 4px solid #C04A00;
-        color: #7A2D00;
-        padding: 0.75rem 1rem;
-        border-radius: 0 8px 8px 0;
-        font-weight: 500;
-        font-size: 1.02rem;
-        margin: 0.5rem 0;
+        background-color: #FFF3E0; border-left: 4px solid #C04A00;
+        color: #7A2D00; padding: 0.75rem 1.1rem;
+        border-radius: 0 8px 8px 0; font-weight: 500;
+        font-size: 1.05rem; margin: 0.5rem 0;
     }
 
     .badge-categoria {
-        display: inline-block;
-        background-color: #C04A00;
-        color: #ffffff;
-        font-size: 0.8rem;
-        font-weight: 700;
-        padding: 2px 10px;
-        border-radius: 20px;
-        margin-left: 6px;
+        display: inline-block; background-color: #C04A00;
+        color: #ffffff; font-size: 0.82rem; font-weight: 700;
+        padding: 2px 10px; border-radius: 20px; margin-left: 6px;
     }
 
     /* ================================================================
-       RODAPÉ
+       RODAPÉ — fundo laranja suave
     ================================================================ */
     .footer-bar {
-        background-color: #F5F5F5;
-        border-top: 1px solid #E8E8E8;
-        color: #777777;
+        background-color: #FFF0E0;
+        border-top: 1px solid #FFCCA0;
+        color: #7A3800;
         text-align: center;
-        padding: 0.7rem;
-        font-size: 0.88rem;
+        padding: 0.75rem;
+        font-size: 0.9rem;
+        font-weight: 500;
         margin-top: 2.5rem;
+        border-radius: 8px;
     }
     </style>
     """,
@@ -293,30 +297,30 @@ def msg_info(texto: str) -> None:
 
 
 # ---------------------------------------------------------------------------
-# Cabeçalho — logo à esquerda (SVG inline adaptado para fundo branco)
-# O arquivo logo.svg está na mesma pasta do app.py (copiado no Dockerfile)
-# As abas ficam logo abaixo alinhadas à direita via CSS (justify-content: flex-end)
+# Cabeçalho — logo em PNG embutida em base64 na navbar fixa escura
+# O arquivo logo.png está na mesma pasta do app.py (copiado no Dockerfile)
 # ---------------------------------------------------------------------------
 
-LOGO_PATH = os.path.join(os.path.dirname(__file__), "logo.svg")
+LOGO_PATH = os.path.join(os.path.dirname(__file__), "logo.png")
 
-col_logo, col_vazio = st.columns([2, 3])
-with col_logo:
-    if os.path.exists(LOGO_PATH):
-        with open(LOGO_PATH, "r") as f:
-            _svg = f.read()
-        # Adapta o SVG para fundo branco:
-        # - remove o fundo escuro (rect fica transparente)
-        # - texto "Declara" passa para preto
-        # - tagline e detalhes amarelos passam para laranja escuro
-        _svg = _svg.replace('width="460"', 'width="240"').replace('height="132"', 'height="69"')
-        _svg = _svg.replace('fill="url(#bgGrad)" filter="url(#bgShadow)"', 'fill="none"')
-        _svg = _svg.replace('<tspan fill="#F5F5F5">Declara</tspan>', '<tspan fill="#1A1A1A">Declara</tspan>')
-        _svg = _svg.replace('fill="#FFD700" letter-spacing="1.6"', 'fill="#C04A00" letter-spacing="1.6"')
-        _svg = _svg.replace('stroke="#FFD700" stroke-width="1"/>', 'stroke="#C04A00" stroke-width="1"/>')
-        st.markdown(_svg, unsafe_allow_html=True)
-    else:
-        st.markdown('<span style="font-size:2.8rem;">🦁</span>', unsafe_allow_html=True)
+if os.path.exists(LOGO_PATH):
+    with open(LOGO_PATH, "rb") as _f:
+        _logo_b64 = base64.b64encode(_f.read()).decode()
+    st.markdown(
+        f'<div class="navbar-bg">'
+        f'<img src="data:image/png;base64,{_logo_b64}" height="46" '
+        f'style="padding-left:2.5rem;padding-top:10px;">'
+        f'</div>',
+        unsafe_allow_html=True,
+    )
+else:
+    st.markdown(
+        '<div class="navbar-bg">'
+        '<span style="color:#FF6B35;font-size:1.8rem;font-weight:800;'
+        'padding-left:2.5rem;line-height:66px;">🦁 DeclaraAI</span>'
+        '</div>',
+        unsafe_allow_html=True,
+    )
 
 # ---------------------------------------------------------------------------
 # Abas principais — renderizadas logo abaixo da logo, alinhadas à direita via CSS
@@ -735,69 +739,124 @@ def _buscar_historico(params: dict) -> list | None:
     return None
 
 
+def _baixar_texto_documento(doc_id: int) -> bytes | None:
+    """Busca o texto extraído de um documento para download."""
+    try:
+        r = requests.get(f"{API_URL}/history/{doc_id}/download", timeout=TIMEOUT_PADRAO)
+        if r.status_code == 200:
+            return r.content
+    except Exception:
+        pass
+    return None
+
+
+_ICONES_CAT = {
+    "Recibo Médico": "🏥",
+    "Comprovante Educacional": "🎓",
+    "Informe de Rendimentos": "💼",
+    "Nota Fiscal": "🧾",
+    "Previdência Privada": "🏦",
+    "Doações": "❤️",
+    "Pensão Alimentícia": "👨‍👧",
+    "Aluguel": "🏠",
+    "Documento Não Classificado": "📄",
+}
+
+
 with aba_historico:
     st.header("Histórico de Documentos")
 
-    with st.expander("Filtros de busca", expanded=True):
+    col_buscar, col_filtro = st.columns([1, 3])
+    with col_buscar:
+        if st.button("Atualizar", type="primary", use_container_width=True):
+            if "hist_documentos" in st.session_state:
+                del st.session_state["hist_documentos"]
+
+    with st.expander("Filtros", expanded=False):
         col_cat, col_nome, col_inicio, col_fim = st.columns(4)
-
         with col_cat:
-            categorias = ["Todas as categorias"] + _buscar_categorias()
-            categoria_selecionada = st.selectbox("Categoria", categorias)
-
+            categorias_disp = ["Todas as categorias"] + _buscar_categorias()
+            hist_cat = st.selectbox("Categoria", categorias_disp, key="hist_cat")
         with col_nome:
-            nome_busca = st.text_input("Nome do arquivo", placeholder="Ex: recibo_jan")
-
+            hist_nome = st.text_input("Nome do arquivo", placeholder="Ex: recibo_jan", key="hist_nome")
         with col_inicio:
-            data_inicio = st.date_input("Data início", value=None)
-
+            hist_inicio = st.date_input("Data início", value=None, key="hist_inicio")
         with col_fim:
-            data_fim = st.date_input("Data fim", value=None)
+            hist_fim = st.date_input("Data fim", value=None, key="hist_fim")
 
-    if st.button("Buscar Documentos", type="primary"):
-        filtros: dict = {"limite": 100}
+        if st.button("Aplicar Filtros", type="secondary"):
+            if "hist_documentos" in st.session_state:
+                del st.session_state["hist_documentos"]
 
-        if categoria_selecionada != "Todas as categorias":
-            filtros["categoria"] = categoria_selecionada
-        if nome_busca:
-            filtros["nome"] = nome_busca
-        if data_inicio:
-            filtros["data_inicio"] = data_inicio.isoformat()
-        if data_fim:
-            filtros["data_fim"] = data_fim.isoformat()
+    # Carrega documentos na sessão para não perder entre reruns
+    if "hist_documentos" not in st.session_state:
+        filtros: dict = {"limite": 200}
+        if st.session_state.get("hist_cat", "Todas as categorias") != "Todas as categorias":
+            filtros["categoria"] = st.session_state["hist_cat"]
+        if st.session_state.get("hist_nome"):
+            filtros["nome"] = st.session_state["hist_nome"]
+        if st.session_state.get("hist_inicio"):
+            filtros["data_inicio"] = st.session_state["hist_inicio"].isoformat()
+        if st.session_state.get("hist_fim"):
+            filtros["data_fim"] = st.session_state["hist_fim"].isoformat()
+        st.session_state["hist_documentos"] = _buscar_historico(filtros) or []
 
-        with st.spinner("Buscando documentos..."):
-            documentos = _buscar_historico(filtros)
+    documentos = st.session_state["hist_documentos"]
 
-        if documentos is not None:
-            st.write(f"**{len(documentos)} documento(s) encontrado(s)**")
+    # ── Dashboard: totais por categoria ──────────────────────────────────
+    if documentos:
+        contagem: dict = {}
+        for d in documentos:
+            cat = d.get("categoria") or "Documento Não Classificado"
+            contagem[cat] = contagem.get(cat, 0) + 1
 
-            if not documentos:
-                msg_aviso("Nenhum documento encontrado com os filtros aplicados.")
-            else:
-                for doc in documentos:
-                    criado_em = doc.get("criado_em", "")[:10] if doc.get("criado_em") else "N/A"
-                    titulo = f"📄 {doc['nome_arquivo']} — {doc['categoria']} ({criado_em})"
+        st.subheader("Resumo")
+        metricas = [("Total de Documentos", len(documentos), "📁")] + [
+            (cat, qtd, _ICONES_CAT.get(cat, "📁")) for cat, qtd in sorted(contagem.items())
+        ]
+        cols_met = st.columns(min(len(metricas), 4))
+        for idx, (label, valor, icone) in enumerate(metricas):
+            cols_met[idx % 4].metric(f"{icone} {label}", valor)
 
-                    with st.expander(titulo):
-                        col1, col2, col3 = st.columns(3)
+        st.divider()
+        st.subheader("Documentos por Categoria")
 
-                        with col1:
-                            st.write(f"**Tipo:** `{doc['tipo_arquivo'].upper()}`")
-                            st.write(f"**Categoria:** {doc['categoria']}")
+        for cat, qtd in sorted(contagem.items()):
+            icone = _ICONES_CAT.get(cat, "📁")
+            docs_cat = [d for d in documentos if (d.get("categoria") or "Documento Não Classificado") == cat]
 
-                        with col2:
-                            st.write(f"**Data detectada:** {doc.get('data_detectada') or '—'}")
-                            st.write(f"**Valor:** {doc.get('valor_detectado') or '—'}")
+            with st.expander(f"{icone} {cat} — {qtd} documento(s)", expanded=False):
+                for doc in docs_cat:
+                    criado_em = (doc.get("criado_em") or "")[:10] or "N/A"
+                    col_info, col_acoes = st.columns([3, 1])
 
-                        with col3:
-                            st.write(f"**Emitente:** {doc.get('emitente_detectado') or '—'}")
-                            st.write(f"**Salvo em:** {criado_em}")
+                    with col_info:
+                        st.markdown(
+                            f"**📄 {doc['nome_arquivo']}**  \n"
+                            f"Tipo: `{doc['tipo_arquivo'].upper()}` &nbsp;|&nbsp; "
+                            f"Data detectada: {doc.get('data_detectada') or '—'} &nbsp;|&nbsp; "
+                            f"Valor: {doc.get('valor_detectado') or '—'}  \n"
+                            f"Emitente: {doc.get('emitente_detectado') or '—'} &nbsp;|&nbsp; "
+                            f"Salvo em: {criado_em}"
+                        )
 
+                    with col_acoes:
+                        texto_bytes = _baixar_texto_documento(doc["id"])
+                        nome_dl = doc["nome_arquivo"].rsplit(".", 1)[0] + "_extraido.txt"
+                        if texto_bytes:
+                            st.download_button(
+                                label="⬇ Baixar",
+                                data=texto_bytes,
+                                file_name=nome_dl,
+                                mime="text/plain",
+                                key=f"dl_{doc['id']}",
+                                use_container_width=True,
+                            )
                         if st.button(
-                            "Excluir do histórico",
+                            "🗑 Excluir",
                             key=f"excluir_{doc['id']}",
                             type="secondary",
+                            use_container_width=True,
                         ):
                             try:
                                 r = requests.delete(
@@ -806,11 +865,17 @@ with aba_historico:
                                 )
                                 if r.status_code == 200:
                                     msg_sucesso("Documento removido.")
+                                    if "hist_documentos" in st.session_state:
+                                        del st.session_state["hist_documentos"]
                                     st.rerun()
                                 else:
                                     msg_erro("Erro ao remover documento.")
                             except Exception as e:
                                 msg_erro(f"Erro: {e}")
+
+                    st.divider()
+    else:
+        msg_aviso("Nenhum documento encontrado. Envie documentos na aba Upload.")
 
 
 # ===========================================================================
