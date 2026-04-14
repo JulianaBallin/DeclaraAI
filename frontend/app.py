@@ -39,224 +39,231 @@ st.markdown(
     """
     <style>
     /* ================================================================
-       FUNDO — degradê radial suave, escuro neutro sem cast de cor
+       BASE — fundo branco, texto escuro
     ================================================================ */
-    .stApp {
-        background: radial-gradient(ellipse at 50% 0%, #1e1e1e 0%, #0D0D0D 65%);
-        color: #E8E8E8;
-    }
+    .stApp { background-color: #FFFFFF; color: #1A1A1A; }
 
-    [data-testid="stSidebar"]        { background-color: #111111; }
-    [data-testid="stSidebarContent"] { background-color: #111111; }
+    [data-testid="stSidebar"]        { background-color: #F5F5F5; }
+    [data-testid="stSidebarContent"] { background-color: #F5F5F5; }
 
     /* ================================================================
-       MARGENS LATERAIS — 2x maior; sem padding-top extra
+       MARGENS LATERAIS — 2x maior que o padrão do Streamlit
     ================================================================ */
     .main .block-container {
-        padding-top: 2rem !important;
+        padding-top: 1.5rem !important;
         padding-left: 5rem !important;
         padding-right: 5rem !important;
         max-width: 100% !important;
     }
 
     /* ================================================================
-       CABEÇALHO — logo inline, sem altura forçada
-    ================================================================ */
-    .bloco-logo {
-        display: flex;
-        align-items: center;
-        padding-bottom: 0;
-        margin-bottom: 0;
-    }
-
-    /* ================================================================
-       ABAS — estilo underline, alinhadas à direita
+       ABAS — underline laranja, alinhadas à direita
     ================================================================ */
     .stTabs [data-baseweb="tab-list"] {
         background-color: transparent;
         border-radius: 0;
         padding: 0;
         gap: 0;
-        border-bottom: 1px solid #2a2a2a;
+        border-bottom: 2px solid #E8E8E8;
         justify-content: flex-end;
     }
 
     .stTabs [data-baseweb="tab"] {
-        font-size: 0.92rem;
+        font-size: 0.95rem;
         font-weight: 600;
-        color: #CCCCCC;
+        color: #555555;
         border-radius: 0;
-        padding: 0.65rem 1.1rem;
+        padding: 0.65rem 1.2rem;
         background-color: transparent;
         border-bottom: 3px solid transparent;
-        margin-bottom: -1px;
-        transition: color 0.18s ease, border-color 0.18s ease;
+        margin-bottom: -2px;
+        transition: color 0.18s ease;
     }
 
     .stTabs [aria-selected="true"] {
         background-color: transparent !important;
-        color: #FF6B35 !important;
-        border-bottom: 3px solid #FF6B35 !important;
+        color: #C04A00 !important;
+        border-bottom: 3px solid #C04A00 !important;
     }
 
     .stTabs [data-baseweb="tab"]:hover {
-        color: #FFD700 !important;
-        background-color: rgba(255, 215, 0, 0.04) !important;
+        color: #C04A00 !important;
+        background-color: #FFF5F0 !important;
     }
 
     /* ================================================================
-       TIPOGRAFIA — fontes mais brancas, parágrafos maiores
+       TIPOGRAFIA
     ================================================================ */
     h1, h2, h3, h4 {
-        color: #F5F5F5 !important;
-        margin-top: 1.6rem !important;
-        margin-bottom: 0.85rem !important;
+        color: #1A1A1A !important;
+        margin-top: 1.5rem !important;
+        margin-bottom: 0.8rem !important;
     }
 
     p, li, .stMarkdown p {
-        color: #DEDEDE !important;
-        font-size: 1.05rem !important;
-        line-height: 1.7 !important;
+        color: #2A2A2A !important;
+        font-size: 1.07rem !important;
+        line-height: 1.75 !important;
     }
 
     label, .stSelectbox label, .stTextInput label,
     .stFileUploader label, .stDateInput label {
-        color: #CCCCCC !important;
+        color: #333333 !important;
         font-size: 1rem !important;
     }
 
-    .stCaption, caption { color: #AAAAAA !important; }
+    .stCaption, caption { color: #666666 !important; }
 
     /* ================================================================
        BOTÕES
     ================================================================ */
     .stButton > button[kind="primary"] {
-        background-color: #FF6B35;
+        background-color: #C04A00;
         color: #ffffff;
         border: none;
         border-radius: 8px;
         font-weight: 700;
-        padding: 0.5rem 1.2rem;
+        padding: 0.5rem 1.4rem;
         transition: background-color 0.2s ease;
     }
-    .stButton > button[kind="primary"]:hover { background-color: #e55a25; }
+    .stButton > button[kind="primary"]:hover { background-color: #A03A00; }
 
     .stButton > button[kind="secondary"] {
-        background-color: #1a1a1a;
-        color: #FFD700;
-        border: 1.5px solid #FFD700;
+        background-color: #FFFFFF;
+        color: #C04A00;
+        border: 1.5px solid #C04A00;
         border-radius: 8px;
         font-weight: 600;
         transition: all 0.2s ease;
     }
     .stButton > button[kind="secondary"]:hover {
-        background-color: #FFD700;
-        color: #0D0D0D;
+        background-color: #FFF0E8;
+        color: #A03A00;
     }
 
     /* ================================================================
        COMPONENTES
     ================================================================ */
     div[data-testid="stExpander"] {
-        background-color: #1a1a1a;
-        border: 1px solid #333333;
+        background-color: #FAFAFA;
+        border: 1px solid #E5E5E5;
         border-radius: 10px;
     }
-    div[data-testid="stExpander"] summary { color: #FFD700; font-weight: 600; }
+    div[data-testid="stExpander"] summary { color: #C04A00; font-weight: 600; }
 
     [data-testid="stMetric"] {
-        background-color: #1a1a1a;
-        border: 1px solid #333333;
+        background-color: #F8F8F8;
+        border: 1px solid #E5E5E5;
         border-radius: 10px;
         padding: 0.8rem;
     }
-    [data-testid="stMetricLabel"] { color: #BBBBBB !important; font-size: 0.85rem; }
-    [data-testid="stMetricValue"] { color: #FFD700 !important; font-weight: 700; }
+    [data-testid="stMetricLabel"] { color: #555555 !important; font-size: 0.87rem; }
+    [data-testid="stMetricValue"] { color: #C04A00 !important; font-weight: 700; font-size: 1.3rem; }
 
     .stTextInput > div > div > input,
     .stTextArea textarea,
     .stSelectbox > div > div {
-        background-color: #1a1a1a !important;
-        border: 1px solid #333333 !important;
-        color: #F0F0F0 !important;
+        background-color: #FAFAFA !important;
+        border: 1px solid #DDDDDD !important;
+        color: #1A1A1A !important;
         border-radius: 8px;
     }
     .stTextInput > div > div > input:focus,
     .stTextArea textarea:focus {
-        border-color: #FF6B35 !important;
-        box-shadow: 0 0 0 2px rgba(255, 107, 53, 0.25);
+        border-color: #C04A00 !important;
+        box-shadow: 0 0 0 2px rgba(192, 74, 0, 0.15);
     }
 
     [data-testid="stChatMessage"] {
-        background-color: #1a1a1a;
+        background-color: #F8F8F8;
         border-radius: 12px;
-        border: 1px solid #2a2a2a;
+        border: 1px solid #EEEEEE;
         margin-bottom: 8px;
     }
 
     [data-testid="stChatInput"] textarea {
-        background-color: #1a1a1a !important;
-        color: #F5F5F5 !important;
-        border: 1.5px solid #FF6B35 !important;
+        background-color: #FAFAFA !important;
+        color: #1A1A1A !important;
+        border: 1.5px solid #C04A00 !important;
         border-radius: 12px;
     }
 
-    .stProgress > div > div > div { background-color: #FF6B35; }
+    .stProgress > div > div > div { background-color: #C04A00; }
 
-    hr { border-color: #2a2a2a !important; }
+    hr { border-color: #EEEEEE !important; }
 
     [data-testid="stFileUploader"] {
-        background-color: #1a1a1a;
-        border: 2px dashed #FF6B35;
+        background-color: #FAFAFA;
+        border: 2px dashed #C04A00;
         border-radius: 10px;
         padding: 1rem;
     }
 
     /* ================================================================
-       MENSAGENS DE ESTADO — alto contraste
+       MENSAGENS DE ESTADO — verde / vermelho / amarelo
     ================================================================ */
     .msg-success {
-        background-color: #0a2e1a; border-left: 4px solid #00c853;
-        color: #a5f0c0; padding: 0.7rem 1rem;
-        border-radius: 0 8px 8px 0; font-weight: 500;
-        font-size: 1.02rem; margin: 0.5rem 0;
+        background-color: #E8F5E9;
+        border-left: 4px solid #2E7D32;
+        color: #1B5E20;
+        padding: 0.75rem 1rem;
+        border-radius: 0 8px 8px 0;
+        font-weight: 500;
+        font-size: 1.02rem;
+        margin: 0.5rem 0;
     }
     .msg-error {
-        background-color: #2e0a0a; border-left: 4px solid #FF3B3B;
-        color: #f5a5a5; padding: 0.7rem 1rem;
-        border-radius: 0 8px 8px 0; font-weight: 500;
-        font-size: 1.02rem; margin: 0.5rem 0;
+        background-color: #FFEBEE;
+        border-left: 4px solid #C62828;
+        color: #7B0000;
+        padding: 0.75rem 1rem;
+        border-radius: 0 8px 8px 0;
+        font-weight: 500;
+        font-size: 1.02rem;
+        margin: 0.5rem 0;
     }
     .msg-warning {
-        background-color: #2a1f00; border-left: 4px solid #FFD700;
-        color: #ffe080; padding: 0.7rem 1rem;
-        border-radius: 0 8px 8px 0; font-weight: 500;
-        font-size: 1.02rem; margin: 0.5rem 0;
+        background-color: #FFFDE7;
+        border-left: 4px solid #F9A825;
+        color: #424242;
+        padding: 0.75rem 1rem;
+        border-radius: 0 8px 8px 0;
+        font-weight: 500;
+        font-size: 1.02rem;
+        margin: 0.5rem 0;
     }
     .msg-info {
-        background-color: #0a1e2e; border-left: 4px solid #FF6B35;
-        color: #ffc4a8; padding: 0.7rem 1rem;
-        border-radius: 0 8px 8px 0; font-weight: 500;
-        font-size: 1.02rem; margin: 0.5rem 0;
+        background-color: #FFF3E0;
+        border-left: 4px solid #C04A00;
+        color: #7A2D00;
+        padding: 0.75rem 1rem;
+        border-radius: 0 8px 8px 0;
+        font-weight: 500;
+        font-size: 1.02rem;
+        margin: 0.5rem 0;
     }
 
     .badge-categoria {
-        display: inline-block; background-color: #FF6B35;
-        color: #ffffff; font-size: 0.78rem; font-weight: 700;
-        padding: 2px 10px; border-radius: 20px; margin-left: 6px;
+        display: inline-block;
+        background-color: #C04A00;
+        color: #ffffff;
+        font-size: 0.8rem;
+        font-weight: 700;
+        padding: 2px 10px;
+        border-radius: 20px;
+        margin-left: 6px;
     }
 
     /* ================================================================
        RODAPÉ
     ================================================================ */
     .footer-bar {
-        background-color: #111111;
-        border-top: 1px solid #2a2a2a;
-        color: #888888;
+        background-color: #F5F5F5;
+        border-top: 1px solid #E8E8E8;
+        color: #777777;
         text-align: center;
         padding: 0.7rem;
-        font-size: 0.85rem;
-        border-radius: 0 0 8px 8px;
+        font-size: 0.88rem;
         margin-top: 2.5rem;
     }
     </style>
@@ -286,20 +293,28 @@ def msg_info(texto: str) -> None:
 
 
 # ---------------------------------------------------------------------------
-# Cabeçalho — logo à esquerda (SVG inline), espaço vazio à direita
+# Cabeçalho — logo à esquerda (SVG inline adaptado para fundo branco)
+# O arquivo logo.svg está na mesma pasta do app.py (copiado no Dockerfile)
 # As abas ficam logo abaixo alinhadas à direita via CSS (justify-content: flex-end)
 # ---------------------------------------------------------------------------
 
-LOGO_PATH = os.path.join(os.path.dirname(__file__), "..", "docs", "diagrams", "logo.svg")
+LOGO_PATH = os.path.join(os.path.dirname(__file__), "logo.svg")
 
 col_logo, col_vazio = st.columns([2, 3])
 with col_logo:
     if os.path.exists(LOGO_PATH):
         with open(LOGO_PATH, "r") as f:
             _svg = f.read()
-        # Reduz para exibição no cabeçalho mantendo proporção (460×132 → 230×66)
-        _svg_header = _svg.replace('width="460"', 'width="230"').replace('height="132"', 'height="66"')
-        st.markdown(f'<div class="bloco-logo">{_svg_header}</div>', unsafe_allow_html=True)
+        # Adapta o SVG para fundo branco:
+        # - remove o fundo escuro (rect fica transparente)
+        # - texto "Declara" passa para preto
+        # - tagline e detalhes amarelos passam para laranja escuro
+        _svg = _svg.replace('width="460"', 'width="240"').replace('height="132"', 'height="69"')
+        _svg = _svg.replace('fill="url(#bgGrad)" filter="url(#bgShadow)"', 'fill="none"')
+        _svg = _svg.replace('<tspan fill="#F5F5F5">Declara</tspan>', '<tspan fill="#1A1A1A">Declara</tspan>')
+        _svg = _svg.replace('fill="#FFD700" letter-spacing="1.6"', 'fill="#C04A00" letter-spacing="1.6"')
+        _svg = _svg.replace('stroke="#FFD700" stroke-width="1"/>', 'stroke="#C04A00" stroke-width="1"/>')
+        st.markdown(_svg, unsafe_allow_html=True)
     else:
         st.markdown('<span style="font-size:2.8rem;">🦁</span>', unsafe_allow_html=True)
 
