@@ -39,95 +39,83 @@ st.markdown(
     """
     <style>
     /* ================================================================
-       FUNDO — degradê suave escuro com toque quente
+       FUNDO — degradê radial suave, escuro neutro sem cast de cor
     ================================================================ */
     .stApp {
-        background: linear-gradient(160deg, #0D0D0D 0%, #1a0e05 45%, #0f0f0f 100%);
+        background: radial-gradient(ellipse at 50% 0%, #1e1e1e 0%, #0D0D0D 65%);
         color: #E8E8E8;
     }
 
-    /* Sidebar */
-    [data-testid="stSidebar"] { background-color: #111111; }
+    [data-testid="stSidebar"]        { background-color: #111111; }
     [data-testid="stSidebarContent"] { background-color: #111111; }
 
     /* ================================================================
-       MARGENS LATERAIS — 2x maior que o padrão
+       MARGENS LATERAIS — 2x maior; sem padding-top extra
     ================================================================ */
     .main .block-container {
-        padding-top: 88px !important;
-        padding-left: 6rem !important;
-        padding-right: 6rem !important;
+        padding-top: 2rem !important;
+        padding-left: 5rem !important;
+        padding-right: 5rem !important;
         max-width: 100% !important;
     }
 
     /* ================================================================
-       NAVBAR FIXA — logo esquerda, abas direita
+       CABEÇALHO — logo inline, sem altura forçada
     ================================================================ */
-    .navbar-topo {
-        position: fixed;
-        top: 0;
-        left: 0;
-        right: 0;
-        height: 68px;
-        background: linear-gradient(90deg, #0D0D0D 0%, #1a0e05 100%);
-        border-bottom: 1px solid #2a2a2a;
-        z-index: 9998;
+    .bloco-logo {
         display: flex;
         align-items: center;
-        padding: 0 3rem;
+        padding-bottom: 0;
+        margin-bottom: 0;
     }
 
-    /* Tab-list posicionada no canto superior direito */
+    /* ================================================================
+       ABAS — estilo underline, alinhadas à direita
+    ================================================================ */
     .stTabs [data-baseweb="tab-list"] {
-        position: fixed !important;
-        top: 0 !important;
-        right: 2rem !important;
-        height: 68px !important;
-        background: transparent !important;
-        border: none !important;
-        z-index: 9999 !important;
-        display: flex !important;
-        align-items: center !important;
-        gap: 0 !important;
-        padding: 0 !important;
+        background-color: transparent;
+        border-radius: 0;
+        padding: 0;
+        gap: 0;
+        border-bottom: 1px solid #2a2a2a;
+        justify-content: flex-end;
     }
 
     .stTabs [data-baseweb="tab"] {
-        height: 68px !important;
-        border-radius: 0 !important;
-        border-bottom: 3px solid transparent !important;
-        padding: 0 1rem !important;
-        font-size: 0.88rem !important;
-        font-weight: 600 !important;
-        color: #cccccc !important;
-        background: transparent !important;
-        transition: color 0.2s ease, border-bottom-color 0.2s ease;
+        font-size: 0.92rem;
+        font-weight: 600;
+        color: #CCCCCC;
+        border-radius: 0;
+        padding: 0.65rem 1.1rem;
+        background-color: transparent;
+        border-bottom: 3px solid transparent;
+        margin-bottom: -1px;
+        transition: color 0.18s ease, border-color 0.18s ease;
     }
 
     .stTabs [aria-selected="true"] {
-        background: transparent !important;
+        background-color: transparent !important;
         color: #FF6B35 !important;
         border-bottom: 3px solid #FF6B35 !important;
     }
 
     .stTabs [data-baseweb="tab"]:hover {
         color: #FFD700 !important;
-        background: rgba(255, 215, 0, 0.04) !important;
-        border-bottom-color: #FFD700 !important;
+        background-color: rgba(255, 215, 0, 0.04) !important;
     }
 
     /* ================================================================
-       TIPOGRAFIA — fontes mais brancas e parágrafos maiores
+       TIPOGRAFIA — fontes mais brancas, parágrafos maiores
     ================================================================ */
     h1, h2, h3, h4 {
         color: #F5F5F5 !important;
         margin-top: 1.6rem !important;
-        margin-bottom: 0.9rem !important;
+        margin-bottom: 0.85rem !important;
     }
 
     p, li, .stMarkdown p {
         color: #DEDEDE !important;
-        font-size: 1.06rem !important;
+        font-size: 1.05rem !important;
         line-height: 1.7 !important;
     }
 
@@ -137,10 +125,7 @@ st.markdown(
         font-size: 1rem !important;
     }
 
-    /* Texto de caption e legenda */
-    .stCaption, caption, small {
-        color: #AAAAAA !important;
-    }
+    .stCaption, caption { color: #AAAAAA !important; }
 
     /* ================================================================
        BOTÕES
@@ -154,10 +139,7 @@ st.markdown(
         padding: 0.5rem 1.2rem;
         transition: background-color 0.2s ease;
     }
-    .stButton > button[kind="primary"]:hover {
-        background-color: #e55a25;
-        color: #ffffff;
-    }
+    .stButton > button[kind="primary"]:hover { background-color: #e55a25; }
 
     .stButton > button[kind="secondary"] {
         background-color: #1a1a1a;
@@ -180,10 +162,7 @@ st.markdown(
         border: 1px solid #333333;
         border-radius: 10px;
     }
-    div[data-testid="stExpander"] summary {
-        color: #FFD700;
-        font-weight: 600;
-    }
+    div[data-testid="stExpander"] summary { color: #FFD700; font-weight: 600; }
 
     [data-testid="stMetric"] {
         background-color: #1a1a1a;
@@ -237,56 +216,34 @@ st.markdown(
        MENSAGENS DE ESTADO — alto contraste
     ================================================================ */
     .msg-success {
-        background-color: #0a2e1a;
-        border-left: 4px solid #00c853;
-        color: #a5f0c0;
-        padding: 0.7rem 1rem;
-        border-radius: 0 8px 8px 0;
-        font-weight: 500;
-        font-size: 1.02rem;
-        margin: 0.5rem 0;
+        background-color: #0a2e1a; border-left: 4px solid #00c853;
+        color: #a5f0c0; padding: 0.7rem 1rem;
+        border-radius: 0 8px 8px 0; font-weight: 500;
+        font-size: 1.02rem; margin: 0.5rem 0;
     }
     .msg-error {
-        background-color: #2e0a0a;
-        border-left: 4px solid #FF3B3B;
-        color: #f5a5a5;
-        padding: 0.7rem 1rem;
-        border-radius: 0 8px 8px 0;
-        font-weight: 500;
-        font-size: 1.02rem;
-        margin: 0.5rem 0;
+        background-color: #2e0a0a; border-left: 4px solid #FF3B3B;
+        color: #f5a5a5; padding: 0.7rem 1rem;
+        border-radius: 0 8px 8px 0; font-weight: 500;
+        font-size: 1.02rem; margin: 0.5rem 0;
     }
     .msg-warning {
-        background-color: #2a1f00;
-        border-left: 4px solid #FFD700;
-        color: #ffe080;
-        padding: 0.7rem 1rem;
-        border-radius: 0 8px 8px 0;
-        font-weight: 500;
-        font-size: 1.02rem;
-        margin: 0.5rem 0;
+        background-color: #2a1f00; border-left: 4px solid #FFD700;
+        color: #ffe080; padding: 0.7rem 1rem;
+        border-radius: 0 8px 8px 0; font-weight: 500;
+        font-size: 1.02rem; margin: 0.5rem 0;
     }
     .msg-info {
-        background-color: #0a1e2e;
-        border-left: 4px solid #FF6B35;
-        color: #ffc4a8;
-        padding: 0.7rem 1rem;
-        border-radius: 0 8px 8px 0;
-        font-weight: 500;
-        font-size: 1.02rem;
-        margin: 0.5rem 0;
+        background-color: #0a1e2e; border-left: 4px solid #FF6B35;
+        color: #ffc4a8; padding: 0.7rem 1rem;
+        border-radius: 0 8px 8px 0; font-weight: 500;
+        font-size: 1.02rem; margin: 0.5rem 0;
     }
 
-    /* Badge de categoria */
     .badge-categoria {
-        display: inline-block;
-        background-color: #FF6B35;
-        color: #ffffff;
-        font-size: 0.78rem;
-        font-weight: 700;
-        padding: 2px 10px;
-        border-radius: 20px;
-        margin-left: 6px;
+        display: inline-block; background-color: #FF6B35;
+        color: #ffffff; font-size: 0.78rem; font-weight: 700;
+        padding: 2px 10px; border-radius: 20px; margin-left: 6px;
     }
 
     /* ================================================================
@@ -329,26 +286,25 @@ def msg_info(texto: str) -> None:
 
 
 # ---------------------------------------------------------------------------
-# Navbar fixa — logo esquerda, abas (via CSS) direita
+# Cabeçalho — logo à esquerda (SVG inline), espaço vazio à direita
+# As abas ficam logo abaixo alinhadas à direita via CSS (justify-content: flex-end)
 # ---------------------------------------------------------------------------
 
 LOGO_PATH = os.path.join(os.path.dirname(__file__), "..", "docs", "diagrams", "logo.svg")
 
-if os.path.exists(LOGO_PATH):
-    with open(LOGO_PATH, "r") as f:
-        _svg_raw = f.read()
-    # Redimensiona para caber na navbar (height 44 px, largura proporcional)
-    _logo_navbar = _svg_raw.replace('width="460"', 'width="153"').replace('height="132"', 'height="44"')
-else:
-    _logo_navbar = '<span style="font-size:2rem; color:#FF6B35;">🦁</span>'
-
-st.markdown(
-    f'<div class="navbar-topo">{_logo_navbar}</div>',
-    unsafe_allow_html=True,
-)
+col_logo, col_vazio = st.columns([2, 3])
+with col_logo:
+    if os.path.exists(LOGO_PATH):
+        with open(LOGO_PATH, "r") as f:
+            _svg = f.read()
+        # Reduz para exibição no cabeçalho mantendo proporção (460×132 → 230×66)
+        _svg_header = _svg.replace('width="460"', 'width="230"').replace('height="132"', 'height="66"')
+        st.markdown(f'<div class="bloco-logo">{_svg_header}</div>', unsafe_allow_html=True)
+    else:
+        st.markdown('<span style="font-size:2.8rem;">🦁</span>', unsafe_allow_html=True)
 
 # ---------------------------------------------------------------------------
-# Abas principais
+# Abas principais — renderizadas logo abaixo da logo, alinhadas à direita via CSS
 # ---------------------------------------------------------------------------
 
 aba_chat, aba_upload, aba_base, aba_historico, aba_resumo, aba_avaliacao = st.tabs(
