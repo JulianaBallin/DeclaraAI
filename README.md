@@ -1,7 +1,5 @@
-<h1 align="center">🤖 DeclaraAI</h1>
-
 <p align="center">
-  <img src="https://media4.giphy.com/media/v1.Y2lkPTc5MGI3NjExcHRiNnd1OTJ5YXlmMWtsNWJsZGI0ZnA5NmNnMXQzbHJjYWhoamRwaSZlcD12MV9pbnRlcm5hbF9naWZfYnlfaWQmY3Q9Zw/5fpKNaivstvfmpejxd/giphy.gif" width="260">
+  <img src="docs/diagrams/logo.svg" alt="DeclaraAI" width="420">
 </p>
 
 <p align="center">
@@ -47,27 +45,9 @@ O **DeclaraAI** é um Micro SaaS com pipeline **RAG (Retrieval-Augmented Generat
 
 <h2 align="center">🧠 Pipeline RAG</h2>
 
-```
-┌─────────────────────────────────────────────────────────────────┐
-│                    INGESTÃO (offline)                           │
-│  [Documentos] → [Loader] → [Chunker 600/80] → [MiniLM Embed]   │
-│                                                    ↓            │
-│                                             [ChromaDB]          │
-└─────────────────────────────────────────────────────────────────┘
-                                                     ↑
-┌─────────────────────────────────────────────────────────────────┐
-│                    CONSULTA (online)                            │
-│  [Pergunta] → [MiniLM Embed] → [Busca Semântica ChromaDB]       │
-│                                        ↓                        │
-│                              [Top-5 Chunks Relevantes]          │
-│                                        ↓                        │
-│                              [Prompt + Contexto]                │
-│                                        ↓                        │
-│                              [Ollama — Mistral 7B]              │
-│                                        ↓                        │
-│                                  [Resposta]                     │
-└─────────────────────────────────────────────────────────────────┘
-```
+<p align="center">
+  <img src="docs/diagrams/pipeline_rag.svg" alt="Pipeline RAG" width="860">
+</p>
 
 ### Decisões Técnicas Justificadas
 
@@ -135,7 +115,8 @@ DeclaraAI/
 │   ├── requirements.txt
 │   └── Dockerfile
 ├── frontend/
-│   ├── app.py                            # Streamlit: 5 abas
+│   ├── app.py                            # Streamlit: 5 abas (laranja/preto)
+│   ├── .streamlit/config.toml            # Tema: laranja, preto, branco
 │   ├── requirements.txt
 │   └── Dockerfile
 ├── data/
@@ -143,6 +124,12 @@ DeclaraAI/
 │   ├── knowledge_base/
 │   │   └── guia_imposto_renda.txt        # Base de conhecimento IRPF incluída
 │   └── chroma_db/                        # Banco vetorial persistente
+├── docs/
+│   └── diagrams/
+│       ├── logo.svg                      # Logo do sistema (leão + IA)
+│       ├── pipeline_rag.svg              # Diagrama do pipeline RAG
+│       ├── c4_contexto.svg               # Diagrama C4 — Contexto
+│       └── c4_containers.svg             # Diagrama C4 — Contêineres
 ├── docker-compose.yml
 ├── .env.example
 └── README.md
@@ -315,6 +302,18 @@ Ou use a aba **🔬 Avaliação** na interface Streamlit.
 <h2 align="center">🧩 Modelagem C4</h2>
 
 O projeto segue o modelo **C4** para representação arquitetural:
+
+### C1 — Contexto
+
+<p align="center">
+  <img src="docs/diagrams/c4_contexto.svg" alt="C4 Contexto" width="780">
+</p>
+
+### C2 — Contêineres
+
+<p align="center">
+  <img src="docs/diagrams/c4_containers.svg" alt="C4 Contêineres" width="860">
+</p>
 
 - **C1 – Contexto:** usuário interage com DeclaraAI via browser
 - **C2 – Contêineres:** Frontend (Streamlit), Backend (FastAPI), Banco Vetorial (ChromaDB), Banco Relacional (SQLite), LLM (Ollama)
