@@ -26,34 +26,273 @@ TIMEOUT_PADRAO = 30
 
 st.set_page_config(
     page_title="DeclaraAI",
-    page_icon="📋",
+    page_icon="🦁",
     layout="wide",
     initial_sidebar_state="collapsed",
 )
 
 # ---------------------------------------------------------------------------
-# CSS customizado mínimo
+# CSS customizado — paleta: laranja (#FF6B35), amarelo (#FFD700), preto, branco
 # ---------------------------------------------------------------------------
 
 st.markdown(
     """
     <style>
-    .metric-label { font-size: 0.85rem; color: #555; }
-    .stTabs [data-baseweb="tab"] { font-size: 1rem; padding: 0.5rem 1.2rem; }
-    div[data-testid="stExpander"] { border: 1px solid #e0e0e0; border-radius: 8px; }
+    /* Fundo geral */
+    .stApp { background-color: #0D0D0D; color: #F5F5F5; }
+
+    /* Sidebar e painéis secundários */
+    [data-testid="stSidebar"] { background-color: #111111; }
+    [data-testid="stSidebarContent"] { background-color: #111111; }
+
+    /* Abas */
+    .stTabs [data-baseweb="tab-list"] {
+        background-color: #1a1a1a;
+        border-radius: 10px;
+        padding: 4px;
+        gap: 4px;
+    }
+    .stTabs [data-baseweb="tab"] {
+        font-size: 0.95rem;
+        font-weight: 600;
+        color: #aaaaaa;
+        border-radius: 8px;
+        padding: 0.5rem 1.2rem;
+        background-color: transparent;
+    }
+    .stTabs [aria-selected="true"] {
+        background-color: #FF6B35 !important;
+        color: #ffffff !important;
+    }
+    .stTabs [data-baseweb="tab"]:hover {
+        color: #FFD700 !important;
+        background-color: #222222 !important;
+    }
+
+    /* Botões primários */
+    .stButton > button[kind="primary"] {
+        background-color: #FF6B35;
+        color: #ffffff;
+        border: none;
+        border-radius: 8px;
+        font-weight: 700;
+        padding: 0.5rem 1.2rem;
+        transition: background-color 0.2s ease;
+    }
+    .stButton > button[kind="primary"]:hover {
+        background-color: #e55a25;
+        color: #ffffff;
+    }
+
+    /* Botões secundários */
+    .stButton > button[kind="secondary"] {
+        background-color: #1a1a1a;
+        color: #FFD700;
+        border: 1.5px solid #FFD700;
+        border-radius: 8px;
+        font-weight: 600;
+        transition: all 0.2s ease;
+    }
+    .stButton > button[kind="secondary"]:hover {
+        background-color: #FFD700;
+        color: #0D0D0D;
+    }
+
+    /* Expanders */
+    div[data-testid="stExpander"] {
+        background-color: #1a1a1a;
+        border: 1px solid #333333;
+        border-radius: 10px;
+    }
+    div[data-testid="stExpander"] summary {
+        color: #FFD700;
+        font-weight: 600;
+    }
+
+    /* Métricas */
+    [data-testid="stMetric"] {
+        background-color: #1a1a1a;
+        border: 1px solid #333333;
+        border-radius: 10px;
+        padding: 0.8rem;
+    }
+    [data-testid="stMetricLabel"] { color: #aaaaaa !important; font-size: 0.82rem; }
+    [data-testid="stMetricValue"] { color: #FFD700 !important; font-weight: 700; }
+
+    /* Inputs e selects */
+    .stTextInput > div > div > input,
+    .stTextArea textarea,
+    .stSelectbox > div > div {
+        background-color: #1a1a1a !important;
+        border: 1px solid #333333 !important;
+        color: #F5F5F5 !important;
+        border-radius: 8px;
+    }
+    .stTextInput > div > div > input:focus,
+    .stTextArea textarea:focus {
+        border-color: #FF6B35 !important;
+        box-shadow: 0 0 0 2px rgba(255, 107, 53, 0.25);
+    }
+
+    /* Chat messages */
+    [data-testid="stChatMessage"] {
+        background-color: #1a1a1a;
+        border-radius: 12px;
+        border: 1px solid #2a2a2a;
+        margin-bottom: 8px;
+    }
+
+    /* Chat input */
+    [data-testid="stChatInput"] textarea {
+        background-color: #1a1a1a !important;
+        color: #F5F5F5 !important;
+        border: 1.5px solid #FF6B35 !important;
+        border-radius: 12px;
+    }
+
+    /* Progress bars */
+    .stProgress > div > div > div {
+        background-color: #FF6B35;
+    }
+
+    /* Dividers */
+    hr { border-color: #2a2a2a !important; }
+
+    /* Cabeçalhos */
+    h1, h2, h3 { color: #F5F5F5 !important; }
+
+    /* File uploader */
+    [data-testid="stFileUploader"] {
+        background-color: #1a1a1a;
+        border: 2px dashed #FF6B35;
+        border-radius: 10px;
+        padding: 1rem;
+    }
+
+    /* Mensagens customizadas */
+    .msg-success {
+        background-color: #0a2e1a;
+        border-left: 4px solid #00c853;
+        color: #a5f0c0;
+        padding: 0.7rem 1rem;
+        border-radius: 0 8px 8px 0;
+        font-weight: 500;
+        margin: 0.4rem 0;
+    }
+    .msg-error {
+        background-color: #2e0a0a;
+        border-left: 4px solid #FF3B3B;
+        color: #f5a5a5;
+        padding: 0.7rem 1rem;
+        border-radius: 0 8px 8px 0;
+        font-weight: 500;
+        margin: 0.4rem 0;
+    }
+    .msg-warning {
+        background-color: #2a1f00;
+        border-left: 4px solid #FFD700;
+        color: #ffe080;
+        padding: 0.7rem 1rem;
+        border-radius: 0 8px 8px 0;
+        font-weight: 500;
+        margin: 0.4rem 0;
+    }
+    .msg-info {
+        background-color: #0a1e2e;
+        border-left: 4px solid #FF6B35;
+        color: #ffc4a8;
+        padding: 0.7rem 1rem;
+        border-radius: 0 8px 8px 0;
+        font-weight: 500;
+        margin: 0.4rem 0;
+    }
+
+    /* Badge de categoria */
+    .badge-categoria {
+        display: inline-block;
+        background-color: #FF6B35;
+        color: #ffffff;
+        font-size: 0.78rem;
+        font-weight: 700;
+        padding: 2px 10px;
+        border-radius: 20px;
+        margin-left: 6px;
+    }
+
+    /* Cabeçalho da logo */
+    .logo-container {
+        display: flex;
+        align-items: center;
+        gap: 16px;
+        margin-bottom: 0.5rem;
+    }
+
+    /* Rodapé */
+    .footer-bar {
+        background-color: #111111;
+        border-top: 1px solid #2a2a2a;
+        color: #555555;
+        text-align: center;
+        padding: 0.6rem;
+        font-size: 0.82rem;
+        border-radius: 0 0 8px 8px;
+        margin-top: 2rem;
+    }
     </style>
     """,
     unsafe_allow_html=True,
 )
 
+
 # ---------------------------------------------------------------------------
-# Cabeçalho
+# Helpers de mensagem com contraste adequado
 # ---------------------------------------------------------------------------
 
-st.title("DeclaraAI")
-st.caption(
-    "Assistente inteligente para organização de documentos e apoio à declaração do IR"
-)
+def msg_sucesso(texto: str) -> None:
+    st.markdown(f'<div class="msg-success">✅ {texto}</div>', unsafe_allow_html=True)
+
+
+def msg_erro(texto: str) -> None:
+    st.markdown(f'<div class="msg-error">❌ {texto}</div>', unsafe_allow_html=True)
+
+
+def msg_aviso(texto: str) -> None:
+    st.markdown(f'<div class="msg-warning">⚠️ {texto}</div>', unsafe_allow_html=True)
+
+
+def msg_info(texto: str) -> None:
+    st.markdown(f'<div class="msg-info">ℹ️ {texto}</div>', unsafe_allow_html=True)
+
+
+# ---------------------------------------------------------------------------
+# Cabeçalho com logo
+# ---------------------------------------------------------------------------
+
+LOGO_PATH = os.path.join(os.path.dirname(__file__), "..", "docs", "diagrams", "logo.svg")
+
+col_logo, col_titulo = st.columns([1, 4])
+with col_logo:
+    if os.path.exists(LOGO_PATH):
+        with open(LOGO_PATH, "r") as f:
+            svg_content = f.read()
+        st.markdown(svg_content, unsafe_allow_html=True)
+    else:
+        st.markdown(
+            '<span style="font-size:3rem;">🦁</span>',
+            unsafe_allow_html=True,
+        )
+with col_titulo:
+    st.markdown(
+        """
+        <div style="padding-top: 8px;">
+            <p style="color:#aaaaaa; margin:0; font-size:0.95rem;">
+                Assistente inteligente para organização de documentos e apoio à declaração do IR
+            </p>
+        </div>
+        """,
+        unsafe_allow_html=True,
+    )
+
 st.divider()
 
 # ---------------------------------------------------------------------------
@@ -79,34 +318,32 @@ def _chamar_api_chat(pergunta: str) -> dict | None:
         )
         if resposta.status_code == 200:
             return resposta.json()
-        st.error(f"Erro da API: {resposta.status_code} — {resposta.text}")
+        msg_erro(f"Erro da API: {resposta.status_code} — {resposta.text}")
     except requests.exceptions.ConnectionError:
-        st.error(
+        msg_erro(
             "Não foi possível conectar ao servidor. "
             "Verifique se o backend está rodando em: " + API_URL
         )
     except requests.exceptions.Timeout:
-        st.error(
+        msg_aviso(
             "O modelo demorou demais para responder. "
             "Certifique-se de que o Ollama está carregado e tente novamente."
         )
     except Exception as erro:
-        st.error(f"Erro inesperado: {erro}")
+        msg_erro(f"Erro inesperado: {erro}")
     return None
 
 
 with aba_chat:
     st.header("Chat com Assistente RAG")
-    st.write(
+    msg_info(
         "Faça perguntas sobre imposto de renda em linguagem natural. "
         "O assistente busca respostas na base de conhecimento tributário."
     )
 
-    # Inicializa histórico de mensagens na sessão
     if "mensagens_chat" not in st.session_state:
         st.session_state.mensagens_chat = []
 
-    # Exibe histórico de mensagens
     for mensagem in st.session_state.mensagens_chat:
         with st.chat_message(mensagem["papel"]):
             st.markdown(mensagem["conteudo"])
@@ -115,18 +352,15 @@ with aba_chat:
                     for fonte in mensagem["fontes"]:
                         st.write(f"- {fonte}")
 
-    # Campo de entrada do usuário
     pergunta_usuario = st.chat_input("Digite sua dúvida sobre IR...")
 
     if pergunta_usuario:
-        # Exibe mensagem do usuário imediatamente
         with st.chat_message("user"):
             st.markdown(pergunta_usuario)
         st.session_state.mensagens_chat.append(
             {"papel": "user", "conteudo": pergunta_usuario}
         )
 
-        # Obtém e exibe resposta do assistente
         with st.chat_message("assistant"):
             with st.spinner("Buscando na base de conhecimento..."):
                 resultado = _chamar_api_chat(pergunta_usuario)
@@ -153,7 +387,6 @@ with aba_chat:
                     "fontes": fontes,
                 })
 
-    # Botão para limpar histórico
     if st.session_state.mensagens_chat:
         if st.button("Limpar conversa", key="limpar_chat"):
             st.session_state.mensagens_chat = []
@@ -180,11 +413,11 @@ def _processar_upload(arquivo) -> dict | None:
         )
         if resposta.status_code == 200:
             return resposta.json().get("dados")
-        st.error(f"Erro no processamento: {resposta.status_code} — {resposta.text}")
+        msg_erro(f"Erro no processamento: {resposta.status_code} — {resposta.text}")
     except requests.exceptions.ConnectionError:
-        st.error("Backend indisponível. Verifique se o servidor está em execução.")
+        msg_erro("Backend indisponível. Verifique se o servidor está em execução.")
     except Exception as erro:
-        st.error(f"Erro ao processar arquivo: {erro}")
+        msg_erro(f"Erro ao processar arquivo: {erro}")
     return None
 
 
@@ -198,20 +431,19 @@ def _salvar_documento(dados: dict) -> bool:
         )
         if resposta.status_code == 200:
             info = resposta.json()
-            st.success(
-                f"Documento salvo com sucesso! "
-                f"ID: {info['id']} | Categoria: {info['categoria']}"
+            msg_sucesso(
+                f"Documento salvo! ID: {info['id']} | Categoria: {info['categoria']}"
             )
             return True
-        st.error(f"Erro ao salvar: {resposta.text}")
+        msg_erro(f"Erro ao salvar: {resposta.text}")
     except Exception as erro:
-        st.error(f"Erro: {erro}")
+        msg_erro(f"Erro: {erro}")
     return False
 
 
 with aba_upload:
     st.header("Upload de Documento Fiscal")
-    st.write(
+    msg_info(
         "Envie recibos médicos, notas fiscais, comprovantes de educação, "
         "informes de rendimentos e outros documentos para organização automática."
     )
@@ -233,9 +465,8 @@ with aba_upload:
 
             if dados_processados:
                 st.session_state.documento_processado = dados_processados
-                st.success("Documento processado com sucesso!")
+                msg_sucesso("Documento processado com sucesso!")
 
-    # Exibe resultado do processamento
     if "documento_processado" in st.session_state and st.session_state.documento_processado:
         dados = st.session_state.documento_processado
 
@@ -302,18 +533,17 @@ def _buscar_historico(params: dict) -> list | None:
         )
         if resposta.status_code == 200:
             return resposta.json()
-        st.error(f"Erro: {resposta.status_code}")
+        msg_erro(f"Erro: {resposta.status_code}")
     except requests.exceptions.ConnectionError:
-        st.error("Backend indisponível.")
+        msg_erro("Backend indisponível.")
     except Exception as erro:
-        st.error(f"Erro: {erro}")
+        msg_erro(f"Erro: {erro}")
     return None
 
 
 with aba_historico:
     st.header("Histórico de Documentos")
 
-    # Painel de filtros
     with st.expander("Filtros de busca", expanded=True):
         col_cat, col_nome, col_inicio, col_fim = st.columns(4)
 
@@ -349,7 +579,7 @@ with aba_historico:
             st.write(f"**{len(documentos)} documento(s) encontrado(s)**")
 
             if not documentos:
-                st.info("Nenhum documento encontrado com os filtros aplicados.")
+                msg_aviso("Nenhum documento encontrado com os filtros aplicados.")
             else:
                 for doc in documentos:
                     criado_em = doc.get("criado_em", "")[:10] if doc.get("criado_em") else "N/A"
@@ -367,12 +597,9 @@ with aba_historico:
                             st.write(f"**Valor:** {doc.get('valor_detectado') or '—'}")
 
                         with col3:
-                            st.write(
-                                f"**Emitente:** {doc.get('emitente_detectado') or '—'}"
-                            )
+                            st.write(f"**Emitente:** {doc.get('emitente_detectado') or '—'}")
                             st.write(f"**Salvo em:** {criado_em}")
 
-                        # Botão de exclusão
                         if st.button(
                             "Excluir do histórico",
                             key=f"excluir_{doc['id']}",
@@ -384,12 +611,12 @@ with aba_historico:
                                     timeout=TIMEOUT_PADRAO,
                                 )
                                 if r.status_code == 200:
-                                    st.success("Documento removido.")
+                                    msg_sucesso("Documento removido.")
                                     st.rerun()
                                 else:
-                                    st.error("Erro ao remover documento.")
+                                    msg_erro("Erro ao remover documento.")
                             except Exception as e:
-                                st.error(f"Erro: {e}")
+                                msg_erro(f"Erro: {e}")
 
 
 # ===========================================================================
@@ -398,7 +625,7 @@ with aba_historico:
 
 with aba_resumo:
     st.header("Resumo Anual para Declaração do IR")
-    st.write(
+    msg_info(
         "Visualize seus documentos organizados por categoria tributária. "
         "Use este resumo como referência ao preencher a declaração."
     )
@@ -419,13 +646,12 @@ with aba_resumo:
                     timeout=TIMEOUT_PADRAO,
                 )
             except requests.exceptions.ConnectionError:
-                st.error("Backend indisponível.")
+                msg_erro("Backend indisponível.")
                 resposta = None
 
         if resposta and resposta.status_code == 200:
             resumo = resposta.json()
 
-            # Métricas gerais
             col1, col2 = st.columns(2)
             col1.metric("Ano de Referência", resumo["ano"])
             col2.metric("Total de Documentos", resumo["total_documentos"])
@@ -433,14 +659,13 @@ with aba_resumo:
             st.divider()
 
             if not resumo["categorias"]:
-                st.info(
+                msg_aviso(
                     f"Nenhum documento encontrado para o ano {ano_selecionado}. "
                     "Salve documentos na aba Upload para começar."
                 )
             else:
                 st.subheader("Documentos por Categoria Tributária")
 
-                # Ícones por categoria
                 icones = {
                     "Recibo Médico": "🏥",
                     "Comprovante Educacional": "🎓",
@@ -456,47 +681,45 @@ with aba_resumo:
                 for categoria, dados_cat in resumo["categorias"].items():
                     icone = icones.get(categoria, "📁")
                     quantidade = dados_cat["quantidade"]
-                    titulo_expander = (
-                        f"{icone} {categoria} — {quantidade} documento(s)"
-                    )
+                    titulo_expander = f"{icone} {categoria} — {quantidade} documento(s)"
 
                     with st.expander(titulo_expander, expanded=True):
                         for doc in dados_cat["documentos"]:
-                            col_nome, col_data, col_valor, col_emit = st.columns(
-                                [3, 2, 2, 3]
-                            )
+                            col_nome, col_data, col_valor, col_emit = st.columns([3, 2, 2, 3])
                             col_nome.write(f"📄 {doc['nome']}")
                             col_data.write(doc.get("data_detectada") or "—")
                             col_valor.write(doc.get("valor_detectado") or "—")
                             col_emit.write(doc.get("emitente") or "—")
 
-                        # Exibe valores detectados se disponíveis
                         if dados_cat["valores"]:
                             st.caption(
                                 f"Valores detectados: {', '.join(dados_cat['valores'])}"
                             )
 
         elif resposta:
-            st.error(f"Erro ao gerar resumo: {resposta.status_code}")
+            msg_erro(f"Erro ao gerar resumo: {resposta.status_code}")
+
 
 # ===========================================================================
 # ABA AVALIAÇÃO
 # ===========================================================================
 
 def _exibir_gauge(label: str, valor: float, maximo: float = 100.0) -> None:
-    """Exibe uma barra de progresso rotulada como gauge de métrica."""
+    """Exibe barra de progresso com legenda colorida."""
     pct = min(valor / maximo, 1.0)
-    cor = "green" if pct >= 0.7 else ("orange" if pct >= 0.4 else "red")
-    st.markdown(
-        f"**{label}:** `{valor:.1f}` / `{maximo:.0f}`"
-        f"  {'🟢' if pct >= 0.7 else ('🟡' if pct >= 0.4 else '🔴')}"
-    )
+    if pct >= 0.7:
+        icone = "🟢"
+    elif pct >= 0.4:
+        icone = "🟡"
+    else:
+        icone = "🔴"
+    st.markdown(f"**{label}:** `{valor:.1f}` / `{maximo:.0f}` {icone}")
     st.progress(pct)
 
 
 with aba_avaliacao:
     st.header("Avaliação do Pipeline RAG")
-    st.write(
+    msg_info(
         "Métricas quantitativas para validar a qualidade da recuperação semântica "
         "e das respostas geradas pelo DeclaraAI."
     )
@@ -521,7 +744,6 @@ previdência, penalidades, autônomos e dependentes.
             """
         )
 
-    # Visualiza casos de teste
     if st.button("Ver Casos de Teste", key="btn_casos"):
         try:
             resp = requests.get(f"{API_URL}/evaluation/casos-teste", timeout=TIMEOUT_PADRAO)
@@ -534,38 +756,33 @@ previdência, penalidades, autônomos e dependentes.
                         f"*(keywords: {caso['total_keywords']})*"
                     )
         except Exception as e:
-            st.error(f"Erro: {e}")
+            msg_erro(f"Erro: {e}")
 
     st.divider()
 
     col_rec, col_full = st.columns(2)
 
-    # --- Avaliação de Recuperação ---
     with col_rec:
         st.subheader("Recuperação Semântica")
         st.caption("Rápido · Não requer Ollama")
         if st.button("Avaliar Recuperação", type="primary", use_container_width=True):
             with st.spinner("Avaliando recuperação..."):
                 try:
-                    resp = requests.post(
-                        f"{API_URL}/evaluation/recuperacao", timeout=120
-                    )
+                    resp = requests.post(f"{API_URL}/evaluation/recuperacao", timeout=120)
                 except requests.exceptions.ConnectionError:
-                    st.error("Backend indisponível.")
+                    msg_erro("Backend indisponível.")
                     resp = None
 
             if resp and resp.status_code == 200:
-                dados = resp.json()
-                st.session_state.resultado_recuperacao = dados
+                st.session_state.resultado_recuperacao = resp.json()
+            elif resp:
+                msg_erro(f"Erro {resp.status_code}: {resp.text[:200]}")
 
         if "resultado_recuperacao" in st.session_state:
             dados = st.session_state.resultado_recuperacao
-            st.success("Avaliação concluída!")
+            msg_sucesso("Avaliação concluída!")
 
-            _exibir_gauge(
-                "Taxa de Recuperação (%)",
-                dados.get("taxa_recuperacao_pct", 0),
-            )
+            _exibir_gauge("Taxa de Recuperação (%)", dados.get("taxa_recuperacao_pct", 0))
             st.metric(
                 "Score Médio de Contexto",
                 f"{dados.get('score_medio_contexto', 0):.4f}",
@@ -579,14 +796,12 @@ previdência, penalidades, autônomos e dependentes.
                 delta_color="inverse",
             )
 
-            st.info(f"**Interpretação:** {dados.get('interpretacao', '')}")
+            msg_info(f"**Interpretação:** {dados.get('interpretacao', '')}")
 
             if dados.get("analise_falhas"):
                 with st.expander("Casos de Falha"):
                     for falha in dados["analise_falhas"]:
-                        st.write(
-                            f"- **{falha['categoria']}:** {falha['pergunta']}"
-                        )
+                        st.write(f"- **{falha['categoria']}:** {falha['pergunta']}")
 
             with st.expander("Resultados Detalhados"):
                 for r in dados.get("resultados", []):
@@ -597,56 +812,38 @@ previdência, penalidades, autônomos e dependentes.
                         f"{'✅' if r['contexto_encontrado'] else '❌'}"
                     )
 
-    # --- Avaliação Completa ---
     with col_full:
         st.subheader("Pipeline Completo")
         st.caption("Requer Ollama ativo · Pode demorar")
-        if st.button(
-            "Avaliar Pipeline Completo", type="secondary", use_container_width=True
-        ):
+        if st.button("Avaliar Pipeline Completo", type="secondary", use_container_width=True):
             with st.spinner(
                 "Executando avaliação completa (recuperação + LLM)... "
                 "Isso pode levar alguns minutos."
             ):
                 try:
-                    resp = requests.post(
-                        f"{API_URL}/evaluation/completa", timeout=600
-                    )
+                    resp = requests.post(f"{API_URL}/evaluation/completa", timeout=600)
                 except requests.exceptions.ConnectionError:
-                    st.error("Backend indisponível.")
+                    msg_erro("Backend indisponível.")
                     resp = None
                 except requests.exceptions.Timeout:
-                    st.error("Timeout — tente novamente ou verifique o Ollama.")
+                    msg_aviso("Timeout — tente novamente ou verifique o Ollama.")
                     resp = None
 
             if resp and resp.status_code == 200:
                 st.session_state.resultado_completo = resp.json()
             elif resp:
-                st.error(f"Erro {resp.status_code}: {resp.text[:200]}")
+                msg_erro(f"Erro {resp.status_code}: {resp.text[:200]}")
 
         if "resultado_completo" in st.session_state:
             dados = st.session_state.resultado_completo
-            st.success("Avaliação concluída!")
+            msg_sucesso("Avaliação concluída!")
 
-            _exibir_gauge(
-                "Taxa de Recuperação (%)",
-                dados.get("taxa_recuperacao_pct", 0),
-            )
-            _exibir_gauge(
-                "Cobertura de Keywords (%)",
-                dados.get("media_cobertura_keywords_pct", 0),
-            )
-            st.metric(
-                "Score Médio de Contexto",
-                f"{dados.get('score_medio_contexto', 0):.4f}",
-            )
-            st.metric(
-                "Casos com Falha",
-                dados.get("casos_com_falha", 0),
-                delta_color="inverse",
-            )
+            _exibir_gauge("Taxa de Recuperação (%)", dados.get("taxa_recuperacao_pct", 0))
+            _exibir_gauge("Cobertura de Keywords (%)", dados.get("media_cobertura_keywords_pct", 0))
+            st.metric("Score Médio de Contexto", f"{dados.get('score_medio_contexto', 0):.4f}")
+            st.metric("Casos com Falha", dados.get("casos_com_falha", 0), delta_color="inverse")
 
-            st.info(f"**Interpretação:** {dados.get('interpretacao', '')}")
+            msg_info(f"**Interpretação:** {dados.get('interpretacao', '')}")
 
             if dados.get("analise_falhas"):
                 with st.expander("Análise de Falhas (cobertura < 50%)"):
@@ -673,8 +870,10 @@ previdência, penalidades, autônomos e dependentes.
 # ---------------------------------------------------------------------------
 # Rodapé
 # ---------------------------------------------------------------------------
-st.divider()
-st.caption(
+st.markdown(
+    '<div class="footer-bar">'
     "DeclaraAI — Projeto Acadêmico UEA | "
     "Este sistema não substitui a orientação de um contador profissional."
+    "</div>",
+    unsafe_allow_html=True,
 )
