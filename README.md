@@ -4,7 +4,7 @@
 
 <p align="center">
   Assistente inteligente com <strong>RAG</strong> para organização de documentos e apoio à declaração do imposto de renda pessoa física.<br>
-  <em>Projeto Acadêmico — UEA • Oficina e Desenvolvimento de Sistemas I</em>
+  <em>Projeto Acadêmico - UEA • Oficina e Desenvolvimento de Sistemas I</em>
 </p>
 
 ---
@@ -390,11 +390,11 @@ O projeto segue o modelo **C4** para representacao arquitetural:
 
 <h2 align="center">⚠️ Limitacoes</h2>
 
-- Nao substitui contador ou validacao oficial da Receita Federal
+- Não substitui contador ou validacao oficial da Receita Federal
 - A qualidade das respostas depende do modelo Ollama configurado
-- Extracao de metadados por heuristicas pode falhar em documentos nao padronizados
+- Extração de metadados por heuristicas pode falhar em documentos nao padronizados
 - Base de conhecimento deve ser atualizada manualmente com novas regras fiscais
-- PDFs baseados em imagem (scan) nao tem texto extraivel sem OCR
+- PDFs baseados em imagem (scan) não tem texto extraivel sem OCR
 
 ---
 
