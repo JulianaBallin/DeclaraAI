@@ -1,0 +1,138 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 480" width="800" height="480">
+  <defs>
+    <linearGradient id="bgMain" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#0D0D0D"/>
+      <stop offset="100%" style="stop-color:#1a1a1a"/>
+    </linearGradient>
+    <linearGradient id="userGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#FF6B35"/>
+      <stop offset="100%" style="stop-color:#cc4a1a"/>
+    </linearGradient>
+    <linearGradient id="sysGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#FFD700"/>
+      <stop offset="100%" style="stop-color:#cc9900"/>
+    </linearGradient>
+    <linearGradient id="extGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#555555"/>
+      <stop offset="100%" style="stop-color:#333333"/>
+    </linearGradient>
+    <marker id="arrowOrange" markerWidth="10" markerHeight="7" refX="9" refY="3.5" orient="auto">
+      <polygon points="0 0, 10 3.5, 0 7" fill="#FF6B35"/>
+    </marker>
+    <marker id="arrowGray" markerWidth="10" markerHeight="7" refX="9" refY="3.5" orient="auto">
+      <polygon points="0 0, 10 3.5, 0 7" fill="#888888"/>
+    </marker>
+    <filter id="shadow">
+      <feDropShadow dx="0" dy="4" stdDeviation="6" flood-color="#FF6B35" flood-opacity="0.2"/>
+    </filter>
+  </defs>
+
+  <!-- Background -->
+  <rect width="800" height="480" fill="url(#bgMain)"/>
+  <rect width="800" height="480" fill="none" stroke="#FF6B35" stroke-width="1.5" opacity="0.4"/>
+
+  <!-- Title -->
+  <text x="400" y="38" text-anchor="middle" font-family="'Segoe UI', Arial, sans-serif" font-size="20" font-weight="700" fill="#FFD700">[C1] Diagrama de Contexto — DeclaraAI</text>
+  <line x1="80" y1="48" x2="720" y2="48" stroke="#FF6B35" stroke-width="1" opacity="0.5"/>
+
+  <!-- ====== USER: Contribuinte ====== -->
+  <g transform="translate(80, 140)" filter="url(#shadow)">
+    <rect x="0" y="0" width="160" height="190" rx="10" fill="#1a1a1a" stroke="#FF6B35" stroke-width="2"/>
+    <!-- Icon: person -->
+    <circle cx="80" cy="48" r="22" fill="url(#userGrad)" opacity="0.9"/>
+    <ellipse cx="80" cy="100" rx="32" ry="22" fill="url(#userGrad)" opacity="0.7"/>
+    <!-- Person silhouette -->
+    <circle cx="80" cy="44" r="14" fill="#0D0D0D"/>
+    <path d="M55 85 Q80 70 105 85 L105 95 Q80 82 55 95Z" fill="#0D0D0D"/>
+    <text x="80" y="140" text-anchor="middle" font-family="'Segoe UI', Arial, sans-serif" font-size="15" font-weight="700" fill="#FF6B35">Contribuinte</text>
+    <text x="80" y="158" text-anchor="middle" font-family="'Segoe UI', Arial, sans-serif" font-size="11" fill="#aaaaaa">[Pessoa]</text>
+    <text x="80" y="176" text-anchor="middle" font-family="'Segoe UI', Arial, sans-serif" font-size="10" fill="#777777">Usuário que deseja</text>
+    <text x="80" y="188" text-anchor="middle" font-family="'Segoe UI', Arial, sans-serif" font-size="10" fill="#777777">declarar o IR</text>
+  </g>
+
+  <!-- ====== SYSTEM: DeclaraAI ====== -->
+  <g transform="translate(300, 100)" filter="url(#shadow)">
+    <rect x="0" y="0" width="200" height="240" rx="12" fill="#1a1a1a" stroke="#FFD700" stroke-width="2.5"/>
+    <!-- System badge -->
+    <rect x="0" y="0" width="200" height="36" rx="12" fill="#FFD700" opacity="0.15"/>
+    <rect x="0" y="24" width="200" height="12" fill="#FFD700" opacity="0.15"/>
+    <text x="100" y="22" text-anchor="middle" font-family="'Segoe UI', Arial, sans-serif" font-size="11" fill="#FFD700" opacity="0.8">[Sistema de Software]</text>
+    <!-- Robot icon -->
+    <rect x="68" y="50" width="64" height="54" rx="8" fill="url(#sysGrad)" opacity="0.2" stroke="#FFD700" stroke-width="1.5"/>
+    <rect x="78" y="60" width="18" height="14" rx="3" fill="#FFD700" opacity="0.7"/>
+    <rect x="104" y="60" width="18" height="14" rx="3" fill="#FFD700" opacity="0.7"/>
+    <rect x="80" y="82" width="40" height="8" rx="4" fill="#FF6B35" opacity="0.8"/>
+    <line x1="60" y1="67" x2="68" y2="72" stroke="#FFD700" stroke-width="2" opacity="0.6"/>
+    <line x1="140" y1="67" x2="132" y2="72" stroke="#FFD700" stroke-width="2" opacity="0.6"/>
+    <!-- Antenna -->
+    <line x1="100" y1="45" x2="100" y2="50" stroke="#FFD700" stroke-width="2"/>
+    <circle cx="100" cy="42" r="4" fill="#FF6B35"/>
+    <text x="100" y="128" text-anchor="middle" font-family="'Segoe UI', Arial, sans-serif" font-size="17" font-weight="800" fill="#FFD700">DeclaraAI</text>
+    <text x="100" y="150" text-anchor="middle" font-family="'Segoe UI', Arial, sans-serif" font-size="10" fill="#aaaaaa">Assistente RAG para</text>
+    <text x="100" y="163" text-anchor="middle" font-family="'Segoe UI', Arial, sans-serif" font-size="10" fill="#aaaaaa">organização fiscal e</text>
+    <text x="100" y="176" text-anchor="middle" font-family="'Segoe UI', Arial, sans-serif" font-size="10" fill="#aaaaaa">suporte à declaração</text>
+    <text x="100" y="189" text-anchor="middle" font-family="'Segoe UI', Arial, sans-serif" font-size="10" fill="#aaaaaa">do IRPF com RAG</text>
+    <text x="100" y="208" text-anchor="middle" font-family="'Segoe UI', Arial, sans-serif" font-size="10" fill="#FF6B35">FastAPI + Streamlit</text>
+    <text x="100" y="222" text-anchor="middle" font-family="'Segoe UI', Arial, sans-serif" font-size="10" fill="#FF6B35">ChromaDB + Ollama</text>
+  </g>
+
+  <!-- ====== EXTERNAL: Receita Federal ====== -->
+  <g transform="translate(570, 100)">
+    <rect x="0" y="0" width="160" height="140" rx="10" fill="#1a1a1a" stroke="#555555" stroke-width="1.5"/>
+    <rect x="0" y="0" width="160" height="28" rx="10" fill="#333333"/>
+    <rect x="0" y="16" width="160" height="12" fill="#333333"/>
+    <text x="80" y="18" text-anchor="middle" font-family="'Segoe UI', Arial, sans-serif" font-size="10" fill="#888888">[Sistema Externo]</text>
+    <text x="80" y="62" text-anchor="middle" font-family="'Segoe UI', Arial, sans-serif" font-size="24">🏛️</text>
+    <text x="80" y="90" text-anchor="middle" font-family="'Segoe UI', Arial, sans-serif" font-size="13" font-weight="700" fill="#aaaaaa">Receita Federal</text>
+    <text x="80" y="108" text-anchor="middle" font-family="'Segoe UI', Arial, sans-serif" font-size="10" fill="#666666">Regulamentações e</text>
+    <text x="80" y="120" text-anchor="middle" font-family="'Segoe UI', Arial, sans-serif" font-size="10" fill="#666666">normas IRPF (offline)</text>
+    <text x="80" y="132" text-anchor="middle" font-family="'Segoe UI', Arial, sans-serif" font-size="10" fill="#555555">Base de conhecimento</text>
+  </g>
+
+  <!-- ====== EXTERNAL: Docs Fiscais ====== -->
+  <g transform="translate(570, 280)">
+    <rect x="0" y="0" width="160" height="130" rx="10" fill="#1a1a1a" stroke="#555555" stroke-width="1.5"/>
+    <rect x="0" y="0" width="160" height="28" rx="10" fill="#333333"/>
+    <rect x="0" y="16" width="160" height="12" fill="#333333"/>
+    <text x="80" y="18" text-anchor="middle" font-family="'Segoe UI', Arial, sans-serif" font-size="10" fill="#888888">[Sistema Externo]</text>
+    <text x="80" y="60" text-anchor="middle" font-family="'Segoe UI', Arial, sans-serif" font-size="24">📄</text>
+    <text x="80" y="86" text-anchor="middle" font-family="'Segoe UI', Arial, sans-serif" font-size="13" font-weight="700" fill="#aaaaaa">Docs Fiscais</text>
+    <text x="80" y="104" text-anchor="middle" font-family="'Segoe UI', Arial, sans-serif" font-size="10" fill="#666666">Recibos, notas fiscais</text>
+    <text x="80" y="116" text-anchor="middle" font-family="'Segoe UI', Arial, sans-serif" font-size="10" fill="#666666">e informes de rend.</text>
+    <text x="80" y="128" text-anchor="middle" font-family="'Segoe UI', Arial, sans-serif" font-size="10" fill="#555555">PDF / TXT / HTML</text>
+  </g>
+
+  <!-- ====== ARROWS ====== -->
+  <!-- User → DeclaraAI -->
+  <line x1="242" y1="230" x2="298" y2="230" stroke="#FF6B35" stroke-width="2" marker-end="url(#arrowOrange)" stroke-dasharray="none"/>
+  <rect x="243" y="210" width="54" height="18" rx="4" fill="#0D0D0D"/>
+  <text x="270" y="222" text-anchor="middle" font-family="'Segoe UI', Arial, sans-serif" font-size="9" fill="#FF6B35">Perguntas e</text>
+  <text x="270" y="233" text-anchor="middle" font-family="'Segoe UI', Arial, sans-serif" font-size="9" fill="#FF6B35">documentos</text>
+
+  <!-- DeclaraAI → User -->
+  <line x1="298" y1="250" x2="242" y2="250" stroke="#FFD700" stroke-width="2" marker-end="url(#arrowGray)" stroke-dasharray="4,3"/>
+  <text x="270" y="266" text-anchor="middle" font-family="'Segoe UI', Arial, sans-serif" font-size="9" fill="#FFD700">Respostas e</text>
+  <text x="270" y="277" text-anchor="middle" font-family="'Segoe UI', Arial, sans-serif" font-size="9" fill="#FFD700">orientações</text>
+
+  <!-- Receita Federal → DeclaraAI (dashed) -->
+  <line x1="568" y1="158" x2="502" y2="190" stroke="#666666" stroke-width="1.5" marker-end="url(#arrowGray)" stroke-dasharray="5,3"/>
+  <text x="545" y="168" text-anchor="middle" font-family="'Segoe UI', Arial, sans-serif" font-size="9" fill="#666666">Normas IRPF</text>
+  <text x="545" y="179" text-anchor="middle" font-family="'Segoe UI', Arial, sans-serif" font-size="9" fill="#666666">(base de conhec.)</text>
+
+  <!-- Docs Fiscais → DeclaraAI -->
+  <line x1="568" y1="328" x2="502" y2="298" stroke="#888888" stroke-width="1.5" marker-end="url(#arrowGray)"/>
+  <text x="545" y="326" text-anchor="middle" font-family="'Segoe UI', Arial, sans-serif" font-size="9" fill="#888888">Upload de</text>
+  <text x="545" y="337" text-anchor="middle" font-family="'Segoe UI', Arial, sans-serif" font-size="9" fill="#888888">documentos</text>
+
+  <!-- Legend -->
+  <rect x="30" y="400" width="340" height="62" rx="8" fill="#111111" stroke="#333333" stroke-width="1"/>
+  <text x="200" y="418" text-anchor="middle" font-family="'Segoe UI', Arial, sans-serif" font-size="11" font-weight="700" fill="#888888">LEGENDA</text>
+  <line x1="50" y1="430" x2="80" y2="430" stroke="#FF6B35" stroke-width="2"/>
+  <text x="88" y="434" font-family="'Segoe UI', Arial, sans-serif" font-size="10" fill="#aaaaaa">Interação síncrona (usuário ↔ sistema)</text>
+  <line x1="50" y1="448" x2="80" y2="448" stroke="#666666" stroke-width="2" stroke-dasharray="5,3"/>
+  <text x="88" y="452" font-family="'Segoe UI', Arial, sans-serif" font-size="10" fill="#aaaaaa">Dados externos (offline / referência)</text>
+
+  <!-- C4 badge -->
+  <rect x="680" y="400" width="90" height="30" rx="6" fill="#FF6B35" opacity="0.15" stroke="#FF6B35" stroke-width="1"/>
+  <text x="725" y="419" text-anchor="middle" font-family="'Segoe UI', Arial, sans-serif" font-size="12" font-weight="700" fill="#FF6B35">C4 • Nível 1</text>
+</svg>

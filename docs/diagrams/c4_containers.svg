@@ -1,0 +1,144 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 900 560" width="900" height="560">
+  <defs>
+    <linearGradient id="bg" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#0D0D0D"/>
+      <stop offset="100%" style="stop-color:#1a1a1a"/>
+    </linearGradient>
+    <marker id="arr1" markerWidth="10" markerHeight="7" refX="9" refY="3.5" orient="auto">
+      <polygon points="0 0, 10 3.5, 0 7" fill="#FF6B35"/>
+    </marker>
+    <marker id="arr2" markerWidth="10" markerHeight="7" refX="9" refY="3.5" orient="auto">
+      <polygon points="0 0, 10 3.5, 0 7" fill="#FFD700"/>
+    </marker>
+    <marker id="arr3" markerWidth="10" markerHeight="7" refX="9" refY="3.5" orient="auto">
+      <polygon points="0 0, 10 3.5, 0 7" fill="#888888"/>
+    </marker>
+    <filter id="glow2">
+      <feDropShadow dx="0" dy="3" stdDeviation="5" flood-color="#FF6B35" flood-opacity="0.25"/>
+    </filter>
+  </defs>
+
+  <!-- Background -->
+  <rect width="900" height="560" fill="url(#bg)"/>
+  <rect width="900" height="560" fill="none" stroke="#FF6B35" stroke-width="1.5" opacity="0.4"/>
+
+  <!-- Title -->
+  <text x="450" y="38" text-anchor="middle" font-family="'Segoe UI', Arial, sans-serif" font-size="20" font-weight="700" fill="#FFD700">[C2] Diagrama de Contêineres — DeclaraAI</text>
+  <line x1="60" y1="48" x2="840" y2="48" stroke="#FF6B35" stroke-width="1" opacity="0.5"/>
+
+  <!-- System boundary -->
+  <rect x="40" y="60" width="820" height="390" rx="14" fill="none" stroke="#FF6B35" stroke-width="1.5" stroke-dasharray="8,4" opacity="0.5"/>
+  <rect x="55" y="52" width="170" height="22" rx="5" fill="#0D0D0D"/>
+  <text x="140" y="67" text-anchor="middle" font-family="'Segoe UI', Arial, sans-serif" font-size="12" fill="#FF6B35" font-weight="600">Sistema: DeclaraAI</text>
+
+  <!-- ===== CONTAINER: Frontend (Streamlit) ===== -->
+  <g transform="translate(60, 85)" filter="url(#glow2)">
+    <rect x="0" y="0" width="175" height="185" rx="10" fill="#1a1a1a" stroke="#FF6B35" stroke-width="2"/>
+    <rect x="0" y="0" width="175" height="34" rx="10" fill="#FF6B35" opacity="0.2"/>
+    <rect x="0" y="22" width="175" height="12" fill="#FF6B35" opacity="0.2"/>
+    <text x="88" y="20" text-anchor="middle" font-family="'Segoe UI', Arial, sans-serif" font-size="10" fill="#FF6B35">[Contêiner: Web App]</text>
+    <text x="88" y="68" text-anchor="middle" font-family="'Segoe UI', Arial, sans-serif" font-size="22">🖥️</text>
+    <text x="88" y="96" text-anchor="middle" font-family="'Segoe UI', Arial, sans-serif" font-size="14" font-weight="700" fill="#F5F5F5">Frontend</text>
+    <text x="88" y="112" text-anchor="middle" font-family="'Segoe UI', Arial, sans-serif" font-size="10" fill="#FF6B35">Streamlit 1.35</text>
+    <text x="88" y="132" text-anchor="middle" font-family="'Segoe UI', Arial, sans-serif" font-size="9" fill="#aaaaaa">Interface web com 5 abas:</text>
+    <text x="88" y="146" text-anchor="middle" font-family="'Segoe UI', Arial, sans-serif" font-size="9" fill="#888888">Chat • Upload • Histórico</text>
+    <text x="88" y="158" text-anchor="middle" font-family="'Segoe UI', Arial, sans-serif" font-size="9" fill="#888888">Resumo • Avaliação</text>
+    <text x="88" y="175" text-anchor="middle" font-family="'Segoe UI', Arial, sans-serif" font-size="9" fill="#555555">Porta: 8501</text>
+  </g>
+
+  <!-- ===== CONTAINER: Backend (FastAPI) ===== -->
+  <g transform="translate(290, 85)" filter="url(#glow2)">
+    <rect x="0" y="0" width="200" height="220" rx="10" fill="#1a1a1a" stroke="#FFD700" stroke-width="2.5"/>
+    <rect x="0" y="0" width="200" height="34" rx="10" fill="#FFD700" opacity="0.15"/>
+    <rect x="0" y="22" width="200" height="12" fill="#FFD700" opacity="0.15"/>
+    <text x="100" y="20" text-anchor="middle" font-family="'Segoe UI', Arial, sans-serif" font-size="10" fill="#FFD700">[Contêiner: API]</text>
+    <text x="100" y="68" text-anchor="middle" font-family="'Segoe UI', Arial, sans-serif" font-size="22">⚡</text>
+    <text x="100" y="96" text-anchor="middle" font-family="'Segoe UI', Arial, sans-serif" font-size="14" font-weight="700" fill="#F5F5F5">Backend</text>
+    <text x="100" y="112" text-anchor="middle" font-family="'Segoe UI', Arial, sans-serif" font-size="10" fill="#FFD700">FastAPI 0.111 · Python 3.11</text>
+    <text x="100" y="132" text-anchor="middle" font-family="'Segoe UI', Arial, sans-serif" font-size="9" fill="#aaaaaa">Pipeline RAG completo</text>
+    <text x="100" y="146" text-anchor="middle" font-family="'Segoe UI', Arial, sans-serif" font-size="9" fill="#888888">routes_chat • routes_documents</text>
+    <text x="100" y="158" text-anchor="middle" font-family="'Segoe UI', Arial, sans-serif" font-size="9" fill="#888888">routes_history • routes_evaluation</text>
+    <text x="100" y="172" text-anchor="middle" font-family="'Segoe UI', Arial, sans-serif" font-size="9" fill="#888888">rag_service • extraction_service</text>
+    <text x="100" y="186" text-anchor="middle" font-family="'Segoe UI', Arial, sans-serif" font-size="9" fill="#888888">classification_service • eval_service</text>
+    <text x="100" y="205" text-anchor="middle" font-family="'Segoe UI', Arial, sans-serif" font-size="9" fill="#555555">Porta: 8000</text>
+  </g>
+
+  <!-- ===== CONTAINER: ChromaDB ===== -->
+  <g transform="translate(560, 85)">
+    <rect x="0" y="0" width="165" height="175" rx="10" fill="#1a1a1a" stroke="#FF6B35" stroke-width="1.8"/>
+    <rect x="0" y="0" width="165" height="30" rx="10" fill="#FF6B35" opacity="0.12"/>
+    <rect x="0" y="18" width="165" height="12" fill="#FF6B35" opacity="0.12"/>
+    <text x="82" y="18" text-anchor="middle" font-family="'Segoe UI', Arial, sans-serif" font-size="9.5" fill="#FF6B35">[Contêiner: Banco Vetorial]</text>
+    <text x="82" y="62" text-anchor="middle" font-family="'Segoe UI', Arial, sans-serif" font-size="22">🗄️</text>
+    <text x="82" y="88" text-anchor="middle" font-family="'Segoe UI', Arial, sans-serif" font-size="13" font-weight="700" fill="#F5F5F5">ChromaDB</text>
+    <text x="82" y="104" text-anchor="middle" font-family="'Segoe UI', Arial, sans-serif" font-size="9.5" fill="#FF6B35">v0.5 · cosine similarity</text>
+    <text x="82" y="122" text-anchor="middle" font-family="'Segoe UI', Arial, sans-serif" font-size="9" fill="#aaaaaa">Embeddings 384 dims</text>
+    <text x="82" y="136" text-anchor="middle" font-family="'Segoe UI', Arial, sans-serif" font-size="9" fill="#888888">paraphrase-multilingual</text>
+    <text x="82" y="148" text-anchor="middle" font-family="'Segoe UI', Arial, sans-serif" font-size="9" fill="#888888">MiniLM-L12-v2</text>
+    <text x="82" y="165" text-anchor="middle" font-family="'Segoe UI', Arial, sans-serif" font-size="9" fill="#555555">Volume: data/chroma_db</text>
+  </g>
+
+  <!-- ===== CONTAINER: Ollama LLM ===== -->
+  <g transform="translate(745, 85)">
+    <rect x="0" y="0" width="105" height="175" rx="10" fill="#1a1a1a" stroke="#FFD700" stroke-width="1.8"/>
+    <rect x="0" y="0" width="105" height="30" rx="10" fill="#FFD700" opacity="0.12"/>
+    <rect x="0" y="18" width="105" height="12" fill="#FFD700" opacity="0.12"/>
+    <text x="52" y="17" text-anchor="middle" font-family="'Segoe UI', Arial, sans-serif" font-size="9" fill="#FFD700">[Contêiner: LLM]</text>
+    <text x="52" y="60" text-anchor="middle" font-family="'Segoe UI', Arial, sans-serif" font-size="22">🤖</text>
+    <text x="52" y="86" text-anchor="middle" font-family="'Segoe UI', Arial, sans-serif" font-size="12" font-weight="700" fill="#F5F5F5">Ollama</text>
+    <text x="52" y="102" text-anchor="middle" font-family="'Segoe UI', Arial, sans-serif" font-size="9" fill="#FFD700">Mistral 7B</text>
+    <text x="52" y="120" text-anchor="middle" font-family="'Segoe UI', Arial, sans-serif" font-size="9" fill="#aaaaaa">Geração de</text>
+    <text x="52" y="132" text-anchor="middle" font-family="'Segoe UI', Arial, sans-serif" font-size="9" fill="#aaaaaa">respostas</text>
+    <text x="52" y="146" text-anchor="middle" font-family="'Segoe UI', Arial, sans-serif" font-size="9" fill="#888888">temp: 0.3</text>
+    <text x="52" y="165" text-anchor="middle" font-family="'Segoe UI', Arial, sans-serif" font-size="9" fill="#555555">Porta: 11434</text>
+  </g>
+
+  <!-- ===== CONTAINER: SQLite ===== -->
+  <g transform="translate(290, 325)">
+    <rect x="0" y="0" width="200" height="110" rx="10" fill="#1a1a1a" stroke="#888888" stroke-width="1.5"/>
+    <rect x="0" y="0" width="200" height="26" rx="10" fill="#444444" opacity="0.5"/>
+    <rect x="0" y="16" width="200" height="10" fill="#444444" opacity="0.5"/>
+    <text x="100" y="16" text-anchor="middle" font-family="'Segoe UI', Arial, sans-serif" font-size="9.5" fill="#888888">[Contêiner: Banco Relacional]</text>
+    <text x="100" y="52" text-anchor="middle" font-family="'Segoe UI', Arial, sans-serif" font-size="20">🗃️</text>
+    <text x="100" y="74" text-anchor="middle" font-family="'Segoe UI', Arial, sans-serif" font-size="12" font-weight="700" fill="#F5F5F5">SQLite + SQLAlchemy</text>
+    <text x="100" y="90" text-anchor="middle" font-family="'Segoe UI', Arial, sans-serif" font-size="9" fill="#aaaaaa">Histórico de documentos</text>
+    <text x="100" y="104" text-anchor="middle" font-family="'Segoe UI', Arial, sans-serif" font-size="9" fill="#555555">Volume: data/declaraai.db</text>
+  </g>
+
+  <!-- ===== ARROWS ===== -->
+  <!-- User (left) → Frontend -->
+  <text x="30" y="198" font-family="'Segoe UI', Arial, sans-serif" font-size="22">👤</text>
+  <line x1="52" y1="195" x2="58" y2="195" stroke="#FF6B35" stroke-width="2" marker-end="url(#arr1)"/>
+
+  <!-- Frontend → Backend -->
+  <line x1="237" y1="185" x2="288" y2="185" stroke="#FF6B35" stroke-width="2" marker-end="url(#arr1)"/>
+  <text x="263" y="178" text-anchor="middle" font-family="'Segoe UI', Arial, sans-serif" font-size="9" fill="#FF6B35">HTTP / REST</text>
+  <text x="263" y="196" text-anchor="middle" font-family="'Segoe UI', Arial, sans-serif" font-size="9" fill="#aaaaaa">JSON</text>
+
+  <!-- Backend → ChromaDB -->
+  <line x1="492" y1="195" x2="558" y2="195" stroke="#FFD700" stroke-width="2" marker-end="url(#arr2)"/>
+  <text x="525" y="188" text-anchor="middle" font-family="'Segoe UI', Arial, sans-serif" font-size="9" fill="#FFD700">busca vetorial</text>
+  <text x="525" y="206" text-anchor="middle" font-family="'Segoe UI', Arial, sans-serif" font-size="9" fill="#aaaaaa">top-5 chunks</text>
+
+  <!-- Backend → Ollama -->
+  <line x1="492" y1="165" x2="743" y2="165" stroke="#FFD700" stroke-width="1.5" stroke-dasharray="5,3" marker-end="url(#arr2)"/>
+  <text x="618" y="158" text-anchor="middle" font-family="'Segoe UI', Arial, sans-serif" font-size="9" fill="#FFD700">prompt + contexto</text>
+
+  <!-- Backend → SQLite -->
+  <line x1="390" y1="307" x2="390" y2="323" stroke="#888888" stroke-width="1.5" marker-end="url(#arr3)"/>
+  <text x="405" y="318" font-family="'Segoe UI', Arial, sans-serif" font-size="9" fill="#888888">CRUD</text>
+
+  <!-- Legend -->
+  <rect x="40" y="465" width="420" height="72" rx="8" fill="#111111" stroke="#333333" stroke-width="1"/>
+  <text x="230" y="482" text-anchor="middle" font-family="'Segoe UI', Arial, sans-serif" font-size="11" font-weight="700" fill="#888888">LEGENDA</text>
+  <line x1="60" y1="496" x2="95" y2="496" stroke="#FF6B35" stroke-width="2"/>
+  <text x="103" y="500" font-family="'Segoe UI', Arial, sans-serif" font-size="9.5" fill="#aaaaaa">Comunicação síncrona (HTTP/REST)</text>
+  <line x1="60" y1="512" x2="95" y2="512" stroke="#FFD700" stroke-width="1.5" stroke-dasharray="5,3"/>
+  <text x="103" y="516" font-family="'Segoe UI', Arial, sans-serif" font-size="9.5" fill="#aaaaaa">Chamada assíncrona (Ollama API)</text>
+  <line x1="60" y1="528" x2="95" y2="528" stroke="#888888" stroke-width="1.5"/>
+  <text x="103" y="532" font-family="'Segoe UI', Arial, sans-serif" font-size="9.5" fill="#aaaaaa">Persistência de dados</text>
+
+  <!-- C4 badge -->
+  <rect x="780" y="465" width="90" height="30" rx="6" fill="#FFD700" opacity="0.15" stroke="#FFD700" stroke-width="1"/>
+  <text x="825" y="484" text-anchor="middle" font-family="'Segoe UI', Arial, sans-serif" font-size="12" font-weight="700" fill="#FFD700">C4 • Nível 2</text>
+</svg>

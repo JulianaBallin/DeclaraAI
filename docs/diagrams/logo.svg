@@ -1,0 +1,104 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 140" width="400" height="140">
+  <defs>
+    <linearGradient id="bgGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#0D0D0D;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#1a1a1a;stop-opacity:1" />
+    </linearGradient>
+    <linearGradient id="lionGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#FFD700;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#FF6B35;stop-opacity:1" />
+    </linearGradient>
+    <filter id="glow">
+      <feGaussianBlur stdDeviation="2" result="coloredBlur"/>
+      <feMerge>
+        <feMergeNode in="coloredBlur"/>
+        <feMergeNode in="SourceGraphic"/>
+      </feMerge>
+    </filter>
+  </defs>
+
+  <!-- Background -->
+  <rect width="400" height="140" rx="12" fill="url(#bgGrad)"/>
+  <rect width="400" height="140" rx="12" fill="none" stroke="#FF6B35" stroke-width="1.5" opacity="0.6"/>
+
+  <!-- Lion Icon Group (left side) -->
+  <g transform="translate(18, 10)">
+    <!-- Mane outer glow -->
+    <circle cx="55" cy="62" r="46" fill="none" stroke="#FF6B35" stroke-width="1" opacity="0.3"/>
+
+    <!-- Mane rays -->
+    <g fill="none" stroke="url(#lionGrad)" stroke-width="3" stroke-linecap="round" opacity="0.85" filter="url(#glow)">
+      <line x1="55" y1="10" x2="55" y2="2"/>
+      <line x1="78" y1="16" x2="83" y2="9"/>
+      <line x1="94" y1="32" x2="101" y2="27"/>
+      <line x1="100" y1="55" x2="108" y2="55"/>
+      <line x1="94" y1="78" x2="101" y2="83"/>
+      <line x1="78" y1="94" x2="83" y2="101"/>
+      <line x1="55" y1="100" x2="55" y2="108"/>
+      <line x1="32" y1="94" x2="27" y2="101"/>
+      <line x1="16" y1="78" x2="9" y2="83"/>
+      <line x1="10" y1="55" x2="2" y2="55"/>
+      <line x1="16" y1="32" x2="9" y2="27"/>
+      <line x1="32" y1="16" x2="27" y2="9"/>
+    </g>
+
+    <!-- Mane circle fill -->
+    <circle cx="55" cy="55" r="37" fill="#FF6B35" opacity="0.18"/>
+    <circle cx="55" cy="55" r="37" fill="none" stroke="#FFD700" stroke-width="2.5" opacity="0.9"/>
+
+    <!-- Face -->
+    <circle cx="55" cy="55" r="26" fill="#1a1a1a"/>
+    <circle cx="55" cy="55" r="26" fill="none" stroke="#FF6B35" stroke-width="1.5" opacity="0.7"/>
+
+    <!-- Eyes -->
+    <ellipse cx="45" cy="50" rx="5" ry="4.5" fill="#FFD700" filter="url(#glow)"/>
+    <ellipse cx="65" cy="50" rx="5" ry="4.5" fill="#FFD700" filter="url(#glow)"/>
+    <!-- Pupils -->
+    <ellipse cx="45" cy="50" rx="2.5" ry="3.5" fill="#0D0D0D"/>
+    <ellipse cx="65" cy="50" rx="2.5" ry="3.5" fill="#0D0D0D"/>
+    <!-- Eye shine -->
+    <circle cx="46.5" cy="48.5" r="1" fill="white" opacity="0.9"/>
+    <circle cx="66.5" cy="48.5" r="1" fill="white" opacity="0.9"/>
+
+    <!-- Nose -->
+    <path d="M50 58 Q55 61 60 58 Q57 64 55 65 Q53 64 50 58Z" fill="#FF6B35"/>
+
+    <!-- Mouth -->
+    <path d="M48 65 Q52 69 55 67 Q58 69 62 65" fill="none" stroke="#FFD700" stroke-width="1.5" stroke-linecap="round"/>
+
+    <!-- Whisker lines -->
+    <line x1="30" y1="60" x2="47" y2="58" stroke="#FFD700" stroke-width="1" opacity="0.6" stroke-linecap="round"/>
+    <line x1="30" y1="63" x2="47" y2="62" stroke="#FFD700" stroke-width="1" opacity="0.6" stroke-linecap="round"/>
+    <line x1="63" y1="58" x2="80" y2="60" stroke="#FFD700" stroke-width="1" opacity="0.6" stroke-linecap="round"/>
+    <line x1="63" y1="62" x2="80" y2="63" stroke="#FFD700" stroke-width="1" opacity="0.6" stroke-linecap="round"/>
+
+    <!-- Circuit nodes on mane -->
+    <circle cx="55" cy="13" r="2.5" fill="#FF6B35" opacity="0.9"/>
+    <circle cx="100" cy="55" r="2.5" fill="#FFD700" opacity="0.9"/>
+    <circle cx="10" cy="55" r="2.5" fill="#FFD700" opacity="0.9"/>
+    <circle cx="78" cy="19" r="2" fill="#FF6B35" opacity="0.8"/>
+    <circle cx="32" cy="19" r="2" fill="#FF6B35" opacity="0.8"/>
+  </g>
+
+  <!-- Text: DeclaraAI -->
+  <g transform="translate(135, 0)">
+    <!-- "Declara" -->
+    <text x="0" y="72" font-family="'Segoe UI', Arial, sans-serif" font-size="46" font-weight="800" letter-spacing="-1" fill="#F5F5F5">Declara</text>
+    <!-- "AI" in orange/yellow gradient -->
+    <text x="183" y="72" font-family="'Segoe UI', Arial, sans-serif" font-size="46" font-weight="800" fill="url(#lionGrad)" filter="url(#glow)">AI</text>
+  </g>
+
+  <!-- Tagline -->
+  <text x="135" y="100" font-family="'Segoe UI', Arial, sans-serif" font-size="13" fill="#FF6B35" letter-spacing="2" opacity="0.9">ASSISTENTE FISCAL INTELIGENTE</text>
+
+  <!-- Decorative circuit line bottom -->
+  <g opacity="0.35">
+    <line x1="135" y1="112" x2="370" y2="112" stroke="#FFD700" stroke-width="1"/>
+    <circle cx="135" cy="112" r="2.5" fill="#FF6B35"/>
+    <circle cx="220" cy="112" r="2" fill="#FFD700"/>
+    <circle cx="300" cy="112" r="2" fill="#FFD700"/>
+    <circle cx="370" cy="112" r="2.5" fill="#FF6B35"/>
+    <line x1="220" y1="109" x2="220" y2="116" stroke="#FFD700" stroke-width="1"/>
+    <line x1="300" y1="109" x2="300" y2="116" stroke="#FFD700" stroke-width="1"/>
+  </g>
+</svg>

@@ -1,0 +1,210 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 900 620" width="900" height="620">
+  <defs>
+    <linearGradient id="bg" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#0D0D0D"/>
+      <stop offset="100%" style="stop-color:#151515"/>
+    </linearGradient>
+    <linearGradient id="phaseOrange" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%" style="stop-color:#FF6B35;stop-opacity:0.25"/>
+      <stop offset="100%" style="stop-color:#FF6B35;stop-opacity:0.05"/>
+    </linearGradient>
+    <linearGradient id="phaseYellow" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%" style="stop-color:#FFD700;stop-opacity:0.20"/>
+      <stop offset="100%" style="stop-color:#FFD700;stop-opacity:0.05"/>
+    </linearGradient>
+    <linearGradient id="nodeOrange" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" style="stop-color:#FF6B35"/>
+      <stop offset="100%" style="stop-color:#cc4a1a"/>
+    </linearGradient>
+    <linearGradient id="nodeYellow" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" style="stop-color:#FFD700"/>
+      <stop offset="100%" style="stop-color:#cc9900"/>
+    </linearGradient>
+    <linearGradient id="nodeGray" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" style="stop-color:#444444"/>
+      <stop offset="100%" style="stop-color:#222222"/>
+    </linearGradient>
+    <marker id="arrOrange" markerWidth="9" markerHeight="7" refX="8" refY="3.5" orient="auto">
+      <polygon points="0 0, 9 3.5, 0 7" fill="#FF6B35"/>
+    </marker>
+    <marker id="arrYellow" markerWidth="9" markerHeight="7" refX="8" refY="3.5" orient="auto">
+      <polygon points="0 0, 9 3.5, 0 7" fill="#FFD700"/>
+    </marker>
+    <marker id="arrGray" markerWidth="9" markerHeight="7" refX="8" refY="3.5" orient="auto">
+      <polygon points="0 0, 9 3.5, 0 7" fill="#888888"/>
+    </marker>
+    <filter id="glow">
+      <feDropShadow dx="0" dy="2" stdDeviation="4" flood-color="#FF6B35" flood-opacity="0.4"/>
+    </filter>
+    <filter id="glowY">
+      <feDropShadow dx="0" dy="2" stdDeviation="4" flood-color="#FFD700" flood-opacity="0.35"/>
+    </filter>
+  </defs>
+
+  <!-- Background -->
+  <rect width="900" height="620" fill="url(#bg)"/>
+  <rect width="900" height="620" fill="none" stroke="#FF6B35" stroke-width="1.5" opacity="0.4"/>
+
+  <!-- Title -->
+  <text x="450" y="38" text-anchor="middle" font-family="'Segoe UI', Arial, sans-serif" font-size="20" font-weight="700" fill="#FFD700">Pipeline RAG — DeclaraAI</text>
+  <line x1="60" y1="48" x2="840" y2="48" stroke="#FF6B35" stroke-width="1" opacity="0.5"/>
+
+  <!-- ===================== PHASE 1: INGESTÃO ===================== -->
+  <rect x="30" y="65" width="840" height="210" rx="12" fill="url(#phaseOrange)" stroke="#FF6B35" stroke-width="1.5" stroke-dasharray="6,3"/>
+  <rect x="46" y="57" width="130" height="20" rx="5" fill="#0D0D0D"/>
+  <text x="112" y="70" text-anchor="middle" font-family="'Segoe UI', Arial, sans-serif" font-size="12" font-weight="700" fill="#FF6B35">FASE 1 — INGESTÃO (offline)</text>
+
+  <!-- Node: Documentos -->
+  <g transform="translate(52, 100)" filter="url(#glow)">
+    <rect x="0" y="0" width="110" height="80" rx="8" fill="#1a1a1a" stroke="#FF6B35" stroke-width="2"/>
+    <text x="55" y="28" text-anchor="middle" font-family="'Segoe UI', Arial, sans-serif" font-size="18">📄</text>
+    <text x="55" y="48" text-anchor="middle" font-family="'Segoe UI', Arial, sans-serif" font-size="11" font-weight="700" fill="#F5F5F5">Documentos</text>
+    <text x="55" y="62" text-anchor="middle" font-family="'Segoe UI', Arial, sans-serif" font-size="9" fill="#FF6B35">PDF · TXT · HTML</text>
+    <text x="55" y="74" text-anchor="middle" font-family="'Segoe UI', Arial, sans-serif" font-size="9" fill="#888888">knowledge_base/</text>
+  </g>
+
+  <!-- Arrow → Loader -->
+  <line x1="163" y1="140" x2="200" y2="140" stroke="#FF6B35" stroke-width="2" marker-end="url(#arrOrange)"/>
+
+  <!-- Node: Loader -->
+  <g transform="translate(202, 100)">
+    <rect x="0" y="0" width="100" height="80" rx="8" fill="#1a1a1a" stroke="#FF6B35" stroke-width="1.5"/>
+    <text x="50" y="28" text-anchor="middle" font-family="'Segoe UI', Arial, sans-serif" font-size="18">📥</text>
+    <text x="50" y="48" text-anchor="middle" font-family="'Segoe UI', Arial, sans-serif" font-size="11" font-weight="700" fill="#F5F5F5">Loader</text>
+    <text x="50" y="62" text-anchor="middle" font-family="'Segoe UI', Arial, sans-serif" font-size="9" fill="#aaaaaa">loader.py</text>
+    <text x="50" y="74" text-anchor="middle" font-family="'Segoe UI', Arial, sans-serif" font-size="9" fill="#888888">file_parsers.py</text>
+  </g>
+
+  <!-- Arrow → Chunker -->
+  <line x1="303" y1="140" x2="340" y2="140" stroke="#FF6B35" stroke-width="2" marker-end="url(#arrOrange)"/>
+
+  <!-- Node: Chunker -->
+  <g transform="translate(342, 100)">
+    <rect x="0" y="0" width="115" height="80" rx="8" fill="#1a1a1a" stroke="#FF6B35" stroke-width="1.5"/>
+    <text x="57" y="28" text-anchor="middle" font-family="'Segoe UI', Arial, sans-serif" font-size="18">✂️</text>
+    <text x="57" y="48" text-anchor="middle" font-family="'Segoe UI', Arial, sans-serif" font-size="11" font-weight="700" fill="#F5F5F5">Chunker</text>
+    <text x="57" y="62" text-anchor="middle" font-family="'Segoe UI', Arial, sans-serif" font-size="9" fill="#FF6B35">size: 600 chars</text>
+    <text x="57" y="74" text-anchor="middle" font-family="'Segoe UI', Arial, sans-serif" font-size="9" fill="#FF6B35">overlap: 80 chars</text>
+  </g>
+
+  <!-- Arrow → Embedder -->
+  <line x1="458" y1="140" x2="495" y2="140" stroke="#FF6B35" stroke-width="2" marker-end="url(#arrOrange)"/>
+
+  <!-- Node: Embeddings -->
+  <g transform="translate(497, 100)">
+    <rect x="0" y="0" width="130" height="80" rx="8" fill="#1a1a1a" stroke="#FF6B35" stroke-width="1.5"/>
+    <text x="65" y="28" text-anchor="middle" font-family="'Segoe UI', Arial, sans-serif" font-size="18">🧬</text>
+    <text x="65" y="48" text-anchor="middle" font-family="'Segoe UI', Arial, sans-serif" font-size="11" font-weight="700" fill="#F5F5F5">Embeddings</text>
+    <text x="65" y="62" text-anchor="middle" font-family="'Segoe UI', Arial, sans-serif" font-size="8.5" fill="#FF6B35">MiniLM-L12-v2</text>
+    <text x="65" y="74" text-anchor="middle" font-family="'Segoe UI', Arial, sans-serif" font-size="8.5" fill="#aaaaaa">384 dims · Singleton</text>
+  </g>
+
+  <!-- Arrow → ChromaDB (down) -->
+  <line x1="562" y1="181" x2="562" y2="218" stroke="#FF6B35" stroke-width="2" marker-end="url(#arrOrange)"/>
+
+  <!-- Node: ChromaDB (storage, centered vertically between phases) -->
+  <g transform="translate(490, 218)" filter="url(#glowY)">
+    <rect x="0" y="0" width="145" height="52" rx="8" fill="#1a1a1a" stroke="#FFD700" stroke-width="2"/>
+    <text x="72" y="20" text-anchor="middle" font-family="'Segoe UI', Arial, sans-serif" font-size="14">🗄️</text>
+    <text x="72" y="38" text-anchor="middle" font-family="'Segoe UI', Arial, sans-serif" font-size="11" font-weight="700" fill="#FFD700">ChromaDB</text>
+    <text x="72" y="50" text-anchor="middle" font-family="'Segoe UI', Arial, sans-serif" font-size="9" fill="#888888">cosine similarity · persistente</text>
+  </g>
+
+  <!-- Phase 1 annotation -->
+  <text x="750" y="130" text-anchor="middle" font-family="'Segoe UI', Arial, sans-serif" font-size="10" fill="#FF6B35" opacity="0.7">Executado uma vez</text>
+  <text x="750" y="145" text-anchor="middle" font-family="'Segoe UI', Arial, sans-serif" font-size="10" fill="#888888" opacity="0.7">ou via POST /ingest</text>
+  <text x="750" y="165" text-anchor="middle" font-family="'Segoe UI', Arial, sans-serif" font-size="10" fill="#555555" opacity="0.7">Auto-ingest na inicialização</text>
+  <text x="750" y="178" text-anchor="middle" font-family="'Segoe UI', Arial, sans-serif" font-size="10" fill="#555555" opacity="0.7">se ChromaDB estiver vazio</text>
+
+  <!-- ===================== PHASE 2: CONSULTA ===================== -->
+  <rect x="30" y="290" width="840" height="270" rx="12" fill="url(#phaseYellow)" stroke="#FFD700" stroke-width="1.5" stroke-dasharray="6,3"/>
+  <rect x="46" y="282" width="140" height="20" rx="5" fill="#0D0D0D"/>
+  <text x="116" y="295" text-anchor="middle" font-family="'Segoe UI', Arial, sans-serif" font-size="12" font-weight="700" fill="#FFD700">FASE 2 — CONSULTA (online)</text>
+
+  <!-- Node: Pergunta -->
+  <g transform="translate(52, 315)" filter="url(#glow)">
+    <rect x="0" y="0" width="110" height="75" rx="8" fill="#1a1a1a" stroke="#FF6B35" stroke-width="2"/>
+    <text x="55" y="26" text-anchor="middle" font-family="'Segoe UI', Arial, sans-serif" font-size="18">💬</text>
+    <text x="55" y="46" text-anchor="middle" font-family="'Segoe UI', Arial, sans-serif" font-size="11" font-weight="700" fill="#F5F5F5">Pergunta</text>
+    <text x="55" y="60" text-anchor="middle" font-family="'Segoe UI', Arial, sans-serif" font-size="9" fill="#aaaaaa">Usuário via chat</text>
+    <text x="55" y="72" text-anchor="middle" font-family="'Segoe UI', Arial, sans-serif" font-size="9" fill="#888888">POST /chat</text>
+  </g>
+
+  <!-- Arrow → Embed Query -->
+  <line x1="163" y1="352" x2="200" y2="352" stroke="#FFD700" stroke-width="2" marker-end="url(#arrYellow)"/>
+
+  <!-- Node: Embed Query -->
+  <g transform="translate(202, 315)">
+    <rect x="0" y="0" width="125" height="75" rx="8" fill="#1a1a1a" stroke="#FFD700" stroke-width="1.5"/>
+    <text x="62" y="26" text-anchor="middle" font-family="'Segoe UI', Arial, sans-serif" font-size="18">🧬</text>
+    <text x="62" y="46" text-anchor="middle" font-family="'Segoe UI', Arial, sans-serif" font-size="11" font-weight="700" fill="#F5F5F5">Embed Pergunta</text>
+    <text x="62" y="60" text-anchor="middle" font-family="'Segoe UI', Arial, sans-serif" font-size="9" fill="#FFD700">MiniLM Singleton</text>
+    <text x="62" y="72" text-anchor="middle" font-family="'Segoe UI', Arial, sans-serif" font-size="9" fill="#888888">vector 384D</text>
+  </g>
+
+  <!-- Arrow → Retriever -->
+  <line x1="328" y1="352" x2="365" y2="352" stroke="#FFD700" stroke-width="2" marker-end="url(#arrYellow)"/>
+
+  <!-- Node: Retriever / Busca Semântica -->
+  <g transform="translate(367, 315)">
+    <rect x="0" y="0" width="125" height="75" rx="8" fill="#1a1a1a" stroke="#FFD700" stroke-width="1.5"/>
+    <text x="62" y="26" text-anchor="middle" font-family="'Segoe UI', Arial, sans-serif" font-size="18">🔍</text>
+    <text x="62" y="45" text-anchor="middle" font-family="'Segoe UI', Arial, sans-serif" font-size="10" font-weight="700" fill="#F5F5F5">Busca Semântica</text>
+    <text x="62" y="59" text-anchor="middle" font-family="'Segoe UI', Arial, sans-serif" font-size="9" fill="#FFD700">ChromaDB query</text>
+    <text x="62" y="72" text-anchor="middle" font-family="'Segoe UI', Arial, sans-serif" font-size="9" fill="#888888">retriever.py</text>
+  </g>
+
+  <!-- Arrow up from ChromaDB to Retriever -->
+  <line x1="562" y1="271" x2="429" y2="313" stroke="#FFD700" stroke-width="1.5" stroke-dasharray="5,3" marker-end="url(#arrYellow)"/>
+  <text x="515" y="298" text-anchor="middle" font-family="'Segoe UI', Arial, sans-serif" font-size="9" fill="#FFD700">top-5 chunks</text>
+
+  <!-- Arrow → Prompt Builder -->
+  <line x1="493" y1="352" x2="530" y2="352" stroke="#FFD700" stroke-width="2" marker-end="url(#arrYellow)"/>
+
+  <!-- Node: Prompt Builder -->
+  <g transform="translate(532, 315)">
+    <rect x="0" y="0" width="115" height="75" rx="8" fill="#1a1a1a" stroke="#FFD700" stroke-width="1.5"/>
+    <text x="57" y="26" text-anchor="middle" font-family="'Segoe UI', Arial, sans-serif" font-size="18">📝</text>
+    <text x="57" y="46" text-anchor="middle" font-family="'Segoe UI', Arial, sans-serif" font-size="10" font-weight="700" fill="#F5F5F5">Prompt Builder</text>
+    <text x="57" y="60" text-anchor="middle" font-family="'Segoe UI', Arial, sans-serif" font-size="9" fill="#FFD700">contexto + query</text>
+    <text x="57" y="72" text-anchor="middle" font-family="'Segoe UI', Arial, sans-serif" font-size="9" fill="#888888">rag_service.py</text>
+  </g>
+
+  <!-- Arrow → Ollama -->
+  <line x1="648" y1="352" x2="685" y2="352" stroke="#FFD700" stroke-width="2" marker-end="url(#arrYellow)"/>
+
+  <!-- Node: Ollama/Mistral -->
+  <g transform="translate(687, 315)" filter="url(#glowY)">
+    <rect x="0" y="0" width="115" height="75" rx="8" fill="#1a1a1a" stroke="#FFD700" stroke-width="2"/>
+    <text x="57" y="26" text-anchor="middle" font-family="'Segoe UI', Arial, sans-serif" font-size="18">🤖</text>
+    <text x="57" y="46" text-anchor="middle" font-family="'Segoe UI', Arial, sans-serif" font-size="10" font-weight="700" fill="#FFD700">Ollama / Mistral</text>
+    <text x="57" y="60" text-anchor="middle" font-family="'Segoe UI', Arial, sans-serif" font-size="9" fill="#aaaaaa">Mistral 7B · temp 0.3</text>
+    <text x="57" y="72" text-anchor="middle" font-family="'Segoe UI', Arial, sans-serif" font-size="9" fill="#888888">generator.py</text>
+  </g>
+
+  <!-- Arrow down → Resposta -->
+  <line x1="744" y1="391" x2="744" y2="432" stroke="#FF6B35" stroke-width="2" marker-end="url(#arrOrange)"/>
+
+  <!-- Node: Resposta -->
+  <g transform="translate(677, 432)" filter="url(#glow)">
+    <rect x="0" y="0" width="135" height="70" rx="8" fill="#1a1a1a" stroke="#FF6B35" stroke-width="2"/>
+    <text x="67" y="26" text-anchor="middle" font-family="'Segoe UI', Arial, sans-serif" font-size="18">✅</text>
+    <text x="67" y="46" text-anchor="middle" font-family="'Segoe UI', Arial, sans-serif" font-size="11" font-weight="700" fill="#F5F5F5">Resposta RAG</text>
+    <text x="67" y="60" text-anchor="middle" font-family="'Segoe UI', Arial, sans-serif" font-size="9" fill="#FF6B35">resposta + fontes + scores</text>
+  </g>
+
+  <!-- Arrow Resposta → Usuário -->
+  <line x1="677" y1="467" x2="107" y2="467" stroke="#FF6B35" stroke-width="1.5" stroke-dasharray="4,3" marker-end="url(#arrOrange)"/>
+  <text x="400" y="460" text-anchor="middle" font-family="'Segoe UI', Arial, sans-serif" font-size="9" fill="#FF6B35">retorno via API → Streamlit → Usuário</text>
+
+  <!-- ===================== LEGEND ===================== -->
+  <rect x="30" y="578" width="840" height="30" rx="6" fill="#111111" stroke="#333333" stroke-width="1"/>
+  <line x1="60" y1="594" x2="90" y2="594" stroke="#FF6B35" stroke-width="2"/>
+  <text x="97" y="598" font-family="'Segoe UI', Arial, sans-serif" font-size="9.5" fill="#aaaaaa">Fluxo de ingestão</text>
+  <line x1="210" y1="594" x2="240" y2="594" stroke="#FFD700" stroke-width="2"/>
+  <text x="248" y="598" font-family="'Segoe UI', Arial, sans-serif" font-size="9.5" fill="#aaaaaa">Fluxo de consulta</text>
+  <line x1="360" y1="594" x2="390" y2="594" stroke="#FFD700" stroke-width="1.5" stroke-dasharray="5,3"/>
+  <text x="398" y="598" font-family="'Segoe UI', Arial, sans-serif" font-size="9.5" fill="#aaaaaa">Recuperação vetorial</text>
+  <rect x="750" y="578" width="118" height="30" rx="5" fill="#FF6B35" opacity="0.15" stroke="#FF6B35" stroke-width="1"/>
+  <text x="809" y="597" text-anchor="middle" font-family="'Segoe UI', Arial, sans-serif" font-size="11" font-weight="700" fill="#FF6B35">RAG Pipeline</text>
+</svg>
