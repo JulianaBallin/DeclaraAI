@@ -100,9 +100,10 @@ class ServicoAvaliacao:
     """
 
     def __init__(self):
-        # Compartilha a instância do banco vetorial entre recuperador e serviço RAG
+        # Instância única compartilhada entre recuperador e serviço RAG
         self.banco_vetorial = BancoVetorial()
         self.recuperador = Recuperador(banco_vetorial=self.banco_vetorial)
+        self.servico_rag = ServicoRAG(banco_vetorial=self.banco_vetorial)
 
     # -----------------------------------------------------------------------
     # Avaliação de Recuperação (sem LLM)
@@ -189,13 +190,12 @@ class ServicoAvaliacao:
             Dicionário com métricas gerais e resultados detalhados por caso.
         """
         logger.info("Iniciando avaliação completa do pipeline RAG...")
-        servico_rag = ServicoRAG()
         resultados: List[dict] = []
 
         for caso in CASOS_TESTE:
             logger.info(f"Avaliando caso {caso['id']}: {caso['pergunta'][:60]}...")
 
-            resultado_rag = await servico_rag.responder_pergunta(caso["pergunta"])
+            resultado_rag = await self.servico_rag.responder_pergunta(caso["pergunta"])
 
             scores = resultado_rag.get("scores_contexto", [])
             score_medio = round(sum(scores) / len(scores), 4) if scores else 0.0

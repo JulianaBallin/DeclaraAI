@@ -35,11 +35,11 @@ class ServicoRAG:
     Recuperador para evitar conexões duplicadas ao ChromaDB.
     """
 
-    def __init__(self):
+    def __init__(self, banco_vetorial: BancoVetorial | None = None):
         self.carregador = CarregadorDocumentos()
         self.chunker = ChunkerTexto()
-        # Instância compartilhada: evita abrir duas conexões ao ChromaDB
-        self.banco_vetorial = BancoVetorial()
+        # Aceita instância externa para evitar múltiplas conexões ao ChromaDB
+        self.banco_vetorial = banco_vetorial or BancoVetorial()
         self.recuperador = Recuperador(banco_vetorial=self.banco_vetorial)
         self.gerador = GeradorResposta()
 
