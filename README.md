@@ -5,115 +5,144 @@
 </p>
 
 <p align="center">
-  Assistente inteligente com <strong>RAG</strong> para organização de documentos e apoio à declaração do imposto de renda.<br>
+  Assistente inteligente com <strong>RAG</strong> para organização de documentos e apoio à declaração do imposto de renda pessoa física.<br>
   <em>Projeto Acadêmico — UEA • Disciplina de RAG</em>
 </p>
 
+---
+
+<h2 align="center">🤖 Tecnologias Utilizadas</h2>
+
 <p align="center">
-  <img alt="Python" src="https://img.shields.io/badge/python-3.11-blue?style=for-the-badge&logo=python">
-  <img alt="FastAPI" src="https://img.shields.io/badge/FastAPI-0.111-green?style=for-the-badge&logo=fastapi">
-  <img alt="Streamlit" src="https://img.shields.io/badge/Streamlit-1.35-red?style=for-the-badge&logo=streamlit">
-  <img alt="ChromaDB" src="https://img.shields.io/badge/ChromaDB-0.5-orange?style=for-the-badge">
-  <img alt="Docker" src="https://img.shields.io/badge/Docker-✔-blue?style=for-the-badge&logo=docker">
+  <img alt="Python" src="https://img.shields.io/badge/python-3.11-blue?style=for-the-badge&logo=python&logoColor=white">
+  <img alt="FastAPI" src="https://img.shields.io/badge/FastAPI-0.111-009688?style=for-the-badge&logo=fastapi&logoColor=white">
+  <img alt="Streamlit" src="https://img.shields.io/badge/Streamlit-1.35-FF4B4B?style=for-the-badge&logo=streamlit&logoColor=white">
+  <img alt="Docker" src="https://img.shields.io/badge/Docker-✔-2496ED?style=for-the-badge&logo=docker&logoColor=white">
+  <img alt="ChromaDB" src="https://img.shields.io/badge/ChromaDB-0.5-orange?style=for-the-badge&logo=databricks&logoColor=white">
+  <img alt="HuggingFace" src="https://img.shields.io/badge/sentence--transformers-multilingual-FFD21E?style=for-the-badge&logo=huggingface&logoColor=black">
+  <img alt="Ollama" src="https://img.shields.io/badge/Ollama-Mistral-black?style=for-the-badge&logo=ollama&logoColor=white">
+  <img alt="SQLite" src="https://img.shields.io/badge/SQLite-SQLAlchemy-003B57?style=for-the-badge&logo=sqlite&logoColor=white">
 </p>
 
 ---
 
-## Descrição
+<h2 align="center">📝 Descrição do Projeto</h2>
 
-O **DeclaraAI** é um Micro SaaS com pipeline **RAG (Retrieval-Augmented Generation)** que auxilia usuários leigos na organização de documentos fiscais e na compreensão do processo de declaração do IRPF. O sistema processa documentos enviados pelo usuário (recibos, notas fiscais, informes), classifica-os automaticamente por categoria tributária e responde dúvidas com base em uma base de conhecimento estruturada.
+O **DeclaraAI** é um Micro SaaS com pipeline **RAG (Retrieval-Augmented Generation)** que auxilia usuários leigos na organização de documentos fiscais e na compreensão do processo de declaração do IRPF. O sistema processa documentos enviados (recibos, notas fiscais, informes), classifica-os automaticamente por categoria tributária e responde dúvidas com base em uma base de conhecimento estruturada.
 
 ---
 
-## Funcionalidades
+<h2 align="center">🎯 Funcionalidades</h2>
 
 | Funcionalidade | Descrição |
 |---|---|
 | **Chat RAG** | Perguntas em linguagem natural respondidas com base na base de conhecimento tributário |
 | **Upload de documentos** | Processamento de PDF, TXT e HTML com extração automática de dados |
-| **Classificação tributária** | Categorização inteligente por tipo de documento fiscal |
+| **Classificação tributária** | Categorização inteligente por tipo de documento fiscal (8 categorias) |
 | **Histórico** | Armazenamento e consulta com filtros por categoria, nome e período |
 | **Resumo anual** | Organização por categoria para facilitar o preenchimento da declaração |
+| **Avaliação RAG** | Métricas quantitativas de qualidade da recuperação e das respostas |
 
 ---
 
-## Arquitetura
+<h2 align="center">🧠 Pipeline RAG</h2>
 
 ```
-Usuário → Streamlit (8501)
-              ↓
-         FastAPI (8000)
-         ├── Chat RAG
-         │   ├── ChromaDB (busca semântica)
-         │   └── Ollama (geração de resposta)
-         ├── Upload & Classificação
-         │   ├── Extração (pdfplumber / BeautifulSoup)
-         │   └── Classificação por palavras-chave
-         └── Histórico
-             └── SQLite (SQLAlchemy)
+┌─────────────────────────────────────────────────────────────────┐
+│                    INGESTÃO (offline)                           │
+│  [Documentos] → [Loader] → [Chunker 600/80] → [MiniLM Embed]   │
+│                                                    ↓            │
+│                                             [ChromaDB]          │
+└─────────────────────────────────────────────────────────────────┘
+                                                     ↑
+┌─────────────────────────────────────────────────────────────────┐
+│                    CONSULTA (online)                            │
+│  [Pergunta] → [MiniLM Embed] → [Busca Semântica ChromaDB]       │
+│                                        ↓                        │
+│                              [Top-5 Chunks Relevantes]          │
+│                                        ↓                        │
+│                              [Prompt + Contexto]                │
+│                                        ↓                        │
+│                              [Ollama — Mistral 7B]              │
+│                                        ↓                        │
+│                                  [Resposta]                     │
+└─────────────────────────────────────────────────────────────────┘
 ```
 
-### Pipeline RAG
+### Decisões Técnicas Justificadas
 
-```
-[Documentos] → [Loader] → [Chunker 600/80] → [Embeddings MiniLM] → [ChromaDB]
-                                                                          ↓
-[Pergunta] ──────────────────────────────────────────────────────→ [Retriever]
-                                                                          ↓
-                                                              [Contexto + Prompt]
-                                                                          ↓
-                                                                   [Ollama LLM]
-                                                                          ↓
-                                                                    [Resposta]
-```
+| Decisão | Justificativa |
+|---|---|
+| **chunk_size = 600 chars** | Suficiente para capturar contexto fiscal completo sem diluir relevância semântica |
+| **overlap = 80 chars** | Preserva frases e valores monetários cortados na fronteira entre chunks |
+| **paraphrase-multilingual-MiniLM-L12-v2** | Suporte nativo ao português, 384 dims, leve para CPU, bom desempenho em similaridade |
+| **cosine similarity** | Mais robusta para documentos de comprimentos variados vs. distância euclidiana |
+| **Mistral 7B via Ollama** | Multilíngue, excelente em tarefas factuais/técnicas, open-source (Apache 2.0), auto-hospedado sem API key |
+| **temperatura = 0.3** | Respostas conservadoras e precisas — domínio fiscal exige mínimo de alucinação |
+| **Singleton embeddings** | Evita recarregar o modelo (~110 MB) a cada requisição |
+| **SQLite** | Zero configuração, suficiente para protótipo — sem dados distribuídos |
 
 ---
 
-## Estrutura do Projeto
+<h2 align="center">🔍 Justificativa do Modelo LLM</h2>
+
+**Mistral 7B** foi escolhido para o DeclaraAI pelos seguintes motivos:
+
+1. **Domínio fiscal e português**: o Mistral 7B apresenta desempenho sólido em tarefas de compreensão e geração em português, idioma do domínio da aplicação.
+2. **Factualidade**: modelos de instrução como o Mistral tendem a seguir o contexto fornecido no prompt com menor taxa de alucinação que modelos maiores sem RAG.
+3. **Auto-hospedado via Ollama**: elimina dependência de APIs externas, garantindo privacidade dos documentos fiscais do usuário.
+4. **Licença aberta**: Apache 2.0 — permite uso acadêmico e comercial sem restrições.
+5. **Eficiência**: 7B parâmetros rodam em CPU (4–8 GB RAM), viabilizando execução em hardware comum.
+
+**Alternativas consideradas:**
+- `llama3`: maior qualidade mas requer mais RAM
+- `phi3`: muito pequeno para contextos fiscais longos
+- APIs externas (OpenAI, Anthropic): não open-source, dependência de conectividade
+
+---
+
+<h2 align="center">📁 Estrutura do Projeto</h2>
 
 ```
 DeclaraAI/
 ├── backend/
 │   ├── app/
-│   │   ├── main.py                    # Ponto de entrada FastAPI
+│   │   ├── main.py                       # FastAPI app + lifespan (auto-ingest)
 │   │   ├── api/
-│   │   │   ├── routes_chat.py         # POST /chat, POST /ingest, GET /status
-│   │   │   ├── routes_documents.py    # POST /documents/upload, POST /documents/save
-│   │   │   └── routes_history.py      # GET /history, GET /history/summary
+│   │   │   ├── routes_chat.py            # POST /chat, POST /ingest, GET /status
+│   │   │   ├── routes_documents.py       # POST /documents/upload, /save
+│   │   │   ├── routes_history.py         # GET /history, /history/summary
+│   │   │   └── routes_evaluation.py      # POST /evaluation/recuperacao, /completa
 │   │   ├── core/
-│   │   │   ├── config.py              # Configurações via pydantic-settings
-│   │   │   └── database.py            # SQLAlchemy + SQLite
-│   │   ├── models/
-│   │   │   └── document.py            # ORM: tabela de documentos
-│   │   ├── schemas/
-│   │   │   └── document.py            # Schemas Pydantic de entrada/saída
+│   │   │   ├── config.py                 # Configurações via pydantic-settings
+│   │   │   └── database.py               # SQLAlchemy + SQLite
+│   │   ├── models/document.py            # ORM: tabela documentos
+│   │   ├── schemas/document.py           # Schemas Pydantic (request/response)
 │   │   ├── services/
-│   │   │   ├── extraction_service.py  # Extração de texto e metadados
-│   │   │   ├── classification_service.py  # Classificação tributária
-│   │   │   ├── history_service.py     # Persistência no SQLite
-│   │   │   └── rag_service.py         # Orquestrador do pipeline RAG
+│   │   │   ├── extraction_service.py     # Extração de texto e metadados (regex)
+│   │   │   ├── classification_service.py # Classificação tributária (8 categorias)
+│   │   │   ├── history_service.py        # CRUD histórico + resumo anual
+│   │   │   ├── rag_service.py            # Orquestrador do pipeline RAG
+│   │   │   └── evaluation_service.py     # Métricas de avaliação do pipeline
 │   │   ├── rag/
-│   │   │   ├── loader.py              # Carregamento de documentos
-│   │   │   ├── chunker.py             # Fragmentação com overlap
-│   │   │   ├── embeddings.py          # sentence-transformers (singleton)
-│   │   │   ├── vector_store.py        # ChromaDB (CRUD vetorial)
-│   │   │   ├── retriever.py           # Busca semântica + estrutura re-ranking
-│   │   │   └── generator.py           # Geração via Ollama
-│   │   └── utils/
-│   │       └── file_parsers.py        # Parsers PDF, TXT, HTML
+│   │   │   ├── loader.py                 # Carregamento de documentos
+│   │   │   ├── chunker.py                # Fragmentação 600 chars / overlap 80
+│   │   │   ├── embeddings.py             # Singleton paraphrase-multilingual-MiniLM
+│   │   │   ├── vector_store.py           # ChromaDB (cosine similarity)
+│   │   │   ├── retriever.py              # Busca semântica + estrutura re-ranking
+│   │   │   └── generator.py              # Geração de resposta via Ollama
+│   │   └── utils/file_parsers.py         # Parsers PDF/TXT/HTML
 │   ├── requirements.txt
 │   └── Dockerfile
 ├── frontend/
-│   ├── app.py                         # Interface Streamlit (4 abas)
+│   ├── app.py                            # Streamlit: 5 abas
 │   ├── requirements.txt
 │   └── Dockerfile
 ├── data/
-│   ├── uploads/                       # Documentos enviados pelos usuários
-│   ├── knowledge_base/                # Base de conhecimento para ingestão
-│   │   └── guia_imposto_renda.txt     # Guia completo do IRPF (incluído)
-│   └── chroma_db/                     # Banco vetorial persistente
-├── docs/
-│   └── diagrams/
+│   ├── uploads/                          # Documentos enviados pelos usuários
+│   ├── knowledge_base/
+│   │   └── guia_imposto_renda.txt        # Base de conhecimento IRPF incluída
+│   └── chroma_db/                        # Banco vetorial persistente
 ├── docker-compose.yml
 ├── .env.example
 └── README.md
@@ -121,15 +150,7 @@ DeclaraAI/
 
 ---
 
-## Pré-requisitos
-
-- [Docker](https://docs.docker.com/get-docker/) e [Docker Compose](https://docs.docker.com/compose/) instalados
-- Pelo menos **8 GB de RAM** (modelo Mistral requer ~4–5 GB)
-- Espaço em disco: ~5 GB para modelos e dependências
-
----
-
-## Execução com Docker (recomendado)
+<h2 align="center">🐳 Como Executar com Docker</h2>
 
 ### 1. Clonar o repositório
 
@@ -138,32 +159,24 @@ git clone https://github.com/JulianaBallin/DeclaraAI.git
 cd DeclaraAI
 ```
 
-### 2. Configurar variáveis de ambiente (opcional)
-
-```bash
-cp .env.example .env
-# Edite o .env se necessário
-```
-
-### 3. Subir os containers
+### 2. Subir os containers
 
 ```bash
 docker-compose up --build
 ```
 
-> Na primeira execução, o Docker baixará as imagens e instalará as dependências.
-> Pode levar alguns minutos dependendo da conexão.
+> **Primeira execução:** aguarde o download das imagens e instalação das dependências (~5 min).
 
-### 4. Baixar o modelo no Ollama
+### 3. Baixar o modelo LLM no Ollama
 
 ```bash
 # Em outro terminal, após os containers subirem:
 docker exec -it declaraai-ollama ollama pull mistral
 ```
 
-> Aguarde o download completo (~4 GB).
+> O download do Mistral 7B (~4 GB) pode levar alguns minutos dependendo da conexão.
 
-### 5. Acessar a aplicação
+### 4. Acessar a aplicação
 
 | Serviço | URL |
 |---|---|
@@ -173,34 +186,26 @@ docker exec -it declaraai-ollama ollama pull mistral
 
 ---
 
-## Execução Local (sem Docker)
+<h2 align="center">🖥️ Como Executar Localmente (sem Docker)</h2>
 
-### Pré-requisitos adicionais
-
+### Pré-requisitos
 - Python 3.11+
-- [Ollama](https://ollama.ai) instalado localmente
+- [Ollama](https://ollama.ai) instalado
 
 ### Backend
 
 ```bash
 cd backend
-
-# Criar e ativar ambiente virtual
 python -m venv .venv
 source .venv/bin/activate        # Linux/Mac
-# ou: .venv\Scripts\activate     # Windows
+# .venv\Scripts\activate         # Windows
 
-# Instalar dependências
 pip install -r requirements.txt
 
-# Configurar variáveis de ambiente
+# Configurar variáveis
 cp ../.env.example ../.env
 # Edite: OLLAMA_BASE_URL=http://localhost:11434
 
-# Criar estrutura de dados
-mkdir -p ../data/uploads ../data/knowledge_base ../data/chroma_db
-
-# Iniciar servidor
 uvicorn app.main:app --reload --host 0.0.0.0 --port 8000
 ```
 
@@ -209,26 +214,20 @@ uvicorn app.main:app --reload --host 0.0.0.0 --port 8000
 ```bash
 cd frontend
 pip install -r requirements.txt
-
-export API_URL=http://localhost:8000  # Linux/Mac
-# ou: set API_URL=http://localhost:8000  # Windows
-
+export API_URL=http://localhost:8000
 streamlit run app.py
 ```
 
 ### Ollama
 
 ```bash
-# Terminal 1: iniciar servidor
-ollama serve
-
-# Terminal 2: baixar modelo
-ollama pull mistral
+ollama serve          # Terminal 1
+ollama pull mistral   # Terminal 2
 ```
 
 ---
 
-## Endpoints da API
+<h2 align="center">🔌 API REST</h2>
 
 ### Chat RAG
 
@@ -244,7 +243,7 @@ ollama pull mistral
 |---|---|---|
 | `POST` | `/documents/upload` | Upload e processamento de documento |
 | `POST` | `/documents/save` | Salvar documento no histórico |
-| `GET` | `/documents/categorias` | Listar categorias disponíveis |
+| `GET` | `/documents/categorias` | Listar categorias tributárias |
 
 ### Histórico
 
@@ -254,119 +253,95 @@ ollama pull mistral
 | `GET` | `/history/summary` | Resumo anual por categoria |
 | `DELETE` | `/history/{id}` | Excluir documento do histórico |
 
----
+### Avaliação
 
-## Exemplos de Uso
+| Método | Endpoint | Descrição |
+|---|---|---|
+| `POST` | `/evaluation/recuperacao` | Avaliar etapa de recuperação (sem LLM) |
+| `POST` | `/evaluation/completa` | Avaliar pipeline completo (com LLM) |
+| `GET` | `/evaluation/casos-teste` | Listar casos de teste |
 
-### Chat via cURL
+### Exemplo de uso
 
 ```bash
+# Chat
 curl -X POST http://localhost:8000/chat \
   -H "Content-Type: application/json" \
   -d '{"pergunta": "Quais despesas médicas posso deduzir no IR?"}'
-```
 
-### Upload de documento
-
-```bash
+# Upload
 curl -X POST http://localhost:8000/documents/upload \
-  -F "arquivo=@/caminho/para/recibo.pdf"
-```
+  -F "arquivo=@recibo.pdf"
 
-### Re-indexar base de conhecimento
-
-```bash
-curl -X POST http://localhost:8000/ingest
+# Avaliação (recuperação)
+curl -X POST http://localhost:8000/evaluation/recuperacao
 ```
 
 ---
 
-## Configuração
+<h2 align="center">📊 Avaliação da Solução</h2>
 
-Todas as configurações são feitas via variáveis de ambiente (arquivo `.env`):
+O sistema implementa métricas quantitativas inspiradas no **RAGAS** (Es et al., 2023), adaptadas para execução autossuficiente sem LLM-juiz externo.
 
-| Variável | Padrão | Descrição |
+### Métricas implementadas
+
+| Métrica | Descrição | Endpoint |
 |---|---|---|
-| `OLLAMA_MODELO` | `mistral` | Modelo LLM a usar no Ollama |
-| `MODELO_EMBEDDINGS` | `paraphrase-multilingual-MiniLM-L12-v2` | Modelo de embeddings |
-| `CHUNK_SIZE` | `600` | Tamanho de cada chunk (caracteres) |
-| `CHUNK_OVERLAP` | `80` | Sobreposição entre chunks |
-| `TOP_K_RESULTADOS` | `5` | Chunks recuperados por consulta |
-| `OLLAMA_BASE_URL` | `http://ollama:11434` | URL do servidor Ollama |
+| **Taxa de Recuperação** | % de perguntas com ao menos 1 chunk recuperado | `/evaluation/recuperacao` |
+| **Score Médio de Contexto** | Similaridade cosseno média (ChromaDB) dos chunks retornados | `/evaluation/recuperacao` |
+| **Cobertura de Keywords** | % de termos esperados encontrados na resposta gerada | `/evaluation/completa` |
+| **Análise de Falhas** | Casos com cobertura < 50% — indica lacunas na base | ambos |
 
----
+### Casos de teste
 
-## Adicionando Conteúdo à Base de Conhecimento
+8 perguntas sobre o domínio IRPF cobrindo:
+obrigatoriedade, deduções médicas, deduções educacionais, modalidades de declaração,
+previdência privada, penalidades, autônomos (carnê-leão) e dependentes.
 
-1. Coloque arquivos `.pdf`, `.txt` ou `.html` em `data/knowledge_base/`
-2. Chame o endpoint de re-indexação:
+### Como avaliar
 
 ```bash
-curl -X POST http://localhost:8000/ingest
+# Avaliação rápida de recuperação (não requer Ollama)
+curl -X POST http://localhost:8000/evaluation/recuperacao
+
+# Avaliação completa com LLM
+curl -X POST http://localhost:8000/evaluation/completa
 ```
 
-O sistema fragmentará os textos em chunks de 600 caracteres com 80 de overlap,
-gerará embeddings e persistirá no ChromaDB automaticamente.
+Ou use a aba **🔬 Avaliação** na interface Streamlit.
 
 ---
 
-## Tecnologias
+<h2 align="center">🧩 Modelagem C4</h2>
 
-| Componente | Tecnologia |
-|---|---|
-| API REST | FastAPI 0.111 |
-| Interface Web | Streamlit 1.35 |
-| Banco Vetorial | ChromaDB 0.5 |
-| Embeddings | sentence-transformers (paraphrase-multilingual-MiniLM-L12-v2) |
-| LLM | Ollama (Mistral, Llama3, etc.) |
-| Banco Relacional | SQLite + SQLAlchemy 2.0 |
-| Extração PDF | pdfplumber |
-| Extração HTML | BeautifulSoup4 |
-| Containerização | Docker + Docker Compose |
+O projeto segue o modelo **C4** para representação arquitetural:
+
+- **C1 – Contexto:** usuário interage com DeclaraAI via browser
+- **C2 – Contêineres:** Frontend (Streamlit), Backend (FastAPI), Banco Vetorial (ChromaDB), Banco Relacional (SQLite), LLM (Ollama)
+- **C3 – Componentes:** pipeline RAG (loader → chunker → embeddings → retriever → generator), serviços de classificação e extração, API REST
 
 ---
 
-## Pipeline RAG — Decisões Técnicas
-
-| Decisão | Justificativa |
-|---|---|
-| **chunk_size = 600** | Suficiente para capturar contexto fiscal sem diluir relevância |
-| **overlap = 80** | Preserva frases cortadas na fronteira de chunks |
-| **paraphrase-multilingual-MiniLM-L12-v2** | Suporte a PT-BR, 384 dims, leve e eficiente |
-| **cosine similarity** | Mais robusta para textos de comprimentos variados |
-| **temperatura = 0.3** | Respostas conservadoras e factuais no domínio fiscal |
-| **Singleton embeddings** | Evita múltiplos carregamentos do modelo em memória |
-| **SQLite** | Suficiente para protótipo acadêmico, zero configuração |
-
----
-
-## Limitações
+<h2 align="center">⚠️ Limitações</h2>
 
 - Não substitui contador ou validação oficial da Receita Federal
 - A qualidade das respostas depende do modelo Ollama configurado
-- Extração por heurísticas pode falhar em documentos mal formatados
-- Base de conhecimento deve ser atualizada manualmente
-- Requer conexão à internet apenas para baixar modelos na primeira execução
+- Extração de metadados por heurísticas pode falhar em documentos não padronizados
+- Base de conhecimento deve ser atualizada manualmente com novas regras fiscais
+- PDFs baseados em imagem (scan) não têm texto extraível sem OCR
 
 ---
 
-## Avaliação do Sistema
+<h2 align="center">👥 Equipe</h2>
 
-O sistema pode ser avaliado com base em:
-
-- **Precisão da recuperação**: relevância dos chunks retornados
-- **Qualidade das respostas**: coerência e fidelidade ao contexto
-- **Classificação de documentos**: acurácia da categorização tributária
-- **Extração de metadados**: taxa de sucesso na identificação de datas/valores
-
----
-
-## Equipe
+<p align="center">
 
 | Nome | Matrícula |
 |---|---|
 | Juliana Ballin Lima | 2315310011 |
 | Fernando Luiz Da Silva Freire | 2315310007 |
+
+</p>
 
 ---
 
