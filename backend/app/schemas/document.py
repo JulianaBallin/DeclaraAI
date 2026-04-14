@@ -72,6 +72,7 @@ class RespostaChat(BaseModel):
     contexto_utilizado: Optional[List[str]] = []
     fontes: Optional[List[str]] = []
     chunks_recuperados: Optional[int] = 0
+    scores_contexto: Optional[List[float]] = []  # Scores de similaridade (0–1)
 
 
 # ---------------------------------------------------------------------------

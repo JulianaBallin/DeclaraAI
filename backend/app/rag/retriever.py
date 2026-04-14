@@ -27,8 +27,14 @@ class Recuperador:
     3. Formatação do contexto para o LLM
     """
 
-    def __init__(self):
-        self.banco_vetorial = BancoVetorial()
+    def __init__(self, banco_vetorial: BancoVetorial | None = None):
+        """
+        Args:
+            banco_vetorial: Instância opcional de BancoVetorial.
+                            Se não fornecida, cria uma nova.
+                            Passar a instância evita conexões duplicadas ao ChromaDB.
+        """
+        self.banco_vetorial = banco_vetorial or BancoVetorial()
 
     def recuperar(
         self,

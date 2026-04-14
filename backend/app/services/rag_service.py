@@ -30,13 +30,17 @@ class ServicoRAG:
 
     Instancia e conecta todos os componentes necessários para ingestão
     de documentos e geração de respostas baseadas em recuperação semântica.
+
+    Nota: o BancoVetorial é criado uma única vez e compartilhado com o
+    Recuperador para evitar conexões duplicadas ao ChromaDB.
     """
 
     def __init__(self):
         self.carregador = CarregadorDocumentos()
         self.chunker = ChunkerTexto()
+        # Instância compartilhada: evita abrir duas conexões ao ChromaDB
         self.banco_vetorial = BancoVetorial()
-        self.recuperador = Recuperador()
+        self.recuperador = Recuperador(banco_vetorial=self.banco_vetorial)
         self.gerador = GeradorResposta()
 
     # -----------------------------------------------------------------------
@@ -114,7 +118,7 @@ class ServicoRAG:
             pergunta: Pergunta do usuário em linguagem natural.
 
         Returns:
-            Dicionário com 'resposta', 'contexto_utilizado', 'fontes' e 'chunks_recuperados'.
+            Dicionário com resposta, contexto, fontes, scores e contagem de chunks.
         """
         logger.info(f"Processando pergunta: '{pergunta[:80]}...'")
 
@@ -127,14 +131,16 @@ class ServicoRAG:
         # Passo 3: Geração de resposta
         resposta = await self.gerador.gerar(pergunta, contexto)
 
-        # Deduplica fontes para o retorno
+        # Deduplica fontes e coleta scores de similaridade para avaliação
         fontes = list({c.get("fonte", "") for c in chunks_relevantes if c.get("fonte")})
+        scores = [round(c.get("score", 0.0), 4) for c in chunks_relevantes]
 
         return {
             "resposta": resposta,
             "contexto_utilizado": [c["texto"] for c in chunks_relevantes],
             "fontes": fontes,
             "chunks_recuperados": len(chunks_relevantes),
+            "scores_contexto": scores,
         }
 
     # -----------------------------------------------------------------------
