@@ -38,38 +38,113 @@ st.set_page_config(
 st.markdown(
     """
     <style>
-    /* Fundo geral */
-    .stApp { background-color: #0D0D0D; color: #F5F5F5; }
+    /* ================================================================
+       FUNDO — degradê suave escuro com toque quente
+    ================================================================ */
+    .stApp {
+        background: linear-gradient(160deg, #0D0D0D 0%, #1a0e05 45%, #0f0f0f 100%);
+        color: #E8E8E8;
+    }
 
-    /* Sidebar e painéis secundários */
+    /* Sidebar */
     [data-testid="stSidebar"] { background-color: #111111; }
     [data-testid="stSidebarContent"] { background-color: #111111; }
 
-    /* Abas */
-    .stTabs [data-baseweb="tab-list"] {
-        background-color: #1a1a1a;
-        border-radius: 10px;
-        padding: 4px;
-        gap: 4px;
-    }
-    .stTabs [data-baseweb="tab"] {
-        font-size: 0.95rem;
-        font-weight: 600;
-        color: #aaaaaa;
-        border-radius: 8px;
-        padding: 0.5rem 1.2rem;
-        background-color: transparent;
-    }
-    .stTabs [aria-selected="true"] {
-        background-color: #FF6B35 !important;
-        color: #ffffff !important;
-    }
-    .stTabs [data-baseweb="tab"]:hover {
-        color: #FFD700 !important;
-        background-color: #222222 !important;
+    /* ================================================================
+       MARGENS LATERAIS — 2x maior que o padrão
+    ================================================================ */
+    .main .block-container {
+        padding-top: 88px !important;
+        padding-left: 6rem !important;
+        padding-right: 6rem !important;
+        max-width: 100% !important;
     }
 
-    /* Botões primários */
+    /* ================================================================
+       NAVBAR FIXA — logo esquerda, abas direita
+    ================================================================ */
+    .navbar-topo {
+        position: fixed;
+        top: 0;
+        left: 0;
+        right: 0;
+        height: 68px;
+        background: linear-gradient(90deg, #0D0D0D 0%, #1a0e05 100%);
+        border-bottom: 1px solid #2a2a2a;
+        z-index: 9998;
+        display: flex;
+        align-items: center;
+        padding: 0 3rem;
+    }
+
+    /* Tab-list posicionada no canto superior direito */
+    .stTabs [data-baseweb="tab-list"] {
+        position: fixed !important;
+        top: 0 !important;
+        right: 2rem !important;
+        height: 68px !important;
+        background: transparent !important;
+        border: none !important;
+        z-index: 9999 !important;
+        display: flex !important;
+        align-items: center !important;
+        gap: 0 !important;
+        padding: 0 !important;
+    }
+
+    .stTabs [data-baseweb="tab"] {
+        height: 68px !important;
+        border-radius: 0 !important;
+        border-bottom: 3px solid transparent !important;
+        padding: 0 1rem !important;
+        font-size: 0.88rem !important;
+        font-weight: 600 !important;
+        color: #cccccc !important;
+        background: transparent !important;
+        transition: color 0.2s ease, border-bottom-color 0.2s ease;
+    }
+
+    .stTabs [aria-selected="true"] {
+        background: transparent !important;
+        color: #FF6B35 !important;
+        border-bottom: 3px solid #FF6B35 !important;
+    }
+
+    .stTabs [data-baseweb="tab"]:hover {
+        color: #FFD700 !important;
+        background: rgba(255, 215, 0, 0.04) !important;
+        border-bottom-color: #FFD700 !important;
+    }
+
+    /* ================================================================
+       TIPOGRAFIA — fontes mais brancas e parágrafos maiores
+    ================================================================ */
+    h1, h2, h3, h4 {
+        color: #F5F5F5 !important;
+        margin-top: 1.6rem !important;
+        margin-bottom: 0.9rem !important;
+    }
+
+    p, li, .stMarkdown p {
+        color: #DEDEDE !important;
+        font-size: 1.06rem !important;
+        line-height: 1.7 !important;
+    }
+
+    label, .stSelectbox label, .stTextInput label,
+    .stFileUploader label, .stDateInput label {
+        color: #CCCCCC !important;
+        font-size: 1rem !important;
+    }
+
+    /* Texto de caption e legenda */
+    .stCaption, caption, small {
+        color: #AAAAAA !important;
+    }
+
+    /* ================================================================
+       BOTÕES
+    ================================================================ */
     .stButton > button[kind="primary"] {
         background-color: #FF6B35;
         color: #ffffff;
@@ -84,7 +159,6 @@ st.markdown(
         color: #ffffff;
     }
 
-    /* Botões secundários */
     .stButton > button[kind="secondary"] {
         background-color: #1a1a1a;
         color: #FFD700;
@@ -98,7 +172,9 @@ st.markdown(
         color: #0D0D0D;
     }
 
-    /* Expanders */
+    /* ================================================================
+       COMPONENTES
+    ================================================================ */
     div[data-testid="stExpander"] {
         background-color: #1a1a1a;
         border: 1px solid #333333;
@@ -109,23 +185,21 @@ st.markdown(
         font-weight: 600;
     }
 
-    /* Métricas */
     [data-testid="stMetric"] {
         background-color: #1a1a1a;
         border: 1px solid #333333;
         border-radius: 10px;
         padding: 0.8rem;
     }
-    [data-testid="stMetricLabel"] { color: #aaaaaa !important; font-size: 0.82rem; }
+    [data-testid="stMetricLabel"] { color: #BBBBBB !important; font-size: 0.85rem; }
     [data-testid="stMetricValue"] { color: #FFD700 !important; font-weight: 700; }
 
-    /* Inputs e selects */
     .stTextInput > div > div > input,
     .stTextArea textarea,
     .stSelectbox > div > div {
         background-color: #1a1a1a !important;
         border: 1px solid #333333 !important;
-        color: #F5F5F5 !important;
+        color: #F0F0F0 !important;
         border-radius: 8px;
     }
     .stTextInput > div > div > input:focus,
@@ -134,7 +208,6 @@ st.markdown(
         box-shadow: 0 0 0 2px rgba(255, 107, 53, 0.25);
     }
 
-    /* Chat messages */
     [data-testid="stChatMessage"] {
         background-color: #1a1a1a;
         border-radius: 12px;
@@ -142,7 +215,6 @@ st.markdown(
         margin-bottom: 8px;
     }
 
-    /* Chat input */
     [data-testid="stChatInput"] textarea {
         background-color: #1a1a1a !important;
         color: #F5F5F5 !important;
@@ -150,18 +222,10 @@ st.markdown(
         border-radius: 12px;
     }
 
-    /* Progress bars */
-    .stProgress > div > div > div {
-        background-color: #FF6B35;
-    }
+    .stProgress > div > div > div { background-color: #FF6B35; }
 
-    /* Dividers */
     hr { border-color: #2a2a2a !important; }
 
-    /* Cabeçalhos */
-    h1, h2, h3 { color: #F5F5F5 !important; }
-
-    /* File uploader */
     [data-testid="stFileUploader"] {
         background-color: #1a1a1a;
         border: 2px dashed #FF6B35;
@@ -169,7 +233,9 @@ st.markdown(
         padding: 1rem;
     }
 
-    /* Mensagens customizadas */
+    /* ================================================================
+       MENSAGENS DE ESTADO — alto contraste
+    ================================================================ */
     .msg-success {
         background-color: #0a2e1a;
         border-left: 4px solid #00c853;
@@ -177,7 +243,8 @@ st.markdown(
         padding: 0.7rem 1rem;
         border-radius: 0 8px 8px 0;
         font-weight: 500;
-        margin: 0.4rem 0;
+        font-size: 1.02rem;
+        margin: 0.5rem 0;
     }
     .msg-error {
         background-color: #2e0a0a;
@@ -186,7 +253,8 @@ st.markdown(
         padding: 0.7rem 1rem;
         border-radius: 0 8px 8px 0;
         font-weight: 500;
-        margin: 0.4rem 0;
+        font-size: 1.02rem;
+        margin: 0.5rem 0;
     }
     .msg-warning {
         background-color: #2a1f00;
@@ -195,7 +263,8 @@ st.markdown(
         padding: 0.7rem 1rem;
         border-radius: 0 8px 8px 0;
         font-weight: 500;
-        margin: 0.4rem 0;
+        font-size: 1.02rem;
+        margin: 0.5rem 0;
     }
     .msg-info {
         background-color: #0a1e2e;
@@ -204,7 +273,8 @@ st.markdown(
         padding: 0.7rem 1rem;
         border-radius: 0 8px 8px 0;
         font-weight: 500;
-        margin: 0.4rem 0;
+        font-size: 1.02rem;
+        margin: 0.5rem 0;
     }
 
     /* Badge de categoria */
@@ -219,24 +289,18 @@ st.markdown(
         margin-left: 6px;
     }
 
-    /* Cabeçalho da logo */
-    .logo-container {
-        display: flex;
-        align-items: center;
-        gap: 16px;
-        margin-bottom: 0.5rem;
-    }
-
-    /* Rodapé */
+    /* ================================================================
+       RODAPÉ
+    ================================================================ */
     .footer-bar {
         background-color: #111111;
         border-top: 1px solid #2a2a2a;
-        color: #555555;
+        color: #888888;
         text-align: center;
-        padding: 0.6rem;
-        font-size: 0.82rem;
+        padding: 0.7rem;
+        font-size: 0.85rem;
         border-radius: 0 0 8px 8px;
-        margin-top: 2rem;
+        margin-top: 2.5rem;
     }
     </style>
     """,
@@ -265,35 +329,23 @@ def msg_info(texto: str) -> None:
 
 
 # ---------------------------------------------------------------------------
-# Cabeçalho com logo
+# Navbar fixa — logo esquerda, abas (via CSS) direita
 # ---------------------------------------------------------------------------
 
 LOGO_PATH = os.path.join(os.path.dirname(__file__), "..", "docs", "diagrams", "logo.svg")
 
-col_logo, col_titulo = st.columns([1, 4])
-with col_logo:
-    if os.path.exists(LOGO_PATH):
-        with open(LOGO_PATH, "r") as f:
-            svg_content = f.read()
-        st.markdown(svg_content, unsafe_allow_html=True)
-    else:
-        st.markdown(
-            '<span style="font-size:3rem;">🦁</span>',
-            unsafe_allow_html=True,
-        )
-with col_titulo:
-    st.markdown(
-        """
-        <div style="padding-top: 8px;">
-            <p style="color:#aaaaaa; margin:0; font-size:0.95rem;">
-                Assistente inteligente para organização de documentos e apoio à declaração do IR
-            </p>
-        </div>
-        """,
-        unsafe_allow_html=True,
-    )
+if os.path.exists(LOGO_PATH):
+    with open(LOGO_PATH, "r") as f:
+        _svg_raw = f.read()
+    # Redimensiona para caber na navbar (height 44 px, largura proporcional)
+    _logo_navbar = _svg_raw.replace('width="460"', 'width="153"').replace('height="132"', 'height="44"')
+else:
+    _logo_navbar = '<span style="font-size:2rem; color:#FF6B35;">🦁</span>'
 
-st.divider()
+st.markdown(
+    f'<div class="navbar-topo">{_logo_navbar}</div>',
+    unsafe_allow_html=True,
+)
 
 # ---------------------------------------------------------------------------
 # Abas principais
@@ -1043,7 +1095,7 @@ previdência, penalidades, autônomos e dependentes.
 # ---------------------------------------------------------------------------
 st.markdown(
     '<div class="footer-bar">'
-    "DeclaraAI — Projeto Acadêmico UEA | "
+    "DeclaraAI - Assistente Inteligente | "
     "Este sistema não substitui a orientação de um contador profissional."
     "</div>",
     unsafe_allow_html=True,
