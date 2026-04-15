@@ -106,9 +106,15 @@ st.markdown(
         padding: 0 0.85rem !important;
         font-size: 0.88rem !important;
         font-weight: 600 !important;
-        color: #DDDDDD !important;
+        color: #FFFFFF !important;
         background: transparent !important;
         transition: color 0.15s ease, background-color 0.15s ease;
+    }
+
+    /* Garante que os ícones/spans dentro das abas também fiquem brancos */
+    .stTabs [data-baseweb="tab"] span,
+    .stTabs [data-baseweb="tab"] p {
+        color: #FFFFFF !important;
     }
 
     /* Aba selecionada — fundo diferenciado com contraste */
@@ -153,7 +159,8 @@ st.markdown(
     ================================================================ */
     .stButton > button[kind="primary"],
     .stButton > button[kind="primary"]:focus,
-    .stButton > button[kind="primary"]:active {
+    .stButton > button[kind="primary"]:active,
+    .stButton > button[kind="primary"]:hover {
         background: linear-gradient(135deg, #D05000 0%, #A03800 100%) !important;
         color: #FFFFFF !important;
         border: none !important;
@@ -162,6 +169,10 @@ st.markdown(
         font-size: 1rem;
         padding: 0.52rem 1.5rem;
         transition: opacity 0.2s ease;
+    }
+    .stButton > button[kind="primary"] p,
+    .stButton > button[kind="primary"] span {
+        color: #FFFFFF !important;
     }
     .stButton > button[kind="primary"]:hover { opacity: 0.88; }
 
@@ -333,8 +344,8 @@ if os.path.exists(LOGO_PATH):
         _logo_b64 = base64.b64encode(_f.read()).decode()
     st.markdown(
         f'<div class="navbar-bg">'
-        f'<img src="data:image/png;base64,{_logo_b64}" height="46" '
-        f'style="padding-left:2.5rem;padding-top:10px;">'
+        f'<img src="data:image/png;base64,{_logo_b64}" height="54" '
+        f'style="padding-left:2.5rem;padding-top:6px;">'
         f'</div>',
         unsafe_allow_html=True,
     )
@@ -394,7 +405,7 @@ with aba_chat:
             {
                 "papel": "assistant",
                 "conteudo": (
-                    "Olá! 👋 Sou o **DeclaraAI**, seu assistente para o Imposto de Renda.\n\n"
+                    "Olá! 👋 Sou o **DecAI**, seu assistente para o Imposto de Renda.\n\n"
                     "Pode me perguntar sobre deduções, documentos necessários, prazos, "
                     "categorias tributárias, rendimentos isentos... estou aqui para ajudar! 😊\n\n"
                     "Como posso te ajudar hoje?"
@@ -862,7 +873,8 @@ with aba_historico:
     with col_h_titulo:
         st.header("Histórico de Documentos")
     with col_h_reload:
-        st.write("")  # alinhamento vertical
+        # Empurra o botão para alinhar verticalmente com o título h1
+        st.markdown("<div style='margin-top:1.55rem'></div>", unsafe_allow_html=True)
         if st.button("🔄", key="btn_reload_hist", help="Atualizar Histórico"):
             for _k in ("hist_documentos", "hist_nomes"):
                 if _k in st.session_state:
