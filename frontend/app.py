@@ -775,10 +775,13 @@ with aba_base:
     # -----------------------------------------------------------------------
     # Seção: arquivos já na base
     # -----------------------------------------------------------------------
-    col_base_titulo, col_base_reload = st.columns([11, 1], vertical_alignment="center")
+    col_base_titulo, col_base_reload = st.columns([11, 1])
     with col_base_titulo:
         st.subheader("Arquivos na Base de Conhecimento")
     with col_base_reload:
+        # margin-top do h3 via CSS global = 1.6rem; h3 ~1.96rem alto → centro em ~2.58rem
+        # button ~2.5rem alto → topo em 2.58 - 1.25 = 1.33rem
+        st.markdown("<div style='height:1.33rem'></div>", unsafe_allow_html=True)
         if st.button("🔄", key="btn_refresh_base", help="Atualizar lista"):
             if "dados_base" in st.session_state:
                 del st.session_state["dados_base"]
@@ -914,10 +917,13 @@ def _buscar_nomes_documentos() -> list[str]:
 
 
 with aba_historico:
-    col_h_titulo, col_h_reload = st.columns([11, 1], vertical_alignment="center")
+    col_h_titulo, col_h_reload = st.columns([11, 1])
     with col_h_titulo:
         st.header("Histórico de Documentos")
     with col_h_reload:
+        # margin-top do h2 via CSS global = 1.6rem; h2 ~2.52rem alto → centro em ~2.86rem
+        # button ~2.5rem alto → topo em 2.86 - 1.25 = 1.61rem
+        st.markdown("<div style='height:1.61rem'></div>", unsafe_allow_html=True)
         if st.button("🔄", key="btn_reload_hist", help="Atualizar Histórico"):
             for _k in ("hist_documentos", "hist_nomes"):
                 if _k in st.session_state:
