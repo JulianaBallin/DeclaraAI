@@ -177,6 +177,7 @@ st.markdown(
     .stButton > button[kind="primary"]:hover { opacity: 0.88; }
 
     /* Botão de download — laranja claro */
+    div[data-testid="stDownloadButton"] button,
     .stDownloadButton > button {
         background: linear-gradient(135deg, #FFB380 0%, #FF8C42 100%) !important;
         color: #3D1800 !important;
@@ -184,19 +185,22 @@ st.markdown(
         border-radius: 8px !important;
         font-weight: 700 !important;
     }
+    div[data-testid="stDownloadButton"] button:hover,
     .stDownloadButton > button:hover { opacity: 0.88; }
 
     /* Botão secundário (🗑 Remover) — amarelo claro */
+    div[data-testid="stButton"] button[kind="secondary"],
     .stButton > button[kind="secondary"],
     .stButton > button[kind="secondary"]:focus {
         background: linear-gradient(135deg, #FFF5B0 0%, #FFE566 100%) !important;
         color: #3D2800 !important;
         border: none !important;
-        border-radius: 8px;
-        font-weight: 600;
+        border-radius: 8px !important;
+        font-weight: 600 !important;
         font-size: 1rem;
         transition: opacity 0.2s ease;
     }
+    div[data-testid="stButton"] button[kind="secondary"]:hover,
     .stButton > button[kind="secondary"]:hover { opacity: 0.85; }
 
     /* ================================================================
@@ -771,14 +775,18 @@ with aba_base:
     # -----------------------------------------------------------------------
     # Seção: arquivos já na base
     # -----------------------------------------------------------------------
-    st.subheader("Arquivos na Base de Conhecimento")
-
-    col_refresh, _ = st.columns([1, 4])
-    with col_refresh:
-        if st.button("🔄 Atualizar lista", key="btn_refresh_base"):
+    col_base_titulo, col_base_reload = st.columns([11, 1])
+    with col_base_titulo:
+        st.markdown(
+            '<h3 style="margin-top:0.9rem;margin-bottom:0.5rem;font-size:1.4rem;'
+            'color:#1A1A1A;font-weight:700;">Arquivos na Base de Conhecimento</h3>',
+            unsafe_allow_html=True,
+        )
+    with col_base_reload:
+        st.markdown("<div style='height:1.1rem'></div>", unsafe_allow_html=True)
+        if st.button("🔄", key="btn_refresh_base", help="Atualizar lista"):
             if "dados_base" in st.session_state:
                 del st.session_state["dados_base"]
-            # Sem st.rerun() explícito — o clique já dispara um rerun
 
     if "dados_base" not in st.session_state:
         with st.spinner("Carregando lista de arquivos..."):
