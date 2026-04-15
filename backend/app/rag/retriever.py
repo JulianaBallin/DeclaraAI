@@ -58,7 +58,8 @@ class Recuperador:
         resultados = self.banco_vetorial.buscar_similares(consulta, top_k=top_k)
 
         if not resultados:
-            logger.warning(f"Nenhum chunk recuperado para: '{consulta[:60]}...'")
+            trecho = consulta[:60] + ("..." if len(consulta) > 60 else "")
+            logger.warning(f"Nenhum chunk recuperado para: '{trecho}'")
             return []
 
         if usar_reranking:

@@ -1,12 +1,13 @@
 """
 Interface web do DeclaraAI construída com Streamlit.
 
-Organizada em 5 abas:
+Organizada em 6 abas:
 - Chat: perguntas em linguagem natural respondidas pelo pipeline RAG
-- Upload: envio e processamento de documentos fiscais
-- Histórico: consulta e filtragem dos documentos salvos
-- Resumo: visão anual agrupada por categoria tributária
-- Avaliação: métricas quantitativas do pipeline RAG
+- Upload: envio e processamento de documentos fiscais do usuário
+- Base de Conhecimento: gerenciamento dos documentos de referência do RAG
+- Histórico: consulta, filtragem e download dos documentos salvos
+- Resumo Anual: visão consolidada por categoria tributária para o IRPF
+- Avaliação: métricas quantitativas do pipeline RAG (inspiradas no RAGAS)
 """
 
 import base64

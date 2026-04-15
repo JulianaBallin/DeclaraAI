@@ -106,8 +106,10 @@ async def adicionar_a_base(arquivo: UploadFile = File(...)):
         )
 
     # Re-indexa toda a base para incluir o novo documento
+    # IMPORTANTE: limpar antes de re-indexar evita duplicação de chunks no ChromaDB
     try:
         servico = ServicoRAG()
+        servico.banco_vetorial.limpar()
         total_chunks = servico.ingerir_base_conhecimento()
         logger.info(f"Re-indexação concluída após upload de '{nome_destino}': {total_chunks} chunks.")
     except Exception as erro:
