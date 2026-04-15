@@ -40,10 +40,22 @@ st.markdown(
     """
     <style>
     /* ================================================================
-       FUNDO — branco com degradê suave
+       OCULTA A BARRA PADRÃO DO STREAMLIT (Deploy / Settings)
     ================================================================ */
+    [data-testid="stHeader"]  { display: none !important; }
+    [data-testid="stToolbar"] { display: none !important; }
+    #MainMenu                 { display: none !important; }
+
+    /* ================================================================
+       FUNDO — branco com degradê suave fixo
+    ================================================================ */
+    html, body {
+        background: #FFFFFF;
+    }
     .stApp {
-        background: linear-gradient(180deg, #FFFFFF 0%, #FDF5EE 100%);
+        background: linear-gradient(180deg, #FFFFFF 0%, #FDF5EE 100%) !important;
+        background-attachment: fixed !important;
+        min-height: 100vh;
         color: #1A1A1A;
     }
 
@@ -139,10 +151,12 @@ st.markdown(
     /* ================================================================
        BOTÕES — degradê suave
     ================================================================ */
-    .stButton > button[kind="primary"] {
-        background: linear-gradient(135deg, #D05000 0%, #A03800 100%);
-        color: #FFFFFF;
-        border: none;
+    .stButton > button[kind="primary"],
+    .stButton > button[kind="primary"]:focus,
+    .stButton > button[kind="primary"]:active {
+        background: linear-gradient(135deg, #D05000 0%, #A03800 100%) !important;
+        color: #FFFFFF !important;
+        border: none !important;
         border-radius: 8px;
         font-weight: 700;
         font-size: 1rem;
@@ -151,16 +165,27 @@ st.markdown(
     }
     .stButton > button[kind="primary"]:hover { opacity: 0.88; }
 
-    .stButton > button[kind="secondary"] {
-        background: linear-gradient(135deg, #FFD700 0%, #FFC000 100%);
-        color: #333333;
-        border: none;
+    .stButton > button[kind="secondary"],
+    .stButton > button[kind="secondary"]:focus {
+        background: linear-gradient(135deg, #FFD700 0%, #FFC000 100%) !important;
+        color: #333333 !important;
+        border: none !important;
         border-radius: 8px;
         font-weight: 600;
         font-size: 1rem;
         transition: opacity 0.2s ease;
     }
     .stButton > button[kind="secondary"]:hover { opacity: 0.85; }
+
+    /* Botão de download */
+    .stDownloadButton > button {
+        background: linear-gradient(135deg, #D05000 0%, #A03800 100%) !important;
+        color: #FFFFFF !important;
+        border: none !important;
+        border-radius: 8px !important;
+        font-weight: 700 !important;
+    }
+    .stDownloadButton > button:hover { opacity: 0.88; }
 
     /* ================================================================
        COMPONENTES
@@ -363,13 +388,19 @@ def _chamar_api_chat(pergunta: str) -> dict | None:
 
 with aba_chat:
     st.header("Chat com Assistente RAG")
-    msg_info(
-        "Faça perguntas sobre imposto de renda em linguagem natural. "
-        "O assistente busca respostas na base de conhecimento tributário."
-    )
 
     if "mensagens_chat" not in st.session_state:
-        st.session_state.mensagens_chat = []
+        st.session_state.mensagens_chat = [
+            {
+                "papel": "assistant",
+                "conteudo": (
+                    "Olá! 👋 Sou o **DeclaraAI**, seu assistente para o Imposto de Renda.\n\n"
+                    "Pode me perguntar sobre deduções, documentos necessários, prazos, "
+                    "categorias tributárias, rendimentos isentos... estou aqui para ajudar! 😊\n\n"
+                    "Como posso te ajudar hoje?"
+                ),
+            }
+        ]
 
     for mensagem in st.session_state.mensagens_chat:
         with st.chat_message(mensagem["papel"]):
@@ -536,6 +567,30 @@ with aba_upload:
                 st.session_state.documento_processado = None
                 st.rerun()
 
+    # ── Uploads recentes ────────────────────────────────────────────────────
+    st.divider()
+    st.subheader("Uploads Recentes")
+
+    try:
+        _resp_rec = requests.get(
+            f"{API_URL}/history", params={"limite": 20}, timeout=TIMEOUT_PADRAO
+        )
+        _recentes = _resp_rec.json() if _resp_rec.status_code == 200 else []
+    except Exception:
+        _recentes = []
+
+    if _recentes:
+        for _doc in _recentes:
+            _criado = (_doc.get("criado_em") or "")[:10] or "N/A"
+            st.markdown(
+                f"📄 **{_doc['nome_arquivo']}** — "
+                f"<span class='badge-categoria'>{_doc['categoria']}</span> "
+                f"&nbsp; `{_doc['tipo_arquivo'].upper()}` &nbsp; {_criado}",
+                unsafe_allow_html=True,
+            )
+    else:
+        msg_aviso("Nenhum documento enviado ainda.")
+
 
 # ===========================================================================
 # ABA BASE DE CONHECIMENTO
@@ -578,6 +633,20 @@ def _enviar_para_base(arquivo) -> dict | None:
         msg_aviso("O servidor demorou demais. Tente novamente.")
     except Exception as erro:
         msg_erro(f"Erro inesperado: {erro}")
+    return None
+
+
+def _baixar_arquivo_base(nome_arquivo: str) -> bytes | None:
+    """Busca os bytes do arquivo da base de conhecimento para download."""
+    try:
+        r = requests.get(
+            f"{API_URL}/knowledge/files/{nome_arquivo}/download",
+            timeout=TIMEOUT_PADRAO,
+        )
+        if r.status_code == 200:
+            return r.content
+    except Exception:
+        pass
     return None
 
 
@@ -656,7 +725,7 @@ with aba_base:
         if st.button("🔄 Atualizar lista", key="btn_refresh_base"):
             if "dados_base" in st.session_state:
                 del st.session_state["dados_base"]
-            st.rerun()
+            # Sem st.rerun() explícito — o clique já dispara um rerun
 
     if "dados_base" not in st.session_state:
         with st.spinner("Carregando lista de arquivos..."):
@@ -682,7 +751,7 @@ with aba_base:
 
             for arq in arquivos_base:
                 icone = icones_tipo.get(arq["tipo"], "📁")
-                col_nome, col_tipo, col_tam, col_del = st.columns([4, 1, 1, 1])
+                col_nome, col_tipo, col_tam, col_dl, col_del = st.columns([4, 1, 1, 1, 1])
 
                 with col_nome:
                     st.markdown(f"{icone} **{arq['nome']}**")
@@ -690,11 +759,25 @@ with aba_base:
                     st.caption(arq["tipo"].upper())
                 with col_tam:
                     st.caption(f"{arq['tamanho_kb']} KB")
+                with col_dl:
+                    _bytes_arq = _baixar_arquivo_base(arq["nome"])
+                    if _bytes_arq:
+                        st.download_button(
+                            label="⬇",
+                            data=_bytes_arq,
+                            file_name=arq["nome"],
+                            mime="application/octet-stream",
+                            key=f"dl_base_{arq['nome']}",
+                            help="Baixar arquivo",
+                            use_container_width=True,
+                        )
                 with col_del:
                     if st.button(
-                        "Remover",
+                        "🗑",
                         key=f"del_base_{arq['nome']}",
                         type="secondary",
+                        help="Remover da base",
+                        use_container_width=True,
                     ):
                         with st.spinner(f"Removendo '{arq['nome']}'..."):
                             removido = _remover_arquivo_base(arq["nome"])
@@ -763,14 +846,31 @@ _ICONES_CAT = {
 }
 
 
-with aba_historico:
-    st.header("Histórico de Documentos")
+def _buscar_nomes_documentos() -> list[str]:
+    """Retorna lista de nomes únicos de documentos no histórico."""
+    try:
+        r = requests.get(f"{API_URL}/history", params={"limite": 500}, timeout=TIMEOUT_PADRAO)
+        if r.status_code == 200:
+            return sorted({d["nome_arquivo"] for d in r.json()})
+    except Exception:
+        pass
+    return []
 
-    col_buscar, col_filtro = st.columns([1, 3])
-    with col_buscar:
-        if st.button("Atualizar", type="primary", use_container_width=True):
-            if "hist_documentos" in st.session_state:
-                del st.session_state["hist_documentos"]
+
+with aba_historico:
+    col_h_titulo, col_h_reload = st.columns([11, 1])
+    with col_h_titulo:
+        st.header("Histórico de Documentos")
+    with col_h_reload:
+        st.write("")  # alinhamento vertical
+        if st.button("🔄", key="btn_reload_hist", help="Atualizar Histórico"):
+            for _k in ("hist_documentos", "hist_nomes"):
+                if _k in st.session_state:
+                    del st.session_state[_k]
+
+    # Carrega lista de nomes para o filtro
+    if "hist_nomes" not in st.session_state:
+        st.session_state["hist_nomes"] = _buscar_nomes_documentos()
 
     with st.expander("Filtros", expanded=False):
         col_cat, col_nome, col_inicio, col_fim = st.columns(4)
@@ -778,7 +878,8 @@ with aba_historico:
             categorias_disp = ["Todas as categorias"] + _buscar_categorias()
             hist_cat = st.selectbox("Categoria", categorias_disp, key="hist_cat")
         with col_nome:
-            hist_nome = st.text_input("Nome do arquivo", placeholder="Ex: recibo_jan", key="hist_nome")
+            nomes_disp = ["Todos os arquivos"] + st.session_state["hist_nomes"]
+            hist_nome_sel = st.selectbox("Nome do arquivo", nomes_disp, key="hist_nome_sel")
         with col_inicio:
             hist_inicio = st.date_input("Data início", value=None, key="hist_inicio")
         with col_fim:
@@ -793,8 +894,9 @@ with aba_historico:
         filtros: dict = {"limite": 200}
         if st.session_state.get("hist_cat", "Todas as categorias") != "Todas as categorias":
             filtros["categoria"] = st.session_state["hist_cat"]
-        if st.session_state.get("hist_nome"):
-            filtros["nome"] = st.session_state["hist_nome"]
+        _nome_sel = st.session_state.get("hist_nome_sel", "Todos os arquivos")
+        if _nome_sel and _nome_sel != "Todos os arquivos":
+            filtros["nome"] = _nome_sel
         if st.session_state.get("hist_inicio"):
             filtros["data_inicio"] = st.session_state["hist_inicio"].isoformat()
         if st.session_state.get("hist_fim"):

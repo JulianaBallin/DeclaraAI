@@ -9,6 +9,7 @@ import shutil
 from pathlib import Path
 
 from fastapi import APIRouter, HTTPException, UploadFile, File
+from fastapi.responses import FileResponse
 
 from app.core.config import configuracoes
 from app.services.rag_service import ServicoRAG
@@ -121,6 +122,34 @@ async def adicionar_a_base(arquivo: UploadFile = File(...)):
         "arquivo": nome_destino,
         "chunks_indexados": total_chunks,
     }
+
+
+@roteador.get(
+    "/files/{nome_arquivo}/download",
+    summary="Baixar arquivo da base de conhecimento",
+    description="Retorna o arquivo original da base de conhecimento para download.",
+)
+async def baixar_arquivo_base(nome_arquivo: str):
+    """Serve o arquivo da base de conhecimento para download direto."""
+    diretorio = Path(configuracoes.CAMINHO_BASE_CONHECIMENTO)
+    caminho = diretorio / nome_arquivo
+
+    if not caminho.exists() or not caminho.is_file():
+        raise HTTPException(
+            status_code=404,
+            detail=f"Arquivo '{nome_arquivo}' não encontrado na base de conhecimento.",
+        )
+
+    try:
+        caminho.resolve().relative_to(diretorio.resolve())
+    except ValueError:
+        raise HTTPException(status_code=400, detail="Caminho inválido.")
+
+    return FileResponse(
+        path=str(caminho),
+        filename=nome_arquivo,
+        media_type="application/octet-stream",
+    )
 
 
 @roteador.delete(
