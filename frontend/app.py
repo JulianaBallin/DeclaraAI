@@ -176,10 +176,21 @@ st.markdown(
     }
     .stButton > button[kind="primary"]:hover { opacity: 0.88; }
 
+    /* Botão de download — laranja claro */
+    .stDownloadButton > button {
+        background: linear-gradient(135deg, #FFB380 0%, #FF8C42 100%) !important;
+        color: #3D1800 !important;
+        border: none !important;
+        border-radius: 8px !important;
+        font-weight: 700 !important;
+    }
+    .stDownloadButton > button:hover { opacity: 0.88; }
+
+    /* Botão secundário (🗑 Remover) — amarelo claro */
     .stButton > button[kind="secondary"],
     .stButton > button[kind="secondary"]:focus {
-        background: linear-gradient(135deg, #FFD700 0%, #FFC000 100%) !important;
-        color: #333333 !important;
+        background: linear-gradient(135deg, #FFF5B0 0%, #FFE566 100%) !important;
+        color: #3D2800 !important;
         border: none !important;
         border-radius: 8px;
         font-weight: 600;
@@ -187,16 +198,6 @@ st.markdown(
         transition: opacity 0.2s ease;
     }
     .stButton > button[kind="secondary"]:hover { opacity: 0.85; }
-
-    /* Botão de download */
-    .stDownloadButton > button {
-        background: linear-gradient(135deg, #D05000 0%, #A03800 100%) !important;
-        color: #FFFFFF !important;
-        border: none !important;
-        border-radius: 8px !important;
-        font-weight: 700 !important;
-    }
-    .stDownloadButton > button:hover { opacity: 0.88; }
 
     /* ================================================================
        COMPONENTES
@@ -344,8 +345,8 @@ if os.path.exists(LOGO_PATH):
         _logo_b64 = base64.b64encode(_f.read()).decode()
     st.markdown(
         f'<div class="navbar-bg">'
-        f'<img src="data:image/png;base64,{_logo_b64}" height="54" '
-        f'style="padding-left:2.5rem;padding-top:6px;">'
+        f'<img src="data:image/png;base64,{_logo_b64}" height="60" '
+        f'style="padding-left:2.5rem;padding-top:3px;">'
         f'</div>',
         unsafe_allow_html=True,
     )
@@ -370,6 +371,38 @@ aba_chat, aba_upload, aba_base, aba_historico, aba_resumo, aba_avaliacao = st.ta
 # ===========================================================================
 # ABA CHAT
 # ===========================================================================
+
+_RESPOSTAS_LOCAIS: dict[frozenset, str] = {
+    frozenset({"oi", "olá", "ola", "hey", "hello", "hi", "e ai", "e aí", "eai"}): (
+        "Olá! 😊 Que bom ter você aqui!\n\n"
+        "Pode me perguntar sobre o Imposto de Renda: deduções permitidas, "
+        "documentos necessários, prazos, categorias tributárias, rendimentos isentos... "
+        "É só perguntar!"
+    ),
+    frozenset({"tudo bem", "tudo bom", "como vai", "como você está", "como voce esta"}): (
+        "Tudo bem, obrigado! 😊 Pronto para te ajudar com o IR.\n\n"
+        "O que você gostaria de saber?"
+    ),
+    frozenset({"bom dia"}): "Bom dia! ☀️ Como posso te ajudar com o Imposto de Renda hoje?",
+    frozenset({"boa tarde"}): "Boa tarde! 🌤️ Em que posso te ajudar com o IR?",
+    frozenset({"boa noite"}): "Boa noite! 🌙 Em que posso te ajudar com o IR?",
+    frozenset({"obrigado", "obrigada", "valeu", "thanks", "vlw"}): (
+        "De nada! 😊 Se tiver mais dúvidas sobre o IR, é só perguntar."
+    ),
+    frozenset({"tchau", "até mais", "ate mais", "até logo", "ate logo", "flw", "bye"}): (
+        "Até logo! 👋 Qualquer dúvida sobre o IR, estarei aqui."
+    ),
+}
+
+
+def _resposta_local(pergunta: str) -> str | None:
+    """Retorna resposta local para saudações simples, sem chamar a API."""
+    normalizado = pergunta.lower().strip().rstrip("!.,?")
+    for termos, resposta in _RESPOSTAS_LOCAIS.items():
+        if normalizado in termos:
+            return resposta
+    return None
+
 
 def _chamar_api_chat(pergunta: str) -> dict | None:
     """Envia pergunta à API e retorna o resultado ou None em caso de erro."""
@@ -431,30 +464,39 @@ with aba_chat:
         )
 
         with st.chat_message("assistant"):
-            with st.spinner("Buscando na base de conhecimento..."):
-                resultado = _chamar_api_chat(pergunta_usuario)
-
-            if resultado:
-                resposta = resultado.get("resposta", "Sem resposta.")
-                fontes = resultado.get("fontes", [])
-                chunks = resultado.get("chunks_recuperados", 0)
-
-                st.markdown(resposta)
-
-                col1, col2 = st.columns([3, 1])
-                with col2:
-                    st.caption(f"Trechos consultados: {chunks}")
-
-                if fontes:
-                    with st.expander("Fontes consultadas"):
-                        for fonte in fontes:
-                            st.write(f"- {fonte}")
-
+            # Saudações e small-talk respondem localmente sem chamar o backend
+            _resp_imediata = _resposta_local(pergunta_usuario)
+            if _resp_imediata:
+                st.markdown(_resp_imediata)
                 st.session_state.mensagens_chat.append({
                     "papel": "assistant",
-                    "conteudo": resposta,
-                    "fontes": fontes,
+                    "conteudo": _resp_imediata,
                 })
+            else:
+                with st.spinner("Consultando base de conhecimento... (pode levar alguns segundos se o Ollama estiver carregando)"):
+                    resultado = _chamar_api_chat(pergunta_usuario)
+
+                if resultado:
+                    resposta = resultado.get("resposta", "Sem resposta.")
+                    fontes = resultado.get("fontes", [])
+                    chunks = resultado.get("chunks_recuperados", 0)
+
+                    st.markdown(resposta)
+
+                    col1, col2 = st.columns([3, 1])
+                    with col2:
+                        st.caption(f"Trechos consultados: {chunks}")
+
+                    if fontes:
+                        with st.expander("Fontes consultadas"):
+                            for fonte in fontes:
+                                st.write(f"- {fonte}")
+
+                    st.session_state.mensagens_chat.append({
+                        "papel": "assistant",
+                        "conteudo": resposta,
+                        "fontes": fontes,
+                    })
 
     if st.session_state.mensagens_chat:
         if st.button("Limpar conversa", key="limpar_chat"):
@@ -871,10 +913,13 @@ def _buscar_nomes_documentos() -> list[str]:
 with aba_historico:
     col_h_titulo, col_h_reload = st.columns([11, 1])
     with col_h_titulo:
-        st.header("Histórico de Documentos")
+        st.markdown(
+            '<h1 style="margin-top:0.9rem;margin-bottom:0.5rem;font-size:2rem;'
+            'color:#1A1A1A;font-weight:700;">Histórico de Documentos</h1>',
+            unsafe_allow_html=True,
+        )
     with col_h_reload:
-        # Empurra o botão para alinhar verticalmente com o título h1
-        st.markdown("<div style='margin-top:1.55rem'></div>", unsafe_allow_html=True)
+        st.markdown("<div style='height:1.1rem'></div>", unsafe_allow_html=True)
         if st.button("🔄", key="btn_reload_hist", help="Atualizar Histórico"):
             for _k in ("hist_documentos", "hist_nomes"):
                 if _k in st.session_state:
