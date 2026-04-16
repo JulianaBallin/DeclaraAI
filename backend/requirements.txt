@@ -20,6 +20,10 @@ pdfplumber==0.11.0
 beautifulsoup4==4.12.3
 lxml==5.2.1
 
+# OCR para imagens JPG/PNG (requer tesseract-ocr instalado no sistema)
+Pillow==10.3.0
+pytesseract==0.3.13
+
 # Pipeline RAG
 sentence-transformers==3.0.1
 chromadb==0.5.3

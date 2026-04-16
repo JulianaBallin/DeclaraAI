@@ -17,10 +17,13 @@ ENV PYTHONDONTWRITEBYTECODE=1 \
 
 WORKDIR /app
 
-# Dependências do sistema necessárias para pdfplumber e compilação de pacotes
+# Dependências do sistema: compilação, pdfplumber e tesseract (OCR para imagens)
 RUN apt-get update && apt-get install -y --no-install-recommends \
         build-essential \
         libpq-dev \
+        tesseract-ocr \
+        tesseract-ocr-por \
+        tesseract-ocr-eng \
     && rm -rf /var/lib/apt/lists/*
 
 # Instala dependências Python
