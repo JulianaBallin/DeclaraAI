@@ -327,6 +327,27 @@ st.markdown(
         margin-top: 2.5rem;
         border-radius: 8px;
     }
+
+    /* Disclaimer / Perfil — caixa centralizada */
+    .disclaimer-box {
+        background: #FFFBF5;
+        border: 2px solid #C04A00;
+        border-radius: 14px;
+        padding: 2rem 2.5rem;
+        max-width: 680px;
+        margin: 4rem auto;
+    }
+    .disclaimer-box h2 { color: #C04A00 !important; }
+    .disclaimer-badge {
+        display: inline-block;
+        background: #C04A00;
+        color: #fff;
+        font-size: 0.78rem;
+        font-weight: 700;
+        padding: 2px 10px;
+        border-radius: 20px;
+        margin-bottom: 1rem;
+    }
     </style>
     """,
     unsafe_allow_html=True,
@@ -378,6 +399,92 @@ else:
         '</div>',
         unsafe_allow_html=True,
     )
+
+# ===========================================================================
+# M9 — DISCLAIMER LEGAL (primeiro acesso)
+# Bloqueia o restante da UI até o usuário confirmar o aviso.
+# ===========================================================================
+
+if "disclaimer_aceito" not in st.session_state:
+    st.session_state.disclaimer_aceito = False
+
+if not st.session_state.disclaimer_aceito:
+    st.markdown(
+        '<div class="disclaimer-box">'
+        '<span class="disclaimer-badge">AVISO LEGAL</span>'
+        "<h2>Antes de começar</h2>"
+        "<p>O <strong>DeclaraAI</strong> é uma ferramenta de <strong>apoio</strong> à organização de "
+        "documentos para a declaração do Imposto de Renda Pessoa Física.</p>"
+        "<ul>"
+        "<li>Este sistema <strong>não substitui</strong> um contador ou profissional habilitado.</li>"
+        "<li>A <strong>responsabilidade legal</strong> pela declaração é sempre do contribuinte.</li>"
+        "<li>As informações geradas são aproximações — sempre confira com a Receita Federal "
+        "ou com um contador antes de enviar sua declaração.</li>"
+        "<li>Documentos como recibos e declarações simples <strong>não têm validade fiscal direta</strong> "
+        "e não substituem notas fiscais eletrônicas.</li>"
+        "</ul>"
+        "<p>Ao continuar, você declara que leu e entendeu este aviso.</p>"
+        "</div>",
+        unsafe_allow_html=True,
+    )
+    col_disc, _ = st.columns([1, 2])
+    with col_disc:
+        if st.button("Li e concordo — Continuar", type="primary", use_container_width=True):
+            st.session_state.disclaimer_aceito = True
+            st.rerun()
+    st.stop()
+
+# ===========================================================================
+# M4 — PERFIL DO DECLARANTE (uma vez por sessão)
+# Solicita nome completo e CPF antes de qualquer interação com documentos.
+# ===========================================================================
+
+if "perfil_registrado" not in st.session_state:
+    st.session_state.perfil_registrado = False
+if "nome_declarante" not in st.session_state:
+    st.session_state.nome_declarante = ""
+
+if not st.session_state.perfil_registrado:
+    st.markdown(
+        '<div class="disclaimer-box">'
+        '<span class="disclaimer-badge">CONFIGURAÇÃO INICIAL</span>'
+        "<h2>Identificação do Declarante</h2>"
+        "<p>Para verificar a titularidade dos documentos, informe seus dados uma única vez. "
+        "Eles serão usados apenas nesta sessão.</p>"
+        "</div>",
+        unsafe_allow_html=True,
+    )
+    col_p1, col_p2 = st.columns(2)
+    with col_p1:
+        nome_input = st.text_input("Nome completo", placeholder="Ex.: Maria Oliveira Santos")
+    with col_p2:
+        cpf_input = st.text_input("CPF", placeholder="000.000.000-00")
+
+    col_btn_p, _ = st.columns([1, 2])
+    with col_btn_p:
+        if st.button("Salvar e continuar", type="primary", use_container_width=True):
+            if nome_input.strip() and cpf_input.strip():
+                try:
+                    requests.post(
+                        f"{API_URL}/declarante/perfil",
+                        json={"nome_completo": nome_input.strip(), "cpf": cpf_input.strip()},
+                        timeout=TIMEOUT_PADRAO,
+                    )
+                except Exception:
+                    pass  # Falha na API não bloqueia o fluxo — nome fica no session_state
+                st.session_state.perfil_registrado = True
+                st.session_state.nome_declarante = nome_input.strip()
+                st.rerun()
+            else:
+                st.warning("Preencha nome e CPF para continuar.")
+    st.markdown(
+        "_Não quero identificar agora_",
+    )
+    if st.button("Pular esta etapa", key="pular_perfil"):
+        st.session_state.perfil_registrado = True
+        st.session_state.nome_declarante = ""
+        st.rerun()
+    st.stop()
 
 # ---------------------------------------------------------------------------
 # Abas principais — renderizadas logo abaixo da logo, alinhadas à direita via CSS
@@ -581,8 +688,8 @@ with aba_upload:
 
     arquivo_enviado = st.file_uploader(
         "Selecione o arquivo",
-        type=["pdf", "txt", "html"],
-        help="Formatos aceitos: PDF, TXT, HTML (máx. recomendado: 10 MB)",
+        type=["pdf", "txt", "html", "xml", "jpg", "jpeg", "png"],
+        help="Formatos aceitos: PDF, TXT, HTML, XML (NF-e), JPG/PNG (imagem com OCR) — máx. recomendado: 10 MB",
     )
 
     if arquivo_enviado:
@@ -601,19 +708,138 @@ with aba_upload:
     if "documento_processado" in st.session_state and st.session_state.documento_processado:
         dados = st.session_state.documento_processado
 
-        st.subheader("Dados Extraídos")
+        st.subheader("Confirme os Dados Extraídos")
+        msg_info(
+            "Revise todos os campos antes de salvar. "
+            "Você pode corrigir qualquer informação abaixo."
+        )
 
-        col1, col2, col3, col4 = st.columns(4)
-        col1.metric("Categoria Sugerida", dados.get("categoria", "N/A"))
-        col2.metric("Data Detectada", dados.get("data_detectada") or "Não encontrada")
-        col3.metric("Valor Detectado", dados.get("valor_detectado") or "Não encontrado")
-        col4.metric("Emitente", dados.get("emitente_detectado") or "Não identificado")
+        # --- Campos editáveis pelo usuário ---
+        col1, col2 = st.columns(2)
+        with col1:
+            cat_opcoes = [
+                "Recibo Médico", "Comprovante Educacional", "Informe de Rendimentos",
+                "Nota Fiscal", "Previdência Privada", "Doações",
+                "Pensão Alimentícia", "Aluguel", "Documento Não Classificado",
+            ]
+            cat_atual = dados.get("categoria", "Documento Não Classificado")
+            idx_cat = cat_opcoes.index(cat_atual) if cat_atual in cat_opcoes else len(cat_opcoes) - 1
+            categoria_editada = st.selectbox("Categoria fiscal", cat_opcoes, index=idx_cat, key="conf_cat")
+            tipo_doc_editado = st.text_input(
+                "Tipo do documento", value=dados.get("tipo_documento", "") or "", key="conf_tipo"
+            )
+        with col2:
+            emitente_editado = st.text_input(
+                "Nome do emitente", value=dados.get("emitente_detectado", "") or "", key="conf_emit"
+            )
+            cnpj_editado = st.text_input(
+                "CNPJ / CPF do emitente", value=dados.get("cnpj_emitente", "") or "", key="conf_cnpj"
+            )
+
+        col3, col4 = st.columns(2)
+        with col3:
+            data_editada = st.text_input(
+                "Data do documento", value=dados.get("data_detectada", "") or "", key="conf_data"
+            )
+            valor_editado = st.text_input(
+                "Valor", value=dados.get("valor_detectado", "") or "", key="conf_valor"
+            )
+        with col4:
+            beneficiario_editado = st.text_input(
+                "Nome do beneficiário", value=dados.get("nome_beneficiario", "") or "", key="conf_benef"
+            )
+            chave_editada = st.text_input(
+                "Chave de acesso (44 dígitos)", value=dados.get("chave_acesso", "") or "", key="conf_chave"
+            )
 
         st.divider()
-        st.subheader("Salvar no Histórico?")
-        st.write(
-            "Deseja salvar este documento para consultar no histórico e incluir "
-            "no resumo anual?"
+
+        # --- M1: Alerta de validade fiscal ---
+        validade = dados.get("validade_fiscal")
+        tipo_doc_val = dados.get("tipo_documento", "")
+        if validade is False:
+            st.markdown(
+                '<div class="msg-warning">'
+                "⚠️ <strong>Atenção:</strong> este documento (recibo ou declaração simples) "
+                "<strong>não tem validade fiscal direta</strong> na Receita Federal. "
+                "Ele comprova pagamento, mas não substitui uma nota fiscal eletrônica. "
+                "Guarde-o mesmo assim, mas prefira solicitar uma NF-e ao prestador."
+                "</div>",
+                unsafe_allow_html=True,
+            )
+        elif validade is True:
+            chave_exib = dados.get("chave_acesso") or chave_editada
+            portal = "https://www.nfe.fazenda.gov.br/portal/consultaRecaptcha.aspx"
+            msg = (
+                "✅ Documento com validade fiscal (NF-e / NFC-e / NFS-e). "
+                "Consulte a autenticidade pela chave de acesso no "
+                f"[portal da Receita Federal]({portal})."
+            )
+            if chave_exib:
+                msg += f"  \nChave: `{chave_exib}`"
+            st.info(msg)
+        else:
+            msg_aviso("Tipo de documento não identificado com certeza. Verifique se é uma nota fiscal ou recibo.")
+
+        # --- M4: Verificação de titularidade ---
+        nome_decl = st.session_state.get("nome_declarante", "")
+        benef_para_verificar = beneficiario_editado or dados.get("nome_beneficiario", "")
+        if nome_decl and benef_para_verificar:
+            try:
+                resp_tit = requests.post(
+                    f"{API_URL}/declarante/verificar-titularidade",
+                    params={"nome_beneficiario": benef_para_verificar},
+                    timeout=TIMEOUT_PADRAO,
+                )
+                if resp_tit.status_code == 200:
+                    tit = resp_tit.json()
+                    status_tit = tit.get("status", "nao_verificado")
+                    msg_tit = tit.get("mensagem", "")
+                    if status_tit == "titular":
+                        st.success(msg_tit)
+                    elif status_tit == "provavel_dependente":
+                        eh_dep = st.radio(
+                            msg_tit,
+                            ["Sim, é meu dependente", "Não, é outra pessoa"],
+                            key="radio_dependente",
+                        )
+                        if eh_dep and "Não" in eh_dep:
+                            msg_aviso(
+                                "Despesas de terceiros não são dedutíveis a menos que a pessoa "
+                                "seja dependente incluído na sua declaração."
+                            )
+                    elif status_tit == "terceiro":
+                        st.warning(msg_tit)
+                        confirma_terceiro = st.checkbox(
+                            "Confirmo que esta pessoa é meu dependente incluído na declaração",
+                            key="chk_terceiro",
+                        )
+                        if not confirma_terceiro:
+                            msg_aviso(
+                                "Você precisará confirmar a dependência para salvar este documento."
+                            )
+            except Exception:
+                pass  # Falha na verificação não bloqueia o fluxo
+
+        # --- M5: Regras de dedutibilidade ---
+        ref_irpf = dados.get("referencia_irpf", "")
+        if ref_irpf:
+            with st.expander("Regras de dedutibilidade desta categoria", expanded=True):
+                st.markdown(ref_irpf)
+
+        confianca = dados.get("confianca_classificacao", "")
+        if confianca == "baixa":
+            msg_aviso(
+                "A classificação automática teve baixa confiança. "
+                "Revise a categoria selecionada antes de salvar."
+            )
+
+        st.divider()
+
+        # --- Confirmação obrigatória ---
+        confirmado = st.checkbox(
+            "Confirmo que revisei os dados acima e estão corretos",
+            key="chk_confirmacao",
         )
 
         col_salvar, col_descartar = st.columns(2)
@@ -623,7 +849,17 @@ with aba_upload:
                 type="primary",
                 use_container_width=True,
                 key="btn_upload_salvar_doc",
+                disabled=not confirmado,
             ):
+                # Aplica edições do usuário antes de salvar
+                dados["categoria"] = categoria_editada
+                dados["tipo_documento"] = tipo_doc_editado
+                dados["emitente_detectado"] = emitente_editado
+                dados["cnpj_emitente"] = cnpj_editado
+                dados["data_detectada"] = data_editada
+                dados["valor_detectado"] = valor_editado
+                dados["nome_beneficiario"] = beneficiario_editado
+                dados["chave_acesso"] = chave_editada
                 with st.spinner("Salvando e indexando no histórico…"):
                     if _salvar_documento(dados):
                         st.session_state.documento_processado = None
@@ -1094,9 +1330,16 @@ with aba_resumo:
         if resposta and resposta.status_code == 200:
             resumo = resposta.json()
 
-            col1, col2 = st.columns(2)
+            col1, col2, col3, col4 = st.columns(4)
             col1.metric("Ano de Referência", resumo["ano"])
             col2.metric("Total de Documentos", resumo["total_documentos"])
+            total_ded = resumo.get("total_deducoes_estimado", 0)
+            economia = resumo.get("economia_estimada", 0)
+            col3.metric("Deduções Estimadas", f"R$ {total_ded:,.2f}".replace(",", "X").replace(".", ",").replace("X", "."))
+            col4.metric("Economia Estimada", f"R$ {economia:,.2f}".replace(",", "X").replace(".", ",").replace("X", "."))
+
+            if resumo.get("aviso_estimativa"):
+                msg_info(resumo["aviso_estimativa"])
 
             st.divider()
 
@@ -1123,9 +1366,22 @@ with aba_resumo:
                 for categoria, dados_cat in resumo["categorias"].items():
                     icone = icones.get(categoria, "📁")
                     quantidade = dados_cat["quantidade"]
-                    titulo_expander = f"{icone} {categoria} — {quantidade} documento(s)"
+                    total_num = dados_cat.get("total_numerico", 0)
+                    titulo_expander = (
+                        f"{icone} {categoria} — {quantidade} documento(s)"
+                        + (f" | Total: R$ {total_num:,.2f}".replace(",", "X").replace(".", ",").replace("X", ".") if total_num else "")
+                    )
 
                     with st.expander(titulo_expander, expanded=True):
+                        # M7 — Alerta de limite
+                        alerta = dados_cat.get("alerta_limite")
+                        if alerta:
+                            excedente = dados_cat.get("excedente")
+                            if excedente:
+                                msg_erro(alerta)
+                            else:
+                                msg_aviso(alerta)
+
                         for doc in dados_cat["documentos"]:
                             col_nome, col_data, col_valor, col_emit = st.columns([3, 2, 2, 3])
                             col_nome.write(f"📄 {doc['nome']}")
