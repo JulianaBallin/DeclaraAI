@@ -5,6 +5,7 @@ Persiste, recupera e organiza os documentos fiscais salvos pelo usuário
 no banco de dados SQLite via SQLAlchemy.
 """
 
+import re
 from sqlalchemy.orm import Session
 from sqlalchemy import extract
 from typing import Optional, List
@@ -13,6 +14,35 @@ from app.models.document import Documento
 import logging
 
 logger = logging.getLogger(__name__)
+
+# ---------------------------------------------------------------------------
+# M7 — Limites de dedução anuais por categoria (valores vigentes IRPF 2024)
+# ---------------------------------------------------------------------------
+LIMITES_DEDUCAO: dict[str, float | None] = {
+    "Comprovante Educacional": 3561.50,   # por pessoa (titular + cada dependente)
+    "Recibo Médico": None,                 # sem limite
+    "Nota Fiscal": None,                   # depende do conteúdo
+    "Previdência Privada": None,           # 12% da renda bruta — calculado dinamicamente
+    "Doações": None,                       # % do imposto — variável
+    "Pensão Alimentícia": None,            # sem limite (dedução integral)
+    "Aluguel": None,
+    "Informe de Rendimentos": None,
+}
+
+# Alíquota estimada para cálculo de economia (alíquota marginal mediana)
+ALIQUOTA_ESTIMATIVA = 0.275  # 27,5%
+
+
+def _parse_valor(valor_str: str | None) -> float:
+    """Converte string 'R$ 1.234,56' para float. Retorna 0.0 se inválido."""
+    if not valor_str:
+        return 0.0
+    apenas_num = re.sub(r"[R$\s]", "", valor_str)
+    apenas_num = apenas_num.replace(".", "").replace(",", ".")
+    try:
+        return float(apenas_num)
+    except ValueError:
+        return 0.0
 
 
 class ServicoHistorico:
@@ -40,10 +70,15 @@ class ServicoHistorico:
             categoria=dados.get("categoria", "Documento Não Classificado"),
             tipo_documento=dados.get("tipo_documento"),
             referencia_irpf=dados.get("referencia_irpf"),
+            validade_fiscal=dados.get("validade_fiscal"),
+            confianca_classificacao=dados.get("confianca_classificacao"),
             texto_extraido=dados.get("texto_extraido", ""),
             data_detectada=dados.get("data_detectada"),
             valor_detectado=dados.get("valor_detectado"),
             emitente_detectado=dados.get("emitente_detectado"),
+            chave_acesso=dados.get("chave_acesso"),
+            cnpj_emitente=dados.get("cnpj_emitente"),
+            nome_beneficiario=dados.get("nome_beneficiario"),
             caminho_arquivo=dados.get("caminho_arquivo", ""),
         )
 
@@ -163,6 +198,45 @@ class ServicoHistorico:
 
             if doc.valor_detectado:
                 resumo["categorias"][categoria]["valores"].append(doc.valor_detectado)
+
+        # M7 — Calcula totais, verifica limites e estima economia
+        total_deducoes = 0.0
+        for categoria, dados_cat in resumo["categorias"].items():
+            total_num = sum(_parse_valor(v) for v in dados_cat["valores"])
+            limite = LIMITES_DEDUCAO.get(categoria)
+
+            dados_cat["total_numerico"] = round(total_num, 2)
+            dados_cat["limite_deducao"] = limite
+            dados_cat["excedente"] = None
+            dados_cat["alerta_limite"] = None
+
+            if limite is not None and total_num > 0:
+                if total_num > limite:
+                    excedente = round(total_num - limite, 2)
+                    dados_cat["excedente"] = excedente
+                    dados_cat["alerta_limite"] = (
+                        f"Limite anual de R$ {limite:,.2f} atingido. "
+                        f"Excedente de R$ {excedente:,.2f} não será deduzido."
+                    )
+                elif total_num > limite * 0.85:
+                    restante = round(limite - total_num, 2)
+                    dados_cat["alerta_limite"] = (
+                        f"Atenção: você usou {total_num / limite * 100:.0f}% do limite anual "
+                        f"(R$ {limite:,.2f}). Restam R$ {restante:,.2f}."
+                    )
+
+            # Soma categorias dedutíveis para estimativa
+            if categoria in ("Recibo Médico", "Comprovante Educacional", "Pensão Alimentícia",
+                             "Previdência Privada", "Doações"):
+                dedutivel = min(total_num, limite) if limite else total_num
+                total_deducoes += dedutivel
+
+        resumo["total_deducoes_estimado"] = round(total_deducoes, 2)
+        resumo["economia_estimada"] = round(total_deducoes * ALIQUOTA_ESTIMATIVA, 2)
+        resumo["aviso_estimativa"] = (
+            "Estimativa calculada com alíquota de 27,5%. "
+            "O valor real depende da base de cálculo completa da sua declaração."
+        )
 
         logger.info(
             f"Resumo gerado para {ano_referencia}: "
