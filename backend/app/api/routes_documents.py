@@ -6,13 +6,14 @@ import shutil
 import uuid
 from pathlib import Path
 
-from fastapi import APIRouter, HTTPException, UploadFile, File, Depends
+from fastapi import APIRouter, HTTPException, UploadFile, File, Depends, Query
 from sqlalchemy.orm import Session
 
 from app.core.config import configuracoes
 from app.core.database import obter_db
 from app.schemas.document import DocumentoSalvar
 from app.services.classification_service import ServicoClassificacao
+from app.services.document_kind_service import inferir_tipo_documento, referencia_irpf
 from app.services.extraction_service import ServicoExtracao
 from app.services.history_service import ServicoHistorico
 from app.services.rag_service import ServicoRAG
@@ -81,6 +82,11 @@ async def upload_documento(arquivo: UploadFile = File(...)):
         # Substitui o nome técnico pelo nome original do arquivo
         dados["nome_arquivo"] = arquivo.filename or nome_unico
         dados["categoria"] = categoria
+        dados["tipo_documento"] = inferir_tipo_documento(
+            dados["texto_extraido"],
+            arquivo.filename or "",
+        )
+        dados["referencia_irpf"] = referencia_irpf(categoria, dados["texto_extraido"])
 
         return {
             "mensagem": "Documento processado com sucesso.",
@@ -150,6 +156,21 @@ async def salvar_documento(
             status_code=500,
             detail=f"Erro ao salvar documento: {str(erro)}",
         )
+
+
+@roteador.get(
+    "/referencia-irpf",
+    summary="Texto de apoio IRPF por categoria",
+    description=(
+        "Retorna a descrição usual do quadro da declaração IRPF para a categoria escolhida. "
+        "Opcionalmente usa um trecho do documento para refinar (ex.: Nota Fiscal de saúde)."
+    ),
+)
+async def obter_referencia_irpf(
+    categoria: str = Query(..., description="Categoria do DeclaraAI"),
+    texto: str = Query("", max_length=12000, description="Trecho do texto extraído (opcional)"),
+):
+    return {"referencia_irpf": referencia_irpf(categoria, texto)}
 
 
 @roteador.get(

@@ -27,6 +27,9 @@ class Documento(Base):
     # Classificação tributária sugerida
     categoria = Column(String(100), nullable=True, index=True)
 
+    tipo_documento = Column(String(200), nullable=True)
+    referencia_irpf = Column(String(500), nullable=True)
+
     # Conteúdo extraído
     texto_extraido = Column(Text, nullable=True)
 

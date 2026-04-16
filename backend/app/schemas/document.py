@@ -16,6 +16,8 @@ class DocumentoBase(BaseModel):
     nome_arquivo: str
     tipo_arquivo: str
     categoria: Optional[str] = None
+    tipo_documento: Optional[str] = None
+    referencia_irpf: Optional[str] = None
     data_detectada: Optional[str] = None
     valor_detectado: Optional[str] = None
     emitente_detectado: Optional[str] = None
@@ -49,6 +51,8 @@ class DocumentoProcessado(BaseModel):
     nome_arquivo: str
     tipo_arquivo: str
     categoria: str
+    tipo_documento: Optional[str] = None
+    referencia_irpf: Optional[str] = None
     texto_extraido: str
     data_detectada: Optional[str] = None
     valor_detectado: Optional[str] = None

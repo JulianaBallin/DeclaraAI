@@ -38,6 +38,8 @@ class ServicoHistorico:
             nome_arquivo=dados.get("nome_arquivo", "arquivo_sem_nome"),
             tipo_arquivo=dados.get("tipo_arquivo", "desconhecido"),
             categoria=dados.get("categoria", "Documento Não Classificado"),
+            tipo_documento=dados.get("tipo_documento"),
+            referencia_irpf=dados.get("referencia_irpf"),
             texto_extraido=dados.get("texto_extraido", ""),
             data_detectada=dados.get("data_detectada"),
             valor_detectado=dados.get("valor_detectado"),

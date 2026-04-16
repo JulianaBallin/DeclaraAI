@@ -1,35 +1,40 @@
 """
-Serviço de classificação de documentos em categorias tributárias.
-
-Utiliza análise de palavras-chave com pontuação ponderada para identificar
-a categoria mais provável de um documento fiscal.
+Classificação híbrida: regras (score + margem) → LLM (JSON) → Requer Revisão.
 """
 
+import json
+import logging
 import re
 from typing import Optional
-import logging
+
+import httpx
+
+from app.core.config import configuracoes
 
 logger = logging.getLogger(__name__)
 
-# ---------------------------------------------------------------------------
-# Mapa de categorias tributárias e palavras-chave associadas
-# ---------------------------------------------------------------------------
-# Cada entrada possui:
-#   - palavras: termos-chave que indicam a categoria
-#   - peso: multiplicador de relevância (categorias mais específicas têm peso maior)
-# ---------------------------------------------------------------------------
+LIMIAR_SCORE: float = 4.0
+MARGEM_MINIMA: float = 2.0
+# Quando DANFE/NFC-e/etc. estão presentes, “Recibo Médico” não deve ganhar só por termos de saúde.
+BONUS_NOTA_FISCAL_DFE: float = 4.0
 
 CATEGORIAS_TRIBUTARIAS: dict[str, dict] = {
     "Recibo Médico": {
         "palavras": [
             "médico", "médica", "consulta", "clínica", "hospital", "saúde",
-            "dentista", "odontológico", "odontologia", "procedimento odontológico",
-            "tratamento odontológico", "infinity odontologia",
-            "psicólogo", "psiquiatra", "fisioterapia",
-            "fisioterapeuta", "fonoaudiólogo", "terapia", "exame", "laboratório",
-            "farmácia", "medicamento", "remédio", "plano de saúde", "cirurgia",
-            "internação", "prontuário", "receita médica", "CRM", "CRO", "CRP",
-            "CRF", "CREFITO", "nutricionista", "psicopedagogo",
+            "dentista", "odontológico", "odontologia", "odontoclínica",
+            "procedimento odontológico", "tratamento odontológico",
+            "psicólogo", "psiquiatra", "fisioterapia", "fisioterapeuta",
+            "fonoaudiólogo", "terapia ocupacional", "terapia", "exame",
+            "laboratório", "farmácia", "medicamento", "remédio",
+            "plano de saúde", "cirurgia", "internação", "prontuário",
+            "receita médica", "nutricionista", "psicopedagogo",
+            "oftalmologia", "cardiologia", "ortopedia", "dermatologia",
+            "ginecologia", "pediatria", "anestesia", "radiologia",
+            "ressonância", "tomografia", "ultrassom", "colonoscopia",
+            "endoscopia", "hemograma",
+            "CRM", "CRO", "CRP", "CRF", "CREFITO",
+            "infinity odontologia", "odontologia ltda",
         ],
         "peso": 2.0,
     },
@@ -40,8 +45,9 @@ CATEGORIAS_TRIBUTARIAS: dict[str, dict] = {
             "aluno", "semestre", "graduação", "pós-graduação", "pós graduação",
             "MEC", "vestibular", "ENEM", "bolsa", "pedagógico", "creche",
             "pré-escola", "técnico", "tecnológico", "especialização",
+            "IFAM", "UEA", "UFAM", "ensino médio", "ensino fundamental",
         ],
-        "peso": 1.5,
+        "peso": 2.0,
     },
     "Informe de Rendimentos": {
         "palavras": [
@@ -53,12 +59,33 @@ CATEGORIAS_TRIBUTARIAS: dict[str, dict] = {
         ],
         "peso": 2.0,
     },
-    # Genérica: perde para categorias específicas quando há sinais claros (ex.: saúde/odontologia).
     "Nota Fiscal": {
         "palavras": [
-            "nota fiscal", "NF-e", "NF-Se", "NFe", "DANFE", "chave de acesso",
-            "ICMS", "IPI", "ISS", "produto", "mercadoria", "compra", "venda",
-            "série", "número NF", "emissão fiscal", "SEFAZ",
+            "nota fiscal",
+            "NF-e",
+            "NFC-e",
+            "NF-Se",
+            "NFe",
+            "DANFE",
+            "chave de acesso",
+            "valor dos serviços",
+            "protocolo de autorização",
+            "ICMS",
+            "IPI",
+            "ISS",
+            "produto",
+            "produtos",
+            "mercadoria",
+            "compra",
+            "venda",
+            "série",
+            "número NF",
+            "emissão fiscal",
+            "SEFAZ",
+            "supermercado",
+            "restaurante",
+            "loja",
+            "comércio",
         ],
         "peso": 1.0,
     },
@@ -95,35 +122,67 @@ CATEGORIAS_TRIBUTARIAS: dict[str, dict] = {
 }
 
 CATEGORIA_PADRAO = "Documento Não Classificado"
+CATEGORIA_REVISAO = "Requer Revisão"
+CATEGORIAS_VALIDAS = set(CATEGORIAS_TRIBUTARIAS.keys()) | {CATEGORIA_PADRAO}
+
+PROMPT_CLASSIFICACAO = """\
+Você é um classificador de documentos fiscais brasileiros para o sistema DeclaraAI.
+
+Analise o texto do documento abaixo e classifique em UMA das categorias:
+- Recibo Médico
+- Comprovante Educacional
+- Informe de Rendimentos
+- Nota Fiscal
+- Previdência Privada
+- Doações
+- Pensão Alimentícia
+- Aluguel
+- Documento Não Classificado
+
+REGRAS OBRIGATÓRIAS:
+1. Responda APENAS com JSON válido. Nenhum texto antes ou depois.
+2. O campo "confianca" deve ser exatamente: "alta", "media" ou "baixa".
+3. O campo "motivo" deve ser uma frase curta (máx 15 palavras).
+4. Se não conseguir classificar com segurança, use "Documento Não Classificado".
+5. Não invente categorias fora da lista acima.
+6. DANFE, NFC-e, NF-e ou chave de acesso (44 dígitos) indicam Nota Fiscal, inclusive de clínica ou odontologia.
+
+Formato obrigatório:
+{{"categoria": "Nome Exato da Categoria", "confianca": "alta", "motivo": "Justificativa breve."}}
+
+TEXTO DO DOCUMENTO:
+{texto}
+
+RESPOSTA JSON:"""
 
 
 class ServicoClassificacao:
-    """
-    Classifica documentos fiscais em categorias tributárias usando pontuação ponderada.
+    def _documento_fiscal_eletronico_evidente(self, texto: str, nome_arquivo: str) -> bool:
+        """True se o texto é claramente NF-e/NFC-e (DANFE, chave, etc.)."""
+        blob = f"{texto}\n{nome_arquivo}"
+        t = blob.lower()
+        if re.search(r"\bdanfe\b", t):
+            return True
+        if re.search(r"\bnfc[\s-]?e\b", t):
+            return True
+        if re.search(r"\bnf[\s-]?se\b", t):
+            return True
+        if re.search(r"\bnf[\s-]?e\b", t):
+            return True
+        if re.search(r"\bnfe\b", t):
+            return True
+        if "documento auxiliar da nota fiscal" in t:
+            return True
+        if "nota fiscal de consumidor" in t:
+            return True
+        if "nota fiscal eletrônica" in t:
+            return True
+        digitos = re.sub(r"\D", "", blob)
+        return bool(re.search(r"\d{44}", digitos))
 
-    A pontuação de cada categoria é calculada contando as ocorrências de suas
-    palavras-chave no texto do documento, multiplicadas pelo peso da categoria.
-    A categoria com maior pontuação é retornada.
-    """
-
-    def classificar(self, texto: str, nome_arquivo: str = "") -> str:
-        """
-        Determina a categoria tributária mais provável para o documento.
-
-        Args:
-            texto: Texto extraído do documento.
-            nome_arquivo: Nome do arquivo (contexto adicional).
-
-        Returns:
-            Nome da categoria tributária identificada ou 'Documento Não Classificado'.
-        """
-        if not texto and not nome_arquivo:
-            return CATEGORIA_PADRAO
-
-        # Combina texto e nome do arquivo para análise
+    def _calcular_pontuacoes(self, texto: str, nome_arquivo: str) -> dict[str, float]:
         texto_analise = f"{texto} {nome_arquivo}".lower()
         pontuacoes: dict[str, float] = {}
-
         for categoria, config in CATEGORIAS_TRIBUTARIAS.items():
             pontuacao = sum(
                 config["peso"]
@@ -132,19 +191,126 @@ class ServicoClassificacao:
             )
             if pontuacao > 0:
                 pontuacoes[categoria] = pontuacao
+        return pontuacoes
 
+    def _avaliar_regras(self, pontuacoes: dict[str, float]) -> Optional[str]:
         if not pontuacoes:
-            logger.info(f"Documento não classificado: nenhuma palavra-chave encontrada.")
-            return CATEGORIA_PADRAO
+            logger.info("Regras: sem palavras-chave → fallback LLM.")
+            return None
 
+        scores_ordenados = sorted(pontuacoes.values(), reverse=True)
+        score_max = scores_ordenados[0]
         categoria_vencedora = max(pontuacoes, key=pontuacoes.get)
-        score_max = pontuacoes[categoria_vencedora]
+
+        if score_max < LIMIAR_SCORE:
+            logger.info(
+                "Regras: score %.1f < limiar %.1f → fallback LLM.",
+                score_max,
+                LIMIAR_SCORE,
+            )
+            return None
+
+        if len(scores_ordenados) >= 2:
+            diferenca = score_max - scores_ordenados[1]
+            if diferenca < MARGEM_MINIMA:
+                logger.info(
+                    "Regras: diferença %.1f entre '%s' (%.1f) e 2º (%.1f) < margem %.1f → LLM.",
+                    diferenca,
+                    categoria_vencedora,
+                    score_max,
+                    scores_ordenados[1],
+                    MARGEM_MINIMA,
+                )
+                return None
+
+        segundo = scores_ordenados[1] if len(scores_ordenados) >= 2 else 0.0
         logger.info(
-            f"Classificado como '{categoria_vencedora}' "
-            f"(score: {score_max:.1f} | candidatos: {len(pontuacoes)})"
+            "Regras aceitas: '%s' score=%.1f margem=%.1f",
+            categoria_vencedora,
+            score_max,
+            score_max - segundo,
         )
         return categoria_vencedora
 
+    def _classificar_com_llm(self, texto: str) -> Optional[str]:
+        texto_limitado = texto[:3000] if len(texto) > 3000 else texto
+        prompt = PROMPT_CLASSIFICACAO.format(texto=texto_limitado)
+
+        payload = {
+            "model": configuracoes.OLLAMA_MODELO,
+            "prompt": prompt,
+            "stream": False,
+            "options": {
+                "temperature": 0.1,
+                "top_p": 0.85,
+                "num_ctx": 4096,
+                "num_predict": 200,
+            },
+        }
+
+        try:
+            url = f"{configuracoes.OLLAMA_BASE_URL.rstrip('/')}/api/generate"
+            resposta = httpx.post(url, json=payload, timeout=60.0)
+            resposta.raise_for_status()
+            texto_resposta = resposta.json().get("response", "").strip()
+            texto_resposta = re.sub(r"```json|```", "", texto_resposta).strip()
+
+            match = re.search(r"\{.*\}", texto_resposta, re.DOTALL)
+            if match:
+                texto_resposta = match.group()
+
+            dados = json.loads(texto_resposta)
+            categoria = str(dados.get("categoria", "")).strip()
+            confianca = str(dados.get("confianca", "")).strip()
+            motivo = str(dados.get("motivo", "")).strip()
+
+            if categoria not in CATEGORIAS_VALIDAS:
+                logger.warning("LLM categoria inválida: '%s'", categoria)
+                return None
+
+            logger.info("LLM: '%s' | %s | %s", categoria, confianca, motivo)
+            return categoria
+
+        except json.JSONDecodeError as e:
+            logger.warning("LLM JSON inválido: %s", e)
+            return None
+        except httpx.ConnectError:
+            logger.warning("Ollama indisponível (conexão).")
+            return None
+        except httpx.TimeoutException:
+            logger.warning("Timeout ao chamar Ollama.")
+            return None
+        except httpx.HTTPStatusError as e:
+            logger.warning("Ollama HTTP %s", e.response.status_code)
+            return None
+        except Exception as e:
+            logger.error("Erro ao chamar LLM: %s", e, exc_info=True)
+            return None
+
+    def classificar(self, texto: str, nome_arquivo: str = "") -> str:
+        if not texto and not nome_arquivo:
+            return CATEGORIA_PADRAO
+
+        pontuacoes = self._calcular_pontuacoes(texto, nome_arquivo)
+        if self._documento_fiscal_eletronico_evidente(texto, nome_arquivo):
+            pontuacoes.pop("Recibo Médico", None)
+            nf = pontuacoes.get("Nota Fiscal", 0.0) + BONUS_NOTA_FISCAL_DFE
+            pontuacoes["Nota Fiscal"] = max(nf, LIMIAR_SCORE)
+            logger.info("Prioridade DFE: removida competição de Recibo Médico; reforço em Nota Fiscal.")
+
+        categoria_regras = self._avaliar_regras(pontuacoes)
+        if categoria_regras is not None:
+            logger.info("Classificação final (regras): '%s'", categoria_regras)
+            return categoria_regras
+
+        logger.info("Acionando fallback LLM…")
+        categoria_llm = self._classificar_com_llm(texto)
+        if categoria_llm is not None:
+            logger.info("Classificação final (LLM): '%s'", categoria_llm)
+            return categoria_llm
+
+        logger.warning("Inconclusivo. Pontuações: %s → Requer Revisão.", pontuacoes)
+        return CATEGORIA_REVISAO
+
     def listar_categorias(self) -> list[str]:
-        """Retorna todas as categorias tributárias disponíveis incluindo a padrão."""
-        return list(CATEGORIAS_TRIBUTARIAS.keys()) + [CATEGORIA_PADRAO]
+        return list(CATEGORIAS_TRIBUTARIAS.keys()) + [CATEGORIA_PADRAO, CATEGORIA_REVISAO]
