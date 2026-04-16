@@ -41,6 +41,24 @@ PADROES_EMITENTE = [
     r"(?i)(?:CNPJ|CPF)[:\s]*[\d.\/\-]+\s*[-–]?\s*([A-ZÀ-Ú][A-Za-zÀ-ú\s]+)",
 ]
 
+# Chave de acesso NF-e: 44 dígitos, possivelmente com espaços/pontos entre grupos
+PADRAO_CHAVE_ACESSO = re.compile(r"(?:chave[:\s]*(?:de\s+acesso)?[:\s]*)?((?:\d[\s.]?){44})", re.IGNORECASE)
+
+PADROES_CNPJ = [
+    r"\b(\d{2}[.\s]?\d{3}[.\s]?\d{3}[/\s]?\d{4}[-\s]?\d{2})\b",  # CNPJ xx.xxx.xxx/xxxx-xx
+]
+
+PADROES_CPF_EMITENTE = [
+    r"(?i)(?:CPF\s*do\s*emitente|CPF\s*emitente|emitente\s*CPF)[:\s]*([\d]{3}[.\s]?[\d]{3}[.\s]?[\d]{3}[-\s]?[\d]{2})",
+]
+
+PADROES_BENEFICIARIO = [
+    r"(?i)(?:paciente|aluno|cliente|tomador|destinatário|destinatario|beneficiário|beneficiario)"
+    r"[:\s]+([A-ZÀ-Ú][A-Za-zÀ-ú\s]{4,})",
+    r"(?i)(?:nome\s+do\s+(?:paciente|aluno|cliente|tomador|destinatário))[:\s]+"
+    r"([A-ZÀ-Ú][A-Za-zÀ-ú\s]{4,})",
+]
+
 
 class ServicoExtracao:
     """
@@ -81,6 +99,9 @@ class ServicoExtracao:
             "data_detectada": self._extrair_data(texto),
             "valor_detectado": self._extrair_valor(texto),
             "emitente_detectado": self._extrair_emitente(texto),
+            "chave_acesso": self._extrair_chave_acesso(texto),
+            "cnpj_emitente": self._extrair_cnpj_emitente(texto),
+            "nome_beneficiario": self._extrair_nome_beneficiario(texto),
             "caminho_arquivo": caminho,
         }
 
@@ -113,5 +134,42 @@ class ServicoExtracao:
             if correspondencia:
                 nome = correspondencia.group(1).strip()
                 if len(nome) >= 4 and not nome.isspace():
+                    return nome[:120]
+        return None
+
+    def _extrair_chave_acesso(self, texto: str) -> Optional[str]:
+        """Extrai a chave de acesso de 44 dígitos de NF-e/NFC-e/NFSe."""
+        # Remove espaços/pontos e procura sequência de 44 dígitos
+        apenas_digitos = re.sub(r"[\s.]", "", texto)
+        correspondencia = re.search(r"\d{44}", apenas_digitos)
+        if correspondencia:
+            return correspondencia.group(0)
+        # Tenta com o padrão contextual (próximo a "chave")
+        correspondencia = PADRAO_CHAVE_ACESSO.search(texto)
+        if correspondencia:
+            chave = re.sub(r"\D", "", correspondencia.group(1))
+            if len(chave) == 44:
+                return chave
+        return None
+
+    def _extrair_cnpj_emitente(self, texto: str) -> Optional[str]:
+        """Extrai CNPJ ou CPF do emitente."""
+        for padrao in PADROES_CNPJ:
+            correspondencia = re.search(padrao, texto)
+            if correspondencia:
+                return re.sub(r"[\s]", "", correspondencia.group(1))
+        for padrao in PADROES_CPF_EMITENTE:
+            correspondencia = re.search(padrao, texto, re.IGNORECASE)
+            if correspondencia:
+                return re.sub(r"[\s]", "", correspondencia.group(1))
+        return None
+
+    def _extrair_nome_beneficiario(self, texto: str) -> Optional[str]:
+        """Extrai o nome do beneficiário/destinatário do documento."""
+        for padrao in PADROES_BENEFICIARIO:
+            correspondencia = re.search(padrao, texto)
+            if correspondencia:
+                nome = correspondencia.group(1).strip().rstrip(".,;:")
+                if len(nome) >= 4:
                     return nome[:120]
         return None
