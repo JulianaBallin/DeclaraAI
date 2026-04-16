@@ -19,6 +19,7 @@ from app.api.routes_documents import roteador as roteador_documentos
 from app.api.routes_history import roteador as roteador_historico
 from app.api.routes_evaluation import roteador as roteador_avaliacao
 from app.api.routes_knowledge import roteador as roteador_base
+from app.api.routes_perfil import roteador as roteador_perfil
 
 # ---------------------------------------------------------------------------
 # Configuração de logging
@@ -137,6 +138,11 @@ app.include_router(
     roteador_base,
     prefix="/knowledge",
     tags=["Base de Conhecimento"],
+)
+app.include_router(
+    roteador_perfil,
+    prefix="/declarante",
+    tags=["Perfil do Declarante"],
 )
 
 
