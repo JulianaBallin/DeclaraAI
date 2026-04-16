@@ -13,7 +13,7 @@ from app.core.config import configuracoes
 from app.core.database import obter_db
 from app.schemas.document import DocumentoSalvar
 from app.services.classification_service import ServicoClassificacao
-from app.services.document_kind_service import inferir_tipo_documento, referencia_irpf
+from app.services.document_kind_service import inferir_tipo_documento, referencia_irpf, validade_fiscal_do_tipo
 from app.services.extraction_service import ServicoExtracao
 from app.services.history_service import ServicoHistorico
 from app.services.rag_service import ServicoRAG
@@ -23,8 +23,8 @@ logger = logging.getLogger(__name__)
 
 roteador = APIRouter()
 
-# Mapeamento de MIME types para extensões permitidas
-EXTENSOES_PERMITIDAS = {".pdf", ".txt", ".html", ".htm"}
+# Extensões de arquivo permitidas para upload
+EXTENSOES_PERMITIDAS = {".pdf", ".txt", ".html", ".htm", ".xml", ".jpg", ".jpeg", ".png"}
 
 
 @roteador.post(
@@ -72,20 +72,24 @@ async def upload_documento(arquivo: UploadFile = File(...)):
         servico_extracao = ServicoExtracao()
         dados = servico_extracao.processar_arquivo(str(caminho_arquivo))
 
-        # Classificação tributária
+        # Classificação tributária com nível de confiança
         servico_classificacao = ServicoClassificacao()
-        categoria = servico_classificacao.classificar(
+        categoria, confianca = servico_classificacao.classificar_com_confianca(
             texto=dados["texto_extraido"],
             nome_arquivo=arquivo.filename or "",
+        )
+
+        tipo_doc = inferir_tipo_documento(
+            dados["texto_extraido"],
+            arquivo.filename or "",
         )
 
         # Substitui o nome técnico pelo nome original do arquivo
         dados["nome_arquivo"] = arquivo.filename or nome_unico
         dados["categoria"] = categoria
-        dados["tipo_documento"] = inferir_tipo_documento(
-            dados["texto_extraido"],
-            arquivo.filename or "",
-        )
+        dados["confianca_classificacao"] = confianca
+        dados["tipo_documento"] = tipo_doc
+        dados["validade_fiscal"] = validade_fiscal_do_tipo(tipo_doc)
         dados["referencia_irpf"] = referencia_irpf(categoria, dados["texto_extraido"])
 
         return {
