@@ -25,15 +25,19 @@ PADROES_DATA = [
 ]
 
 PADROES_VALOR = [
-    r"R\$\s*(\d{1,3}(?:\.\d{3})*(?:,\d{2})?)",               # R$ 1.234,56
-    r"(?i)(?:valor|total|subtotal)[:\s]+R?\$?\s*(\d{1,3}(?:\.\d{3})*(?:,\d{2})?)",
+    r"(?i)valor\s+total\s*R?\$?\s*[\n\r\s]*(\d{1,3}(?:\.\d{3})*(?:,\d{2})?)",
+    r"(?i)valor\s+dos\s+servi[çc]os\s*R?\$?\s*[\n\r\s]*(\d{1,3}(?:\.\d{3})*(?:,\d{2})?)",
+    r"(?i)valor\s+recebido\s*R?\$?\s*[\n\r\s]*(\d{1,3}(?:\.\d{3})*(?:,\d{2})?)",
+    # Genérico por último; linhas R$ 0,00 são descartadas em _extrair_valor
+    r"R\$\s*(\d{1,3}(?:\.\d{3})*(?:,\d{2})?)",
+    r"(?i)(?:total|subtotal)[:\s]+R?\$?\s*(\d{1,3}(?:\.\d{3})*(?:,\d{2})?)",
     r"(?i)(?:mensalidade|honorários)[:\s]+R?\$?\s*(\d{1,3}(?:\.\d{3})*(?:,\d{2})?)",
 ]
 
 PADROES_EMITENTE = [
+    r"([A-ZÀ-Ú][A-Za-zÀ-ú\s]{3,}(?:Ltda|LTDA|S\.A\.|SA|ME|EPP|EIRELI|LTDA\.))",
     r"(?i)(?:emitente|empresa|prestador|fornecedor|clínica|hospital|escola|"
-    r"universidade|colégio|laboratório|farmácia)[:\s]+([A-ZÀ-Ú][A-Za-zÀ-ú\s]+(?:Ltda|LTDA|S\.A\.|SA|ME|EPP|EIRELI)?)",
-    r"([A-ZÀ-Ú][A-Za-zÀ-ú\s]{3,}(?:Ltda|LTDA|S\.A\.|SA|ME|EPP|EIRELI))",
+    r"universidade|colégio|laboratório|farmácia|odontologia)[:\s]+([A-ZÀ-Ú][A-Za-zÀ-ú\s]+)",
     r"(?i)(?:CNPJ|CPF)[:\s]*[\d.\/\-]+\s*[-–]?\s*([A-ZÀ-Ú][A-Za-zÀ-ú\s]+)",
 ]
 
@@ -93,11 +97,12 @@ class ServicoExtracao:
         return None
 
     def _extrair_valor(self, texto: str) -> Optional[str]:
-        """Retorna o primeiro valor monetário encontrado."""
+        """Prioriza totais rotulados; ignora valores 0,00 (subtotais vazios em NFC-e)."""
         for padrao in PADROES_VALOR:
-            correspondencia = re.search(padrao, texto, re.IGNORECASE)
-            if correspondencia:
-                valor_bruto = correspondencia.group(1)
+            for correspondencia in re.finditer(padrao, texto, re.IGNORECASE | re.MULTILINE):
+                valor_bruto = correspondencia.group(1).strip()
+                if valor_bruto in ("0,00", "0.00", "0"):
+                    continue
                 return f"R$ {valor_bruto}"
         return None
 
@@ -107,7 +112,6 @@ class ServicoExtracao:
             correspondencia = re.search(padrao, texto)
             if correspondencia:
                 nome = correspondencia.group(1).strip()
-                # Filtra correspondências muito curtas ou com apenas espaços
                 if len(nome) >= 4 and not nome.isspace():
-                    return nome[:120]  # Limita o tamanho do nome
+                    return nome[:120]
         return None

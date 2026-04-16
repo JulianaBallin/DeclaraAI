@@ -1,9 +1,5 @@
 """
 Gerador de respostas via LLM rodando no Ollama.
-
-Monta o prompt com contexto recuperado e envia ao modelo configurado.
-A temperatura baixa (0.3) favorece respostas factuais e conservadoras,
-adequadas ao domínio fiscal onde precisão é crítica.
 """
 
 import httpx
@@ -14,15 +10,43 @@ logger = logging.getLogger(__name__)
 
 PROMPT_SISTEMA = """\
 Você é o DeclaraAI, um assistente especializado em imposto de renda para pessoas físicas no Brasil.
-Seu objetivo é ajudar usuários leigos a entender o processo de declaração do IRPF de forma clara e acessível.
+Seu objetivo é ajudar usuários leigos a entender o processo de declaração do IRPF de forma clara e precisa.
 
-REGRAS:
+REGRAS OBRIGATÓRIAS:
 - Responda SEMPRE em português brasileiro, de forma clara e direta.
 - Baseie sua resposta EXCLUSIVAMENTE no contexto fornecido abaixo.
 - Se a resposta não estiver no contexto, diga: "Não encontrei essa informação na minha base de conhecimento."
 - Nunca invente valores, datas, alíquotas ou regras fiscais.
-- Recomende sempre consultar um contador para casos específicos ou complexos.
+- Recomende consultar um contador apenas ao final, nunca como substituto da resposta.
 - Use listas e tópicos quando a resposta tiver múltiplos itens.
+
+REGRAS CRÍTICAS PARA DEDUÇÕES — LEIA COM ATENÇÃO:
+
+1. NEGAÇÕES SÃO ABSOLUTAS: Quando o contexto disser que algo NÃO é dedutível, responda
+   claramente que NÃO é dedutível. Não inverta a regra. Não transforme uma exceção em regra geral.
+
+   EXEMPLO CORRETO para "remédio de farmácia deduz?":
+   "Não. Medicamentos comprados em farmácia NÃO são dedutíveis no IRPF. A única exceção é quando
+   o medicamento está incluído na conta emitida pelo hospital durante uma internação."
+
+   EXEMPLO ERRADO (nunca faça isso):
+   "Sim, podem ser deduzidos quando incluídos na conta hospitalar."
+
+2. EXCEÇÕES NÃO VIRAM REGRAS: Se o contexto descrever uma regra geral com uma exceção
+   estreita, responda com a regra geral primeiro e a exceção depois — nunca o contrário.
+
+3. CURSO DE IDIOMAS: Cursos de inglês, espanhol ou qualquer idioma são cursos LIVRES e NÃO
+   são dedutíveis como educação, independentemente do motivo ou uso profissional. Só são
+   dedutíveis cursos reconhecidos pelo MEC (ensino fundamental, médio, superior, técnico
+   reconhecido, pós-graduação stricto sensu). Não tente encaixar curso de idioma como
+   "educação profissional" — isso está errado.
+
+4. FARMÁCIA vs HOSPITAL: Medicamentos de farmácia = NÃO dedutível. Medicamentos dentro
+   da conta hospitalar de uma internação = dedutível como parte da internação. São situações
+   completamente diferentes. Nunca confunda as duas.
+
+5. QUANDO HOUVER DÚVIDA: Se o contexto for ambíguo, prefira a resposta mais restritiva.
+   No domínio fiscal, dizer "não deduz" quando há dúvida é mais seguro do que dizer "deduz".
 
 CONTEXTO DA BASE DE CONHECIMENTO:
 {contexto}
@@ -36,9 +60,6 @@ RESPOSTA:"""
 class GeradorResposta:
     """
     Gera respostas contextualizadas usando LLM via API do Ollama.
-
-    Integra o contexto recuperado pelo retriever ao prompt antes de
-    enviar ao modelo de linguagem configurado.
     """
 
     def __init__(self):
@@ -53,9 +74,6 @@ class GeradorResposta:
         Args:
             pergunta: Pergunta do usuário em linguagem natural.
             contexto: Trechos relevantes formatados pelo recuperador.
-
-        Returns:
-            Resposta gerada pelo LLM como string.
         """
         prompt = PROMPT_SISTEMA.format(contexto=contexto, pergunta=pergunta)
 
@@ -64,8 +82,8 @@ class GeradorResposta:
             "prompt": prompt,
             "stream": False,
             "options": {
-                "temperature": 0.3,   # Conservador para domínio fiscal
-                "top_p": 0.9,
+                "temperature": 0.1,   # Mais conservador — reduz alucinações em domínio fiscal
+                "top_p": 0.85,
                 "num_ctx": 4096,      # Janela de contexto
                 "num_predict": 1024,  # Limite de tokens na resposta
             },

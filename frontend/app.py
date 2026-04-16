@@ -25,6 +25,7 @@ API_URL = os.getenv("API_URL", "http://localhost:8000")
 TIMEOUT_CHAT = 180
 TIMEOUT_UPLOAD = 90
 TIMEOUT_PADRAO = 30
+TIMEOUT_SAVE = 180  # /documents/save pode indexar no RAG — precisa de margem
 
 st.set_page_config(
     page_title="DeclaraAI",
@@ -71,8 +72,12 @@ st.markdown(
         top: 0; left: 0; right: 0;
         height: 66px;
         background: linear-gradient(90deg, #1A1A1A 0%, #3D1800 55%, #1A1A1A 100%);
-        z-index: 9997;
+        z-index: 100;
         border-bottom: 2px solid #FF6B35;
+        pointer-events: none;
+    }
+    .navbar-bg img {
+        pointer-events: auto;
     }
 
     /* Empurra conteúdo abaixo da navbar */
@@ -90,17 +95,23 @@ st.markdown(
         position: fixed !important;
         top: 0 !important;
         right: 1.5rem !important;
+        left: auto !important;
+        width: fit-content !important;
+        max-width: min(96vw, 920px) !important;
         height: 66px !important;
+        max-height: 66px !important;
+        overflow: hidden !important;
         background: transparent !important;
         border: none !important;
-        z-index: 9999 !important;
+        z-index: 150 !important;
         display: flex !important;
         align-items: center !important;
         padding: 0 !important;
         gap: 2px !important;
+        pointer-events: none !important;
     }
-
     .stTabs [data-baseweb="tab"] {
+        pointer-events: auto !important;
         height: 66px !important;
         border-radius: 0 !important;
         border-bottom: 3px solid transparent !important;
@@ -176,6 +187,10 @@ st.markdown(
         color: #FFFFFF !important;
     }
     .stButton > button[kind="primary"]:hover { opacity: 0.88; }
+
+    .stButton > button {
+        cursor: pointer !important;
+    }
 
     /* Botão de download — laranja claro */
     div[data-testid="stDownloadButton"] button,
@@ -543,7 +558,7 @@ def _salvar_documento(dados: dict) -> bool:
         resposta = requests.post(
             f"{API_URL}/documents/save",
             json=dados,
-            timeout=TIMEOUT_PADRAO,
+            timeout=TIMEOUT_SAVE,
         )
         if resposta.status_code == 200:
             info = resposta.json()
@@ -594,19 +609,6 @@ with aba_upload:
         col3.metric("Valor Detectado", dados.get("valor_detectado") or "Não encontrado")
         col4.metric("Emitente", dados.get("emitente_detectado") or "Não identificado")
 
-        with st.expander("Texto Extraído (primeiros 2000 caracteres)"):
-            texto_completo = dados.get("texto_extraido", "")
-            trecho = texto_completo[:2000]
-            if len(texto_completo) > 2000:
-                trecho += "\n\n[...texto truncado...]"
-            st.text_area(
-                label="",
-                value=trecho,
-                height=200,
-                disabled=True,
-                label_visibility="collapsed",
-            )
-
         st.divider()
         st.subheader("Salvar no Histórico?")
         st.write(
@@ -616,14 +618,31 @@ with aba_upload:
 
         col_salvar, col_descartar = st.columns(2)
         with col_salvar:
-            if st.button("Salvar Documento", type="primary", use_container_width=True):
-                if _salvar_documento(dados):
-                    st.session_state.documento_processado = None
-                    st.rerun()
+            if st.button(
+                "Salvar Documento",
+                type="primary",
+                use_container_width=True,
+                key="btn_upload_salvar_doc",
+            ):
+                with st.spinner("Salvando e indexando no histórico…"):
+                    if _salvar_documento(dados):
+                        st.session_state.documento_processado = None
+                        st.rerun()
         with col_descartar:
-            if st.button("Descartar", use_container_width=True):
+            if st.button(
+                "Descartar",
+                use_container_width=True,
+                key="btn_upload_descartar_doc",
+            ):
                 st.session_state.documento_processado = None
                 st.rerun()
+
+        texto_completo = dados.get("texto_extraido", "") or ""
+        trecho = texto_completo[:2000]
+        if len(texto_completo) > 2000:
+            trecho += "\n\n[...texto truncado...]"
+        with st.expander("Texto Extraído (primeiros 2000 caracteres)", expanded=False):
+            st.text(trecho)
 
     # ── Uploads recentes ────────────────────────────────────────────────────
     st.divider()

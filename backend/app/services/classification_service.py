@@ -23,13 +23,15 @@ CATEGORIAS_TRIBUTARIAS: dict[str, dict] = {
     "Recibo Médico": {
         "palavras": [
             "médico", "médica", "consulta", "clínica", "hospital", "saúde",
-            "dentista", "odontológico", "psicólogo", "psiquiatra", "fisioterapia",
+            "dentista", "odontológico", "odontologia", "procedimento odontológico",
+            "tratamento odontológico", "infinity odontologia",
+            "psicólogo", "psiquiatra", "fisioterapia",
             "fisioterapeuta", "fonoaudiólogo", "terapia", "exame", "laboratório",
             "farmácia", "medicamento", "remédio", "plano de saúde", "cirurgia",
             "internação", "prontuário", "receita médica", "CRM", "CRO", "CRP",
             "CRF", "CREFITO", "nutricionista", "psicopedagogo",
         ],
-        "peso": 1.5,
+        "peso": 2.0,
     },
     "Comprovante Educacional": {
         "palavras": [
@@ -51,6 +53,7 @@ CATEGORIAS_TRIBUTARIAS: dict[str, dict] = {
         ],
         "peso": 2.0,
     },
+    # Genérica: perde para categorias específicas quando há sinais claros (ex.: saúde/odontologia).
     "Nota Fiscal": {
         "palavras": [
             "nota fiscal", "NF-e", "NF-Se", "NFe", "DANFE", "chave de acesso",
