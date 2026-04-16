@@ -232,7 +232,8 @@ class ServicoClassificacao:
         )
         return categoria_vencedora
 
-    def _classificar_com_llm(self, texto: str) -> Optional[str]:
+    def _classificar_com_llm(self, texto: str) -> tuple[Optional[str], str]:
+        """Retorna (categoria, confianca). confianca pode ser 'alta', 'media', 'baixa' ou 'desconhecida'."""
         texto_limitado = texto[:3000] if len(texto) > 3000 else texto
         prompt = PROMPT_CLASSIFICACAO.format(texto=texto_limitado)
 
@@ -261,35 +262,41 @@ class ServicoClassificacao:
 
             dados = json.loads(texto_resposta)
             categoria = str(dados.get("categoria", "")).strip()
-            confianca = str(dados.get("confianca", "")).strip()
+            confianca = str(dados.get("confianca", "desconhecida")).strip()
             motivo = str(dados.get("motivo", "")).strip()
 
             if categoria not in CATEGORIAS_VALIDAS:
                 logger.warning("LLM categoria inválida: '%s'", categoria)
-                return None
+                return None, "baixa"
 
             logger.info("LLM: '%s' | %s | %s", categoria, confianca, motivo)
-            return categoria
+            return categoria, confianca
 
         except json.JSONDecodeError as e:
             logger.warning("LLM JSON inválido: %s", e)
-            return None
+            return None, "baixa"
         except httpx.ConnectError:
             logger.warning("Ollama indisponível (conexão).")
-            return None
+            return None, "baixa"
         except httpx.TimeoutException:
             logger.warning("Timeout ao chamar Ollama.")
-            return None
+            return None, "baixa"
         except httpx.HTTPStatusError as e:
             logger.warning("Ollama HTTP %s", e.response.status_code)
-            return None
+            return None, "baixa"
         except Exception as e:
             logger.error("Erro ao chamar LLM: %s", e, exc_info=True)
-            return None
+            return None, "baixa"
 
     def classificar(self, texto: str, nome_arquivo: str = "") -> str:
+        """Mantido por compatibilidade — retorna apenas a categoria."""
+        categoria, _ = self.classificar_com_confianca(texto, nome_arquivo)
+        return categoria
+
+    def classificar_com_confianca(self, texto: str, nome_arquivo: str = "") -> tuple[str, str]:
+        """Retorna (categoria, confianca). confianca: 'alta' | 'media' | 'baixa'."""
         if not texto and not nome_arquivo:
-            return CATEGORIA_PADRAO
+            return CATEGORIA_PADRAO, "baixa"
 
         pontuacoes = self._calcular_pontuacoes(texto, nome_arquivo)
         if self._documento_fiscal_eletronico_evidente(texto, nome_arquivo):
@@ -300,17 +307,20 @@ class ServicoClassificacao:
 
         categoria_regras = self._avaliar_regras(pontuacoes)
         if categoria_regras is not None:
-            logger.info("Classificação final (regras): '%s'", categoria_regras)
-            return categoria_regras
+            scores = sorted(pontuacoes.values(), reverse=True)
+            margem = (scores[0] - scores[1]) if len(scores) >= 2 else scores[0]
+            confianca = "alta" if margem >= 4.0 else "media"
+            logger.info("Classificação final (regras): '%s' | %s", categoria_regras, confianca)
+            return categoria_regras, confianca
 
         logger.info("Acionando fallback LLM…")
-        categoria_llm = self._classificar_com_llm(texto)
+        categoria_llm, confianca_llm = self._classificar_com_llm(texto)
         if categoria_llm is not None:
-            logger.info("Classificação final (LLM): '%s'", categoria_llm)
-            return categoria_llm
+            logger.info("Classificação final (LLM): '%s' | %s", categoria_llm, confianca_llm)
+            return categoria_llm, confianca_llm
 
         logger.warning("Inconclusivo. Pontuações: %s → Requer Revisão.", pontuacoes)
-        return CATEGORIA_REVISAO
+        return CATEGORIA_REVISAO, "baixa"
 
     def listar_categorias(self) -> list[str]:
         return list(CATEGORIAS_TRIBUTARIAS.keys()) + [CATEGORIA_PADRAO, CATEGORIA_REVISAO]

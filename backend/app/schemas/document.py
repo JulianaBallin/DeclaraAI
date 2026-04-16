@@ -18,9 +18,14 @@ class DocumentoBase(BaseModel):
     categoria: Optional[str] = None
     tipo_documento: Optional[str] = None
     referencia_irpf: Optional[str] = None
+    validade_fiscal: Optional[bool] = None
+    confianca_classificacao: Optional[str] = None
     data_detectada: Optional[str] = None
     valor_detectado: Optional[str] = None
     emitente_detectado: Optional[str] = None
+    chave_acesso: Optional[str] = None
+    cnpj_emitente: Optional[str] = None
+    nome_beneficiario: Optional[str] = None
 
 
 class DocumentoSalvar(DocumentoBase):
@@ -53,10 +58,15 @@ class DocumentoProcessado(BaseModel):
     categoria: str
     tipo_documento: Optional[str] = None
     referencia_irpf: Optional[str] = None
+    validade_fiscal: Optional[bool] = None
+    confianca_classificacao: Optional[str] = None
     texto_extraido: str
     data_detectada: Optional[str] = None
     valor_detectado: Optional[str] = None
     emitente_detectado: Optional[str] = None
+    chave_acesso: Optional[str] = None
+    cnpj_emitente: Optional[str] = None
+    nome_beneficiario: Optional[str] = None
     caminho_arquivo: Optional[str] = None
 
 
@@ -105,3 +115,20 @@ class ResumoAnual(BaseModel):
     ano: int
     total_documentos: int
     categorias: dict
+
+
+# ---------------------------------------------------------------------------
+# Schemas de Perfil do Declarante (M4)
+# ---------------------------------------------------------------------------
+
+class PerfilDeclarante(BaseModel):
+    """Dados do titular da declaração fornecidos pelo usuário."""
+    nome_completo: str
+    cpf: str
+
+
+class RespostaVerificacaoTitularidade(BaseModel):
+    """Resultado da verificação de nome do beneficiário vs. declarante."""
+    status: str          # "titular" | "provavel_dependente" | "terceiro" | "nao_verificado"
+    mensagem: str
+    requer_confirmacao: bool

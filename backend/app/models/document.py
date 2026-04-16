@@ -2,7 +2,7 @@
 Modelo de banco de dados para documentos fiscais salvos pelo usuário.
 """
 
-from sqlalchemy import Column, Integer, String, Text, DateTime
+from sqlalchemy import Column, Integer, String, Text, DateTime, Boolean
 from sqlalchemy.sql import func
 from app.core.database import Base
 
@@ -30,6 +30,10 @@ class Documento(Base):
     tipo_documento = Column(String(200), nullable=True)
     referencia_irpf = Column(String(500), nullable=True)
 
+    # M1: validade fiscal e confiança da classificação
+    validade_fiscal = Column(Boolean, nullable=True)          # True = NF-e/NFC-e/NFSe; False = recibo/declaração
+    confianca_classificacao = Column(String(10), nullable=True)  # alta | media | baixa
+
     # Conteúdo extraído
     texto_extraido = Column(Text, nullable=True)
 
@@ -37,6 +41,11 @@ class Documento(Base):
     data_detectada = Column(String(50), nullable=True)
     valor_detectado = Column(String(50), nullable=True)
     emitente_detectado = Column(String(255), nullable=True)
+
+    # M2: campos estruturados para NF-e
+    chave_acesso = Column(String(44), nullable=True)     # chave 44 dígitos
+    cnpj_emitente = Column(String(20), nullable=True)    # CNPJ ou CPF do emitente
+    nome_beneficiario = Column(String(255), nullable=True)  # destinatário/paciente/aluno
 
     # Localização do arquivo no servidor
     caminho_arquivo = Column(String(500), nullable=True)

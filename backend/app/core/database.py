@@ -47,17 +47,22 @@ def _migrar_colunas_documentos():
         if not insp.has_table("documentos"):
             return
         existentes = {c["name"] for c in insp.get_columns("documentos")}
+        novas_colunas = [
+            ("tipo_documento", "VARCHAR(200)"),
+            ("referencia_irpf", "VARCHAR(500)"),
+            ("validade_fiscal", "BOOLEAN"),
+            ("confianca_classificacao", "VARCHAR(10)"),
+            ("chave_acesso", "VARCHAR(44)"),
+            ("cnpj_emitente", "VARCHAR(20)"),
+            ("nome_beneficiario", "VARCHAR(255)"),
+        ]
         with motor.begin() as conn:
-            if "tipo_documento" not in existentes:
-                conn.execute(
-                    text("ALTER TABLE documentos ADD COLUMN tipo_documento VARCHAR(200)")
-                )
-                logger.info("Coluna tipo_documento adicionada à tabela documentos.")
-            if "referencia_irpf" not in existentes:
-                conn.execute(
-                    text("ALTER TABLE documentos ADD COLUMN referencia_irpf VARCHAR(500)")
-                )
-                logger.info("Coluna referencia_irpf adicionada à tabela documentos.")
+            for coluna, tipo_sql in novas_colunas:
+                if coluna not in existentes:
+                    conn.execute(
+                        text(f"ALTER TABLE documentos ADD COLUMN {coluna} {tipo_sql}")
+                    )
+                    logger.info("Coluna %s adicionada à tabela documentos.", coluna)
     except Exception as e:
         logger.warning("Migração leve documentos: %s", e)
 
