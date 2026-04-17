@@ -1,20 +1,40 @@
 """
 Recuperador semântico do pipeline RAG.
 
-Realiza busca por similaridade no ChromaDB e formata o contexto
-para envio ao modelo gerador (LLM).
+Realiza busca por similaridade no ChromaDB, aplica re-ranking com cross-encoder
+multilíngue e formata o contexto para envio ao modelo gerador (LLM).
 
-Estrutura preparada para re-ranking com cross-encoder:
-O método _reranquear() está documentado com instruções de implementação.
-Para ativá-lo, instale um modelo cross-encoder e descomente o código.
+Re-ranking:
+    Modelo: cross-encoder/mmarco-mMiniLMv2-L12-H384-v1
+    Justificativa: treinado em MS MARCO multilíngue (inclui português), avalia
+    o par (consulta, trecho) de forma conjunta — captura relações semânticas
+    mais finas que o bi-encoder e melhora a precisão para perguntas complexas.
 """
 
 from typing import List
+from sentence_transformers import CrossEncoder
 from app.rag.vector_store import BancoVetorial
 from app.core.config import configuracoes
 import logging
 
 logger = logging.getLogger(__name__)
+
+
+# Singleton do cross-encoder carregado na primeira chamada ao re-ranking
+_cross_encoder_global: CrossEncoder | None = None
+
+# Modelo multilíngue treinado no MS MARCO — suporta português nativamente
+_MODELO_CROSS_ENCODER = "cross-encoder/mmarco-mMiniLMv2-L12-H384-v1"
+
+
+def _obter_cross_encoder() -> CrossEncoder:
+    """Retorna instância global do cross-encoder, carregando na primeira chamada."""
+    global _cross_encoder_global
+    if _cross_encoder_global is None:
+        logger.info(f"Carregando cross-encoder: {_MODELO_CROSS_ENCODER}")
+        _cross_encoder_global = CrossEncoder(_MODELO_CROSS_ENCODER)
+        logger.info("Cross-encoder carregado com sucesso.")
+    return _cross_encoder_global
 
 
 class Recuperador:
@@ -23,7 +43,7 @@ class Recuperador:
 
     Fluxo:
     1. Busca por similaridade semântica (bi-encoder via ChromaDB)
-    2. Re-ranking opcional com cross-encoder (estrutura preparada)
+    2. Re-ranking com cross-encoder multilíngue (mmarco-mMiniLMv2)
     3. Formatação do contexto para o LLM
     """
 
@@ -40,30 +60,35 @@ class Recuperador:
         self,
         consulta: str,
         top_k: int | None = None,
-        usar_reranking: bool = False,
+        usar_reranking: bool = True,
     ) -> List[dict]:
         """
         Recupera os chunks mais relevantes para a consulta.
 
+        Busca um número maior de candidatos no bi-encoder (top_k * 3) e depois
+        aplica o cross-encoder para re-rankear e retornar apenas os top_k melhores.
+
         Args:
             consulta: Texto da pergunta do usuário.
-            top_k: Número de resultados a retornar.
-            usar_reranking: Se True, aplica re-ranking nos resultados.
+            top_k: Número de resultados a retornar após re-ranking.
+            usar_reranking: Se True (padrão), aplica re-ranking com cross-encoder.
 
         Returns:
             Lista de chunks ordenados por relevância.
         """
         top_k = top_k or configuracoes.TOP_K_RESULTADOS
 
-        resultados = self.banco_vetorial.buscar_similares(consulta, top_k=top_k)
+        # Recupera mais candidatos para o re-ranking ter melhor pool de seleção
+        candidatos_k = top_k * 3 if usar_reranking else top_k
+        resultados = self.banco_vetorial.buscar_similares(consulta, top_k=candidatos_k)
 
         if not resultados:
             trecho = consulta[:60] + ("..." if len(consulta) > 60 else "")
             logger.warning(f"Nenhum chunk recuperado para: '{trecho}'")
             return []
 
-        if usar_reranking:
-            resultados = self._reranquear(consulta, resultados)
+        if usar_reranking and len(resultados) > 1:
+            resultados = self._reranquear(consulta, resultados)[:top_k]
 
         logger.info(
             f"Recuperados {len(resultados)} chunk(s) | "
@@ -73,31 +98,31 @@ class Recuperador:
 
     def _reranquear(self, consulta: str, resultados: List[dict]) -> List[dict]:
         """
-        Re-ranqueia resultados usando modelo cross-encoder.
+        Re-ranqueia resultados usando cross-encoder multilíngue.
 
-        ESTRUTURA PREPARADA — para implementar:
-        1. Instale: pip install sentence-transformers
-        2. Use o modelo: cross-encoder/ms-marco-MiniLM-L-6-v2
-        3. Descomente o código abaixo
+        O cross-encoder avalia o par (consulta, trecho) de forma conjunta,
+        capturando relações semânticas mais finas que o bi-encoder e melhorando
+        a precisão para perguntas complexas em português.
 
-        Vantagem sobre bi-encoder:
-        O cross-encoder avalia o par (consulta, texto) conjuntamente,
-        capturando relações semânticas mais finas e melhorando a ordem
-        dos resultados para perguntas complexas.
+        Args:
+            consulta: Texto da pergunta do usuário.
+            resultados: Lista de chunks retornados pelo bi-encoder.
+
+        Returns:
+            Lista re-ordenada por score do cross-encoder (maior primeiro).
         """
-        # ----------------------------------------------------------------
-        # from sentence_transformers import CrossEncoder
-        # cross_encoder = CrossEncoder("cross-encoder/ms-marco-MiniLM-L-6-v2")
-        # pares = [[consulta, r["texto"]] for r in resultados]
-        # scores = cross_encoder.predict(pares)
-        # resultados_reranqueados = sorted(
-        #     zip(scores, resultados), key=lambda x: x[0], reverse=True
-        # )
-        # return [r for _, r in resultados_reranqueados]
-        # ----------------------------------------------------------------
-
-        logger.debug("Re-ranking desabilitado — retornando ordem original.")
-        return resultados
+        try:
+            cross_encoder = _obter_cross_encoder()
+            pares = [[consulta, r["texto"]] for r in resultados]
+            scores = cross_encoder.predict(pares)
+            reordenados = sorted(
+                zip(scores, resultados), key=lambda x: x[0], reverse=True
+            )
+            logger.debug(f"Re-ranking aplicado sobre {len(resultados)} candidato(s).")
+            return [r for _, r in reordenados]
+        except Exception as erro:
+            logger.warning(f"Re-ranking falhou, usando ordem original: {erro}")
+            return resultados
 
     def formatar_contexto(self, chunks: List[dict]) -> str:
         """

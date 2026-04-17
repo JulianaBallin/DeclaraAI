@@ -115,7 +115,7 @@ class GeradorResposta:
         }
 
         try:
-            async with httpx.AsyncClient(timeout=180.0) as cliente:
+            async with httpx.AsyncClient(timeout=300.0) as cliente:
                 resposta = await cliente.post(self.url_geracao, json=payload)
                 resposta.raise_for_status()
                 dados = resposta.json()
@@ -134,6 +134,29 @@ class GeradorResposta:
         except Exception as erro:
             logger.error(f"Erro inesperado ao chamar Ollama: {erro}")
             return f"Erro ao processar sua pergunta. Por favor, tente novamente."
+
+    async def aquecer(self) -> None:
+        """
+        Pré-carrega o modelo Ollama na memória para reduzir a latência da primeira consulta.
+
+        Envia um prompt vazio com keep_alive para que o Ollama carregue o modelo
+        sem gerar texto. Deve ser chamado como task assíncrona no startup da aplicação.
+        """
+        try:
+            logger.info(f"Aquecendo modelo '{self.modelo}' no Ollama...")
+            async with httpx.AsyncClient(timeout=300.0) as cliente:
+                await cliente.post(
+                    self.url_geracao,
+                    json={
+                        "model": self.modelo,
+                        "prompt": "",
+                        "keep_alive": "10m",
+                        "stream": False,
+                    },
+                )
+            logger.info(f"Modelo '{self.modelo}' pré-carregado com sucesso.")
+        except Exception as erro:
+            logger.warning(f"Aquecimento do Ollama falhou (não crítico): {erro}")
 
     async def verificar_disponibilidade(self) -> bool:
         """

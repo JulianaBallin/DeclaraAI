@@ -5,6 +5,7 @@ Configura o aplicativo FastAPI, registra as rotas, inicializa o banco de dados
 e executa a ingestão automática da base de conhecimento na primeira execução.
 """
 
+import asyncio
 import logging
 from contextlib import asynccontextmanager
 from pathlib import Path
@@ -88,6 +89,16 @@ async def ciclo_de_vida(app: FastAPI):
             f"Ingestão automática falhou (não crítico): {erro}. "
             "Use POST /ingest para indexar manualmente."
         )
+
+    # Pré-aquece o modelo LLM em segundo plano para eliminar latência na primeira consulta.
+    # Sem isso, a primeira mensagem do chat sempre excede o tempo limite enquanto o Ollama
+    # carrega o modelo (~4 GB) na memória após o cold start.
+    async def _aquecer_modelo():
+        from app.rag.generator import GeradorResposta
+        await GeradorResposta().aquecer()
+
+    asyncio.create_task(_aquecer_modelo())
+    logger.info("Aquecimento do modelo Ollama iniciado em segundo plano.")
 
     yield  # Aplicação em execução
 
