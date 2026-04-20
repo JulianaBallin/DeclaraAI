@@ -68,7 +68,7 @@ async def listar_historico(
     data_fim: Optional[str] = Query(
         None, description="Data de fim no formato YYYY-MM-DD"
     ),
-    limite: int = Query(50, ge=1, le=200, description="Número máximo de resultados"),
+    limite: int = Query(50, ge=1, le=500, description="Número máximo de resultados"),
     offset: int = Query(0, ge=0, description="Pular N resultados (paginação)"),
     db: Session = Depends(obter_db),
 ):
