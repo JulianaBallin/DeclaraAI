@@ -1,0 +1,51 @@
+================================================================
+         BRADESCO VIDA E PREVIDÊNCIA S.A.
+     CNPJ: 51.990.695/0001-60 – SUSEP: 10.0360.5
+   Rua Boa Vista, 74 – Centro – São Paulo/SP – CEP 01014-000
+================================================================
+
+         COMPROVANTE DE CONTRIBUIÇÃO PREVIDENCIÁRIA PRIVADA
+                   PLANO PGBL – ANO-CALENDÁRIO 2024
+
+Participante: CARLOS EDUARDO MENDES FIGUEIREDO
+CPF: 987.654.321-00
+Nº do Contrato: PGBL-2019-00456789
+Tipo de Plano: PGBL (Plano Gerador de Benefício Livre)
+Regime de Tributação: Progressivo
+
+----------------------------------------------------------------
+              CONTRIBUIÇÕES REALIZADAS EM 2024
+----------------------------------------------------------------
+Janeiro/2024:     R$   900,00   – pago em 15/01/2024
+Fevereiro/2024:   R$   900,00   – pago em 15/02/2024
+Março/2024:       R$   900,00   – pago em 15/03/2024
+Abril/2024:       R$   900,00   – pago em 15/04/2024
+Maio/2024:        R$   900,00   – pago em 15/05/2024
+Junho/2024:       R$   900,00   – pago em 17/06/2024
+Julho/2024:       R$   900,00   – pago em 15/07/2024
+Agosto/2024:      R$   900,00   – pago em 15/08/2024
+Setembro/2024:    R$   900,00   – pago em 16/09/2024
+Outubro/2024:     R$   900,00   – pago em 15/10/2024
+Novembro/2024:    R$   900,00   – pago em 15/11/2024
+Dezembro/2024:    R$   900,00   – pago em 16/12/2024
+
+----------------------------------------------------------------
+TOTAL CONTRIBUÍDO EM 2024:        R$ 10.800,00
+Renda bruta tributável (ref.):    R$ 100.333,33
+Percentual sobre renda bruta:     10,77% (limite dedutível: 12%)
+----------------------------------------------------------------
+
+Saldo acumulado do plano em 31/12/2024: R$ 87.450,32
+Rentabilidade 2024: 12,35% (CDI + 0,8%)
+
+================================================================
+São Paulo, 31 de janeiro de 2025.
+
+Bradesco Vida e Previdência S.A.
+CNPJ: 51.990.695/0001-60
+
+IRPF: PGBL é dedutível até 12% da renda bruta tributável.
+Lance na ficha "Pagamentos Efetuados", código 36.
+VGBL NÃO é dedutível – não confunda os planos.
+DOCUMENTO FICTÍCIO PARA FINS DE TESTE DE SISTEMA.
+================================================================

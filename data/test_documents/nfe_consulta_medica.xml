@@ -1,0 +1,118 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- DOCUMENTO FICTÍCIO PARA TESTES — NÃO TEM VALIDADE FISCAL -->
+<nfeProc xmlns="http://www.portalfiscal.inf.br/nfe" versao="4.00">
+  <NFe>
+    <infNFe Id="NFe35240312345678000190550010000012341234567890" versao="4.00">
+
+      <ide>
+        <cUF>13</cUF>
+        <cNF>12345678</cNF>
+        <natOp>Prestação de Serviços de Saúde</natOp>
+        <mod>55</mod>
+        <serie>001</serie>
+        <nNF>1234</nNF>
+        <dhEmi>2024-03-12T10:30:00-04:00</dhEmi>
+        <tpNF>1</tpNF>
+        <idDest>1</idDest>
+        <cMunFG>1302603</cMunFG>
+        <tpImp>1</tpImp>
+        <tpEmis>1</tpEmis>
+        <tpAmb>2</tpAmb>
+        <finNFe>1</finNFe>
+        <indFinal>1</indFinal>
+        <indPres>1</indPres>
+      </ide>
+
+      <emit>
+        <CNPJ>12345678000190</CNPJ>
+        <xNome>CLINICA MEDICA SAO LUCAS LTDA</xNome>
+        <xFant>Clínica São Lucas</xFant>
+        <enderEmit>
+          <xLgr>Rua das Flores</xLgr>
+          <nro>200</nro>
+          <xBairro>Centro</xBairro>
+          <cMun>1302603</cMun>
+          <xMun>Manaus</xMun>
+          <UF>AM</UF>
+          <CEP>69010100</CEP>
+          <cPais>1058</cPais>
+          <xPais>Brasil</xPais>
+          <fone>9233334444</fone>
+        </enderEmit>
+        <CRT>1</CRT>
+      </emit>
+
+      <dest>
+        <CPF>98765432100</CPF>
+        <xNome>CARLOS EDUARDO MENDES FIGUEIREDO</xNome>
+        <enderDest>
+          <xLgr>Rua Recife</xLgr>
+          <nro>320</nro>
+          <xCompl>Apto 102</xCompl>
+          <xBairro>Parque 10</xBairro>
+          <cMun>1302603</cMun>
+          <xMun>Manaus</xMun>
+          <UF>AM</UF>
+          <CEP>69055550</CEP>
+          <cPais>1058</cPais>
+          <xPais>Brasil</xPais>
+        </enderDest>
+        <indIEDest>9</indIEDest>
+      </dest>
+
+      <det nItem="1">
+        <prod>
+          <cProd>CONS001</cProd>
+          <xProd>Consulta Médica - Cardiologia</xProd>
+          <NCM>00000000</NCM>
+          <CFOP>5933</CFOP>
+          <uCom>UN</uCom>
+          <qCom>1.0000</qCom>
+          <vUnCom>350.00</vUnCom>
+          <vProd>350.00</vProd>
+          <indTot>1</indTot>
+        </prod>
+        <imposto>
+          <ISSQN>
+            <vBC>350.00</vBC>
+            <vAliq>5.00</vAliq>
+            <vISSQN>17.50</vISSQN>
+            <cMunFG>1302603</cMunFG>
+            <cListServ>4.03</cListServ>
+            <indISS>1</indISS>
+          </ISSQN>
+        </imposto>
+      </det>
+
+      <total>
+        <ICMSTot>
+          <vBC>0.00</vBC>
+          <vICMS>0.00</vICMS>
+          <vProd>350.00</vProd>
+          <vDesc>0.00</vDesc>
+          <vNF>350.00</vNF>
+          <vServ>350.00</vServ>
+        </ICMSTot>
+      </total>
+
+      <transp>
+        <modFrete>9</modFrete>
+      </transp>
+
+      <pag>
+        <detPag>
+          <tPag>01</tPag>
+          <vPag>350.00</vPag>
+        </detPag>
+      </pag>
+
+      <infAdic>
+        <infCpl>Médico responsável: Dr. Roberto Alves Souza – CRM 54321-AM.
+Paciente: Carlos Eduardo Mendes Figueiredo – CPF: 987.654.321-00.
+DOCUMENTO FICTÍCIO PARA FINS DE TESTE DE SISTEMA.
+Chave de acesso: 3524 0312 3456 7800 0190 5500 1000 0012 3412 3456 7890</infCpl>
+      </infAdic>
+
+    </infNFe>
+  </NFe>
+</nfeProc>

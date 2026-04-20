@@ -1,0 +1,53 @@
+================================================================
+         INFORME DE RENDIMENTOS – ANO-CALENDÁRIO 2024
+                   (para declaração IRPF 2025)
+================================================================
+
+FONTE PAGADORA
+Razão Social: TECH AMAZÔNIA SISTEMAS LTDA
+CNPJ: 33.444.555/0001-66
+Endereço: Av. André Araújo, 550 – Aleixo – Manaus/AM
+
+BENEFICIÁRIO
+Nome: CARLOS EDUARDO MENDES FIGUEIREDO
+CPF: 987.654.321-00
+Cargo: Analista de Sistemas Pleno
+Vínculo: Empregado CLT
+
+----------------------------------------------------------------
+                    RENDIMENTOS TRIBUTÁVEIS
+----------------------------------------------------------------
+Salários e ordenados:                       R$  84.000,00
+13º Salário:                                R$   7.000,00
+Férias (1/3 constitucional incluso):        R$   9.333,33
+Total de Rendimentos Tributáveis:           R$ 100.333,33
+
+----------------------------------------------------------------
+               DEDUÇÕES NA FONTE (já descontadas)
+----------------------------------------------------------------
+INSS (contribuição previdenciária):         R$   8.757,34
+IRRF (imposto retido na fonte):             R$  12.450,00
+Plano de saúde coletivo (folha):            R$   3.600,00
+
+----------------------------------------------------------------
+              RENDIMENTOS ISENTOS / NÃO TRIBUTÁVEIS
+----------------------------------------------------------------
+FGTS depositado (não recebido):             R$   6.720,00
+Vale-refeição / alimentação (isento):       R$   3.840,00
+
+----------------------------------------------------------------
+                       TOTAIS CONSOLIDADOS
+----------------------------------------------------------------
+Total de rendimentos tributáveis:           R$ 100.333,33
+Total de deduções na fonte:                 R$  24.807,34
+Base de cálculo IRRF:                       R$  75.525,99
+
+================================================================
+Manaus, 28 de fevereiro de 2025.
+
+Responsável: Departamento Pessoal – Tech Amazônia Sistemas Ltda
+CNPJ: 33.444.555/0001-66
+
+ATENÇÃO: Este documento é para uso exclusivo na declaração do
+Imposto de Renda da Pessoa Física. Guarde por 5 anos.
+================================================================
