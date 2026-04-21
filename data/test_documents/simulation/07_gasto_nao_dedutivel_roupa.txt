@@ -1,0 +1,37 @@
+================================================================
+             RENNER S.A.
+    CNPJ: 92.754.738/0481-50
+  Shopping Manauara, Loja 142 – Adrianópolis – Manaus/AM
+       Fone: (92) 3300-5522 | sac@lojasrenner.com.br
+================================================================
+
+                 CUPOM FISCAL ELETRÔNICO
+                       NFC-e Nº 089.432
+
+CPF do Cliente: 071.234.567-18
+Nome: ANA CLARA RODRIGUES NASCIMENTO
+
+Data: 22/07/2024  |  Hora: 15:43:22
+
+----------------------------------------------------------------
+DESCRIÇÃO                    QTD    V. UNIT    V. TOTAL
+----------------------------------------------------------------
+Vestido floral manga curta     1    R$ 129,90   R$ 129,90
+Calça jeans skinny             1    R$  89,90   R$  89,90
+Blusa de algodão               2    R$  49,90   R$  99,80
+Tênis casual feminino          1    R$ 159,90   R$ 159,90
+----------------------------------------------------------------
+Subtotal:                                       R$ 479,50
+Desconto (10% cliente ouro):                   R$  47,95
+----------------------------------------------------------------
+TOTAL PAGO:                                     R$ 431,55
+
+Forma de pagamento: Cartão de crédito
+Parcelamento: 3x de R$ 143,85
+
+ATENÇÃO: Compras de vestuário e calçados NÃO são dedutíveis
+no IRPF, independentemente da finalidade (trabalho, uso
+pessoal etc.). Não inclua este comprovante na declaração.
+================================================================
+DOCUMENTO FICTÍCIO PARA FINS DE TESTE DE SISTEMA.
+================================================================

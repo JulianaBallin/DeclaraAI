@@ -1,6 +1,7 @@
 """
 Rótulos para exibição: tipo de documento fiscal vs. referência na declaração IRPF.
-Inclui validade fiscal por tipo e fichas/códigos oficiais da Receita Federal.
+Inclui validade fiscal por tipo, fichas/códigos oficiais da Receita Federal e
+avaliação de dedutibilidade pelo conteúdo do documento.
 """
 
 import re
@@ -250,3 +251,191 @@ def info_categoria(categoria: str) -> dict:
         categoria,
         _REF_IRPF_POR_CATEGORIA["Documento Não Classificado"],
     )
+
+
+# ---------------------------------------------------------------------------
+# Avaliação de dedutibilidade pelo conteúdo do documento
+# ---------------------------------------------------------------------------
+
+# Cada entrada: (padrões de detecção, mensagem de aviso, exceções que tornam dedutível)
+_PADROES_NAO_DEDUTIVEIS: list[tuple[list[str], str, list[str]]] = [
+    (
+        ["roupa", "vestuário", "vestuario", "calçado", "calcado", "tênis", "tenis",
+         "camisa", "calça", "calca", "vestido", "saia", "blusa", "camiseta",
+         "sapato", "sandália", "sandalia", "moda", "confecção", "confeccao",
+         "renner", "riachuelo", "c&a ", " cea ", "marisa", "zara", "hering",
+         "track&field", "lupo", "reserva", "osklen", "animale", "shoulder",
+         "loja de roupas", "loja de calçados", "boutique"],
+        "Roupas e calçados NÃO são dedutíveis no IRPF, independentemente do valor ou finalidade.",
+        [],
+    ),
+    (
+        ["smartphone", "celular", "iphone", "notebook", "computador", "tablet",
+         "televisão", "televisao", "tv ", " tv\n", "monitor", "eletrodoméstico",
+         "eletrodomestico", "geladeira", "fogão", "fogao", "máquina de lavar",
+         "lava-louças", "ar condicionado", "aspirador", "liquidificador",
+         "americanas", "magazine luiza", "magalu", "casas bahia", "fast shop",
+         "kabum", "ponto frio", "extra.com"],
+        "Eletrônicos e eletrodomésticos NÃO são dedutíveis no IRPF.",
+        [],
+    ),
+    (
+        ["supermercado", "hipermercado", "mercado", "mercearia", "hortifruti",
+         "açougue", "padaria", "pão de açúcar", "carrefour", "extra ", "walmart",
+         "assaí", "atacadão", "comper", "savegnago", "send", "super muffato",
+         "condor", "rede mais", "mercadinhos são luiz"],
+        (
+            "Compras de supermercado e alimentos NÃO são dedutíveis no IRPF. "
+            "Exceto alimentos incluídos em conta hospitalar de internação."
+        ),
+        ["internação", "conta hospitalar", "hospital", "dieta enteral", "nutrição parenteral"],
+    ),
+    (
+        ["combustível", "combustivel", "gasolina", "etanol", "diesel", "gnv",
+         "posto de combustível", "posto ipiranga", "posto shell", "posto petrobras",
+         "posto br", "ale combustíveis", "raízen"],
+        "Combustível NÃO é dedutível no IRPF para pessoa física.",
+        [],
+    ),
+    (
+        ["restaurante", "lanchonete", "pizzaria", "hamburger", "hambúrguer",
+         "churrascaria", "sushi", "delivery", "ifood", "uber eats", "rappi",
+         "mcdonalds", "mc donalds", "burguer king", "bob's", "subway",
+         "refeição", "almoço", "jantar", "café da manhã", "bar e restaurante"],
+        (
+            "Alimentação em restaurantes NÃO é dedutível no IRPF. "
+            "Apenas alimentação prescrita como parte de tratamento hospitalar é dedutível."
+        ),
+        ["internação", "dieta hospitalar", "nutrição clínica"],
+    ),
+    (
+        ["perfume", "cosmético", "cosmetico", "maquiagem", "batom", "base",
+         "creme facial", "creme corporal", "shampoo", "condicionador", "tintura",
+         "salão de beleza", "cabeleireiro", "manicure", "pedicure", "depilação",
+         "o boticário", "natura ", "avon ", "vult", "quem disse berenice",
+         "mac cosméticos", "sephora", "beauty", "perfumaria"],
+        "Cosméticos, perfumes e serviços de beleza NÃO são dedutíveis no IRPF.",
+        [],
+    ),
+    (
+        ["academia", "ginástica", "musculação", "musculacao", "crossfit",
+         "pilates", "yoga", "spinning", "smartfit", "bodytech", "bio ritmo",
+         "runner", "cia athletica", "swim", "natação", "natacao", "futebol",
+         "tênis esportivo", "clube esportivo", "mensalidade academia"],
+        (
+            "Academia e atividades físicas NÃO são dedutíveis como despesa médica no IRPF. "
+            "Exceção: se prescrita por médico como tratamento de saúde, com laudo e CID, "
+            "pode ser dedutível — consulte um contador."
+        ),
+        ["prescrição médica", "prescricao medica", "laudo médico", "fisioterapia", "reabilitação"],
+    ),
+    (
+        ["curso de inglês", "curso de ingles", "curso de espanhol",
+         "curso de francês", "curso de frances", "curso de alemão", "curso de alemao",
+         "curso de mandarim", "curso de japonês", "curso de japonês",
+         "curso livre", "curso profissionalizante",
+         "speak up", "wizard", "fisk", "ccaa", "cultura inglesa",
+         "yázigi", "yazigi", "skill idiomas", "english", "english school"],
+        (
+            "Cursos de idiomas e cursos livres NÃO são dedutíveis no IRPF. "
+            "Apenas cursos com reconhecimento MEC são dedutíveis (ensino fundamental, "
+            "médio, superior, técnico reconhecido pelo MEC e pós-graduação stricto sensu)."
+        ),
+        [],
+    ),
+    (
+        ["farmácia", "farmacia", "drogaria", "drogasil", "raia drogasil",
+         "ultrafarma", "panvel", "droga raia", "pacheco", "pague menos",
+         "farmácias associadas", "medicamento", "remédio", "remedio",
+         "comprimido", "cápsula", "capsula", "xarope", "pomada", "antibiótico",
+         "antibiotic", "vitamina", "suplemento alimentar"],
+        (
+            "Medicamentos adquiridos em farmácia NÃO são dedutíveis no IRPF. "
+            "A única exceção é quando o medicamento está incluído na conta emitida pelo "
+            "hospital durante uma internação. Guarde o documento, mas não lance como dedução."
+        ),
+        ["internação", "conta hospitalar", "hospital", "clínica de internação"],
+    ),
+    (
+        ["pet shop", "veterinário", "veterinario", "petco", "petz", "cobasi",
+         "ração", "racao", "banho e tosa", "plano pet"],
+        "Gastos com animais de estimação NÃO são dedutíveis no IRPF.",
+        [],
+    ),
+    (
+        ["vgbl", "vida gerador de benefício"],
+        (
+            "VGBL NÃO é dedutível no IRPF — é tratado como seguro de vida. "
+            "Apenas PGBL (código 36) é dedutível, até 12% da renda bruta tributável."
+        ),
+        [],
+    ),
+]
+
+
+def avaliar_dedutibilidade_conteudo(texto: str, categoria: str) -> dict:
+    """
+    Avalia se o conteúdo do documento é dedutível no IRPF detectando
+    padrões de gastos sabidamente não dedutíveis.
+
+    Complementa a classificação por categoria: um documento classificado como
+    'Nota Fiscal' pode conter roupas (não dedutível) ou serviços médicos (dedutível).
+    A categoria por si só não garante dedutibilidade — o conteúdo decide.
+
+    Args:
+        texto: Texto extraído do documento.
+        categoria: Categoria tributária atribuída pelo classificador.
+
+    Returns:
+        Dicionário com:
+            - dedutivel (bool|None): False = não dedutível; None = inconclusivo
+            - aviso (str|None): mensagem explicativa ao usuário
+            - nivel (str): "erro" (certamente não dedutível) | "aviso" | "ok"
+    """
+    t = texto.lower()
+
+    for padroes, mensagem, excecoes in _PADROES_NAO_DEDUTIVEIS:
+        if any(p in t for p in padroes):
+            # Verifica se há exceção que torna o documento dedutível
+            if excecoes and any(e in t for e in excecoes):
+                continue
+            return {
+                "dedutivel": False,
+                "aviso": mensagem,
+                "nivel": "erro",
+            }
+
+    # Verificação adicional: doação para pessoa física ou entidade não habilitada
+    if categoria == "Doações":
+        if re.search(r"\b(cpf|pessoa física|amigo|familiar|vizinho|igreja|templo|culto)\b", t):
+            return {
+                "dedutivel": False,
+                "aviso": (
+                    "Doações a pessoas físicas, igrejas ou entidades não habilitadas pelo governo "
+                    "NÃO são dedutíveis no IRPF. Somente doações para fundos oficiais (ECA, FIA, "
+                    "PRONAC, Fundo do Idoso etc.) são dedutíveis."
+                ),
+                "nivel": "aviso",
+            }
+
+    # Verificação: pensão alimentícia sem decisão judicial
+    if categoria == "Pensão Alimentícia":
+        tem_judicial = any(
+            p in t for p in [
+                "decisão judicial", "decisao judicial", "sentença", "sentenca",
+                "processo", "acordo judicial", "escritura pública", "escritura publica",
+                "homologado", "vara de família", "vara de familia",
+            ]
+        )
+        if not tem_judicial:
+            return {
+                "dedutivel": None,
+                "aviso": (
+                    "Atenção: não foi detectada referência a decisão judicial ou escritura pública. "
+                    "Pensão paga voluntariamente sem decisão judicial NÃO é dedutível no IRPF. "
+                    "Confirme se existe sentença ou escritura antes de lançar."
+                ),
+                "nivel": "aviso",
+            }
+
+    return {"dedutivel": None, "aviso": None, "nivel": "ok"}

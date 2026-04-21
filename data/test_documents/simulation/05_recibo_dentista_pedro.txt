@@ -1,0 +1,39 @@
+================================================================
+         DR. MARCOS AURÉLIO PINHEIRO
+         CRO/AM 7.432 – Odontologia
+   Av. André Araújo, 680, Sala 12 – Aleixo – Manaus/AM
+      Fone: (92) 3677-2233 | marcos.odonto@gmail.com
+================================================================
+
+              RECIBO DE ATENDIMENTO ODONTOLÓGICO
+                          Nº 003089
+
+Responsável: ANA CLARA RODRIGUES NASCIMENTO
+CPF: 071.234.567-18
+
+Paciente: PEDRO HENRIQUE RODRIGUES NASCIMENTO (dependente)
+CPF do dependente: 234.567.891-73
+Data de nascimento do paciente: 12/07/2014
+
+Procedimento: Tratamento ortodôntico – Instalação de aparelho fixo
+Data: 10/04/2024
+
+Valor cobrado: R$ 1.500,00 (um mil e quinhentos reais)
+Forma de pagamento: Cartão de crédito (parcelado 3x de R$ 500,00)
+
+Plano de tratamento: 24 meses
+Próximo atendimento agendado: 10/05/2024
+
+
+Manaus, 10 de abril de 2024.
+
+
+_________________________________________
+Dr. Marcos Aurélio Pinheiro
+CRO/AM 7.432
+
+IRPF: Despesas com dentistas são dedutíveis (Ficha "Pagamentos
+Efetuados", código 21 – Médicos). Inclui tratamento ortodôntico.
+Lançar em nome do dependente Pedro Henrique Rodrigues Nascimento.
+DOCUMENTO FICTÍCIO PARA FINS DE TESTE DE SISTEMA.
+================================================================

@@ -1,0 +1,85 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- DOCUMENTO FICTÍCIO PARA FINS DE TESTE DE SISTEMA -->
+<nfeProc xmlns="http://www.portalfiscal.inf.br/nfe" versao="4.00">
+  <NFe>
+    <infNFe Id="NFe35240845678901234567890123456789012345678901" versao="4.00">
+      <ide>
+        <cUF>13</cUF>
+        <cNF>87654321</cNF>
+        <natOp>Prestação de Serviços Médicos</natOp>
+        <mod>55</mod>
+        <serie>1</serie>
+        <nNF>004512</nNF>
+        <dhEmi>2024-06-20T10:30:00-04:00</dhEmi>
+        <tpNF>1</tpNF>
+        <idDest>1</idDest>
+        <cMunFG>1302603</cMunFG>
+        <tpImp>1</tpImp>
+        <tpEmis>1</tpEmis>
+        <finNFe>1</finNFe>
+        <indFinal>1</indFinal>
+        <indPres>1</indPres>
+      </ide>
+      <emit>
+        <CNPJ>98765432000155</CNPJ>
+        <xNome>CLINICA PEDIATRICA SAUDAVEL LTDA</xNome>
+        <xFant>Clinica Saudavel</xFant>
+        <enderEmit>
+          <xLgr>Avenida Coronel Teixeira</xLgr>
+          <nro>1320</nro>
+          <xCpl>Sala 210</xCpl>
+          <xBairro>Nova Esperança</xBairro>
+          <cMun>1302603</cMun>
+          <xMun>Manaus</xMun>
+          <UF>AM</UF>
+          <CEP>69037000</CEP>
+        </enderEmit>
+        <CRM>12345</CRM>
+      </emit>
+      <dest>
+        <CPF>07123456718</CPF>
+        <xNome>ANA CLARA RODRIGUES NASCIMENTO</xNome>
+        <!-- Paciente: PEDRO HENRIQUE RODRIGUES NASCIMENTO (dependente) -->
+        <enderDest>
+          <xLgr>Rua Recife</xLgr>
+          <nro>320</nro>
+          <xCpl>Apto 102</xCpl>
+          <xBairro>Parque 10</xBairro>
+          <cMun>1302603</cMun>
+          <xMun>Manaus</xMun>
+          <UF>AM</UF>
+          <CEP>69055490</CEP>
+        </enderDest>
+      </dest>
+      <det nItem="1">
+        <prod>
+          <cProd>CONS-PED-001</cProd>
+          <xProd>Consulta Pediátrica – Pedro Henrique Rodrigues Nascimento (dependente)</xProd>
+          <NCM>98191200</NCM>
+          <CFOP>9301</CFOP>
+          <uCom>UN</uCom>
+          <qCom>1.0000</qCom>
+          <vUnCom>280.00</vUnCom>
+          <vProd>280.00</vProd>
+        </prod>
+        <imposto>
+          <ISSQN>
+            <vBC>280.00</vBC>
+            <vAliq>2.00</vAliq>
+            <vISSQN>5.60</vISSQN>
+          </ISSQN>
+        </imposto>
+      </det>
+      <total>
+        <ICMSTot>
+          <vNF>280.00</vNF>
+        </ICMSTot>
+      </total>
+      <infAdic>
+        <infCpl>Despesa médica dedutível no IRPF – código 21 (Médicos).
+Paciente: Pedro Henrique Rodrigues Nascimento – dependente da declarante.
+Data: 20/06/2024. DOCUMENTO FICTÍCIO PARA FINS DE TESTE.</infCpl>
+      </infAdic>
+    </infNFe>
+  </NFe>
+</nfeProc>

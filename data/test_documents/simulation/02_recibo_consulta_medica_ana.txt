@@ -1,0 +1,33 @@
+================================================================
+         DRA. FERNANDA COSTA OLIVEIRA
+         CRM/AM 18.765 – Clínica Médica
+   Av. Djalma Batista, 1010, Sala 305 – Chapada – Manaus/AM
+      Fone: (92) 3888-4422 | contato@dracosta.med.br
+================================================================
+
+              RECIBO DE CONSULTA MÉDICA
+                      Nº 002341
+
+Paciente: ANA CLARA RODRIGUES NASCIMENTO
+CPF: 071.234.567-18
+
+Especialidade: Clínica Médica – Consulta de Rotina
+Data da consulta: 14/03/2024
+
+Valor cobrado: R$ 350,00 (trezentos e cinquenta reais)
+Forma de pagamento: PIX
+
+Pagamento recebido em: 14/03/2024
+
+
+Manaus, 14 de março de 2024.
+
+
+_________________________________________
+Dra. Fernanda Costa Oliveira
+CRM/AM 18.765
+
+IRPF: Despesas médicas são dedutíveis (Ficha "Pagamentos Efetuados",
+código 21 – Médicos).
+DOCUMENTO FICTÍCIO PARA FINS DE TESTE DE SISTEMA.
+================================================================

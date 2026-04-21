@@ -781,6 +781,15 @@ with aba_upload:
         else:
             msg_aviso("Tipo de documento não identificado com certeza. Verifique se é uma nota fiscal ou recibo.")
 
+        # --- Aviso de dedutibilidade pelo conteúdo ---
+        aviso_ded = dados.get("aviso_deducao")
+        nivel_ded = dados.get("nivel_aviso_deducao", "ok")
+        if aviso_ded:
+            if nivel_ded == "erro":
+                msg_erro(f"🚫 Gasto NÃO dedutível no IRPF: {aviso_ded}")
+            else:
+                msg_aviso(f"⚠️ Atenção sobre dedutibilidade: {aviso_ded}")
+
         # --- M4: Verificação de titularidade ---
         nome_decl = st.session_state.get("nome_declarante", "")
         benef_para_verificar = beneficiario_editado or dados.get("nome_beneficiario", "")

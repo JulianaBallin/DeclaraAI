@@ -13,7 +13,12 @@ from app.core.config import configuracoes
 from app.core.database import obter_db
 from app.schemas.document import DocumentoSalvar
 from app.services.classification_service import ServicoClassificacao
-from app.services.document_kind_service import inferir_tipo_documento, referencia_irpf, validade_fiscal_do_tipo
+from app.services.document_kind_service import (
+    inferir_tipo_documento,
+    referencia_irpf,
+    validade_fiscal_do_tipo,
+    avaliar_dedutibilidade_conteudo,
+)
 from app.services.extraction_service import ServicoExtracao
 from app.services.history_service import ServicoHistorico
 from app.services.rag_service import ServicoRAG
@@ -91,6 +96,11 @@ async def upload_documento(arquivo: UploadFile = File(...)):
         dados["tipo_documento"] = tipo_doc
         dados["validade_fiscal"] = validade_fiscal_do_tipo(tipo_doc)
         dados["referencia_irpf"] = referencia_irpf(categoria, dados["texto_extraido"])
+
+        # Avalia se o conteúdo é dedutível no IRPF (detecta gastos sabidamente inválidos)
+        avaliacao = avaliar_dedutibilidade_conteudo(dados["texto_extraido"], categoria)
+        dados["aviso_deducao"] = avaliacao.get("aviso")
+        dados["nivel_aviso_deducao"] = avaliacao.get("nivel", "ok")
 
         return {
             "mensagem": "Documento processado com sucesso.",
