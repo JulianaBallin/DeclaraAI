@@ -35,8 +35,10 @@ O **DeclaraAI** é um Micro SaaS com pipeline **RAG (Retrieval-Augmented Generat
 | Funcionalidade | Descrição |
 |---|---|
 | **Chat RAG** | Perguntas em linguagem natural respondidas com base na base de conhecimento tributário |
-| **Upload de documentos** | Processamento de PDF, TXT e HTML com extração automática de dados |
+| **Upload de documentos** | Processamento de PDF, TXT, HTML, XML, JPG e PNG com extração automática de dados |
 | **Classificação tributária** | Categorização inteligente por tipo de documento fiscal (8 categorias) |
+| **Validação de dedutibilidade** | Detecta automaticamente gastos não dedutíveis (roupas, eletrônicos, farmácia, academia etc.) e alerta o usuário |
+| **Verificação de titularidade** | Identifica se o beneficiário do documento é o declarante ou um dependente |
 | **Base de Conhecimento** | Gerenciamento dos documentos de referência do assistente diretamente pela interface |
 | **Histórico** | Armazenamento e consulta com filtros por categoria, nome e período |
 | **Resumo anual** | Organização por categoria para facilitar o preenchimento da declaração |
@@ -91,10 +93,11 @@ DeclaraAI/
 │   │   ├── main.py                       # FastAPI app + lifespan (auto-ingest)
 │   │   ├── api/
 │   │   │   ├── routes_chat.py            # POST /chat, POST /ingest, GET /status
-│   │   │   ├── routes_documents.py       # POST /documents/upload, /save
+│   │   │   ├── routes_documents.py       # POST /documents/upload, /save, /referencia-irpf
 │   │   │   ├── routes_history.py         # GET /history, /history/summary
 │   │   │   ├── routes_evaluation.py      # POST /evaluation/recuperacao, /completa
-│   │   │   └── routes_knowledge.py       # GET /knowledge/files, POST /knowledge/upload
+│   │   │   ├── routes_knowledge.py       # GET /knowledge/files, POST /knowledge/upload
+│   │   │   └── routes_perfil.py          # POST /declarante/perfil, /verificar-titularidade
 │   │   ├── core/
 │   │   │   ├── config.py                 # Configurações via pydantic-settings
 │   │   │   └── database.py               # SQLAlchemy + SQLite
@@ -103,17 +106,19 @@ DeclaraAI/
 │   │   ├── services/
 │   │   │   ├── extraction_service.py     # Extração de texto e metadados (regex)
 │   │   │   ├── classification_service.py # Classificação tributária (8 categorias)
+│   │   │   ├── document_kind_service.py  # Tipo de doc, validade fiscal e dedutibilidade
 │   │   │   ├── history_service.py        # CRUD histórico + resumo anual
 │   │   │   ├── rag_service.py            # Orquestrador do pipeline RAG
+│   │   │   ├── titularidade_service.py   # Verifica declarante vs. dependente
 │   │   │   └── evaluation_service.py     # Métricas de avaliação do pipeline
 │   │   ├── rag/
 │   │   │   ├── loader.py                 # Carregamento de documentos
 │   │   │   ├── chunker.py                # Fragmentação 600 chars / overlap 80
 │   │   │   ├── embeddings.py             # Singleton paraphrase-multilingual-MiniLM
 │   │   │   ├── vector_store.py           # ChromaDB (cosine similarity)
-│   │   │   ├── retriever.py              # Busca semântica + estrutura re-ranking
+│   │   │   ├── retriever.py              # Busca semântica + re-ranking CrossEncoder
 │   │   │   └── generator.py              # Geração de resposta via Ollama
-│   │   └── utils/file_parsers.py         # Parsers PDF/TXT/HTML
+│   │   └── utils/file_parsers.py         # Parsers PDF/TXT/HTML/XML/imagem
 │   ├── requirements.txt
 │   └── Dockerfile
 ├── frontend/
@@ -125,7 +130,9 @@ DeclaraAI/
 │   ├── uploads/                          # Documentos enviados pelos usuários
 │   ├── knowledge_base/
 │   │   └── guia_imposto_renda.txt        # Base de conhecimento IRPF incluída
-│   └── chroma_db/                        # Banco vetorial persistente
+│   ├── chroma_db/                        # Banco vetorial persistente
+│   └── test_documents/                   # Documentos fictícios para testes
+│       └── simulation/                   # Simulação de persona real (Ana Clara + dependentes)
 ├── docs/
 │   └── diagrams/
 │       ├── logo.svg                      # Logo do sistema (leão + IA)
@@ -147,7 +154,7 @@ A interface é construída com **Streamlit** na paleta laranja (`#FF6B35`), amar
 | Aba | Ícone | Descrição |
 |---|---|---|
 | **Chat** | 💬 | Perguntas em linguagem natural respondidas pelo pipeline RAG com exibição das fontes consultadas |
-| **Upload** | 📄 | Envio de documentos pessoais (recibos, notas, informes) com extração automática de categoria, data, valor e emitente |
+| **Upload** | 📄 | Envio de documentos pessoais (recibos, notas, informes) com extração automática de categoria, data, valor, emitente e validação de dedutibilidade |
 | **Base de Conhecimento** | 🗂️ | Adição e remoção de documentos de referência (guias, instruções da Receita Federal) com re-indexação automática no ChromaDB |
 | **Histórico** | 📚 | Consulta e filtragem dos documentos salvos por categoria, nome e período, com opção de exclusão |
 | **Resumo Anual** | 📊 | Visão consolidada dos documentos agrupados por categoria tributária para apoio ao preenchimento da declaração |
@@ -308,9 +315,18 @@ A documentação interativa completa está disponível em `http://localhost:8000
 
 | Método | Endpoint | Descrição |
 |---|---|---|
-| `POST` | `/documents/upload` | Upload e processamento de documento pessoal |
-| `POST` | `/documents/save` | Salvar documento no histórico |
-| `GET` | `/documents/categorias` | Listar categorias tributárias |
+| `POST` | `/documents/upload` | Upload e processamento (PDF, TXT, HTML, XML, JPG, PNG) com validação de dedutibilidade |
+| `POST` | `/documents/save` | Salvar documento no histórico e indexar no ChromaDB |
+| `GET` | `/documents/categorias` | Listar categorias tributárias disponíveis |
+| `GET` | `/documents/referencia-irpf` | Texto de apoio IRPF por categoria |
+
+### Declarante
+
+| Método | Endpoint | Descrição |
+|---|---|---|
+| `POST` | `/declarante/perfil` | Registrar nome e CPF do declarante na sessão |
+| `GET` | `/declarante/perfil` | Consultar perfil do declarante registrado |
+| `POST` | `/declarante/verificar-titularidade` | Verificar se beneficiário é declarante ou dependente |
 
 ### Base de Conhecimento
 

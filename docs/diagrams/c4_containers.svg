@@ -37,9 +37,9 @@
     <text x="95" y="62" text-anchor="middle" font-size="22">🖥️</text>
     <text x="95" y="90" text-anchor="middle" font-family="'Segoe UI', Arial, sans-serif" font-size="14" font-weight="700" fill="#F5F5F5">Frontend</text>
     <text x="95" y="108" text-anchor="middle" font-family="'Segoe UI', Arial, sans-serif" font-size="9.5" fill="#FF6B35">Streamlit 1.35</text>
-    <text x="95" y="130" text-anchor="middle" font-family="'Segoe UI', Arial, sans-serif" font-size="9" fill="#aaa">Interface com 5 abas:</text>
-    <text x="95" y="145" text-anchor="middle" font-family="'Segoe UI', Arial, sans-serif" font-size="9" fill="#888">Chat / Upload / Historico</text>
-    <text x="95" y="160" text-anchor="middle" font-family="'Segoe UI', Arial, sans-serif" font-size="9" fill="#888">Resumo / Avaliacao</text>
+    <text x="95" y="130" text-anchor="middle" font-family="'Segoe UI', Arial, sans-serif" font-size="9" fill="#aaa">Interface com 6 abas:</text>
+    <text x="95" y="145" text-anchor="middle" font-family="'Segoe UI', Arial, sans-serif" font-size="9" fill="#888">Chat / Upload / Conhecimento</text>
+    <text x="95" y="160" text-anchor="middle" font-family="'Segoe UI', Arial, sans-serif" font-size="9" fill="#888">Historico / Resumo / Avaliacao</text>
     <text x="95" y="180" text-anchor="middle" font-family="'Segoe UI', Arial, sans-serif" font-size="9" fill="#666">Tema laranja / preto</text>
     <text x="95" y="202" text-anchor="middle" font-family="'Segoe UI', Arial, sans-serif" font-size="9" fill="#555">Porta: 8501</text>
   </g>
