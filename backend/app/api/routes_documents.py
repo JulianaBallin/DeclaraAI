@@ -14,8 +14,14 @@ from app.core.database import obter_db
 from app.schemas.document import DocumentoSalvar
 from app.services.classification_service import ServicoClassificacao
 from app.services.document_kind_service import (
+    ajustar_categoria_irpf_por_tipo_documento,
     inferir_tipo_documento,
+    inferir_tipo_documento_resumido,
+    inferir_categoria_conteudo,
+    legenda_validade_fiscal,
     referencia_irpf,
+    resumir_status_irpf,
+    texto_declara_ficticio_ou_teste_sem_validade_fiscal,
     validade_fiscal_do_tipo,
     avaliar_dedutibilidade_conteudo,
 )
@@ -84,23 +90,53 @@ async def upload_documento(arquivo: UploadFile = File(...)):
             nome_arquivo=arquivo.filename or "",
         )
 
-        tipo_doc = inferir_tipo_documento(
+        tipo_detalhe = inferir_tipo_documento(
             dados["texto_extraido"],
             arquivo.filename or "",
         )
+        tipo_exib = inferir_tipo_documento_resumido(
+            dados["texto_extraido"],
+            arquivo.filename or "",
+        )
+        categoria = ajustar_categoria_irpf_por_tipo_documento(
+            tipo_exib, categoria, dados["texto_extraido"]
+        )
+        val_ok = validade_fiscal_do_tipo(tipo_exib)
+        if texto_declara_ficticio_ou_teste_sem_validade_fiscal(
+            dados["texto_extraido"]
+        ):
+            val_ok = False
 
         # Substitui o nome técnico pelo nome original do arquivo
         dados["nome_arquivo"] = arquivo.filename or nome_unico
         dados["categoria"] = categoria
         dados["confianca_classificacao"] = confianca
-        dados["tipo_documento"] = tipo_doc
-        dados["validade_fiscal"] = validade_fiscal_do_tipo(tipo_doc)
+        dados["tipo_documento"] = tipo_exib
+        dados["tipo_documento_detalhado"] = tipo_detalhe
+        dados["validade_fiscal"] = val_ok
+        dados["validade_fiscal_legenda"] = legenda_validade_fiscal(
+            val_ok, tipo_exib, texto=dados["texto_extraido"]
+        )
+        dados["tipo_leiaute"] = tipo_exib
+        natureza = inferir_categoria_conteudo(dados["texto_extraido"])
+        dados["categoria_conteudo"] = natureza
+        dados["natureza_conteudo"] = natureza
         dados["referencia_irpf"] = referencia_irpf(categoria, dados["texto_extraido"])
 
         # Avalia se o conteúdo é dedutível no IRPF (detecta gastos sabidamente inválidos)
         avaliacao = avaliar_dedutibilidade_conteudo(dados["texto_extraido"], categoria)
         dados["aviso_deducao"] = avaliacao.get("aviso")
         dados["nivel_aviso_deducao"] = avaliacao.get("nivel", "ok")
+        st_irpf = resumir_status_irpf(
+            avaliacao,
+            texto=dados["texto_extraido"],
+            validade_fiscal=val_ok,
+            categoria_conteudo=natureza,
+            nome_beneficiario=dados.get("nome_beneficiario"),
+            categoria_interna=categoria,
+        )
+        dados["status_irpf"] = st_irpf["status_irpf"]
+        dados["motivo_status_irpf"] = st_irpf.get("motivo_status_irpf", "")
 
         return {
             "mensagem": "Documento processado com sucesso.",

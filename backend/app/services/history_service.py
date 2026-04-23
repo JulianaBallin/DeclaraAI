@@ -69,6 +69,11 @@ class ServicoHistorico:
             tipo_arquivo=dados.get("tipo_arquivo", "desconhecido"),
             categoria=dados.get("categoria", "Documento Não Classificado"),
             tipo_documento=dados.get("tipo_documento"),
+            tipo_leiaute=dados.get("tipo_leiaute"),
+            categoria_conteudo=dados.get("categoria_conteudo"),
+            status_irpf=dados.get("status_irpf"),
+            motivo_status_irpf=dados.get("motivo_status_irpf"),
+            validade_fiscal_legenda=dados.get("validade_fiscal_legenda"),
             referencia_irpf=dados.get("referencia_irpf"),
             validade_fiscal=dados.get("validade_fiscal"),
             confianca_classificacao=dados.get("confianca_classificacao"),
@@ -77,8 +82,11 @@ class ServicoHistorico:
             valor_detectado=dados.get("valor_detectado"),
             emitente_detectado=dados.get("emitente_detectado"),
             chave_acesso=dados.get("chave_acesso"),
+            codigo_verificacao=dados.get("codigo_verificacao"),
+            identificador_fiscal=dados.get("identificador_fiscal"),
             cnpj_emitente=dados.get("cnpj_emitente"),
             nome_beneficiario=dados.get("nome_beneficiario"),
+            nome_tomador_nfs_e=dados.get("nome_tomador_nfs_e"),
             caminho_arquivo=dados.get("caminho_arquivo", ""),
         )
 

@@ -10,6 +10,7 @@ from typing import Optional
 import httpx
 
 from app.core.config import configuracoes
+from app.services.document_kind_service import texto_eh_recibo_aluguel
 
 logger = logging.getLogger(__name__)
 
@@ -17,6 +18,16 @@ LIMIAR_SCORE: float = 4.0
 MARGEM_MINIMA: float = 2.0
 # Quando DANFE/NFC-e/etc. estão presentes, “Recibo Médico” não deve ganhar só por termos de saúde.
 BONUS_NOTA_FISCAL_DFE: float = 4.0
+
+
+def _evidencia_nfse(texto: str, nome_arquivo: str) -> bool:
+    b = f"{texto} {nome_arquivo}".lower()
+    return bool(
+        re.search(r"nota\s+fiscal\s+de\s+servi[çc]os\s+eletr", b)
+        or re.search(r"\bnfs[\s.-]*e\b", b)
+        or re.search(r"\bnfse\b", b)
+    )
+
 
 CATEGORIAS_TRIBUTARIAS: dict[str, dict] = {
     "Recibo Médico": {
@@ -159,6 +170,8 @@ RESPOSTA JSON:"""
 class ServicoClassificacao:
     def _documento_fiscal_eletronico_evidente(self, texto: str, nome_arquivo: str) -> bool:
         """True se o texto é claramente NF-e/NFC-e (DANFE, chave, etc.)."""
+        if texto_eh_recibo_aluguel(f"{texto}\n{nome_arquivo}"):
+            return False
         blob = f"{texto}\n{nome_arquivo}"
         t = blob.lower()
         if re.search(r"\bdanfe\b", t):
@@ -178,6 +191,10 @@ class ServicoClassificacao:
         if "nota fiscal eletrônica" in t:
             return True
         digitos = re.sub(r"\D", "", blob)
+        if not re.search(
+            r"chave\s+(de\s+)?acesso|danfe|nf-?e|nfce|nfs-?e|nfe|nota\s+fiscal", t,
+        ):
+            return False
         return bool(re.search(r"\d{44}", digitos))
 
     def _calcular_pontuacoes(self, texto: str, nome_arquivo: str) -> dict[str, float]:
@@ -298,12 +315,21 @@ class ServicoClassificacao:
         if not texto and not nome_arquivo:
             return CATEGORIA_PADRAO, "baixa"
 
+        if texto_eh_recibo_aluguel(f"{texto}\n{nome_arquivo}"):
+            logger.info("Recibo de aluguel detectado → categoria 'Aluguel' (alta).")
+            return "Aluguel", "alta"
+
+        if _evidencia_nfse(texto, nome_arquivo):
+            logger.info("NFS-e detectada no texto → categoria 'Nota Fiscal' com confiança alta.")
+            return "Nota Fiscal", "alta"
+
         pontuacoes = self._calcular_pontuacoes(texto, nome_arquivo)
         if self._documento_fiscal_eletronico_evidente(texto, nome_arquivo):
             pontuacoes.pop("Recibo Médico", None)
+            pontuacoes.pop("Comprovante Educacional", None)
             nf = pontuacoes.get("Nota Fiscal", 0.0) + BONUS_NOTA_FISCAL_DFE
             pontuacoes["Nota Fiscal"] = max(nf, LIMIAR_SCORE)
-            logger.info("Prioridade DFE: removida competição de Recibo Médico; reforço em Nota Fiscal.")
+            logger.info("Prioridade DFE: fora de competição recibo/ensino; reforço em Nota Fiscal.")
 
         categoria_regras = self._avaliar_regras(pontuacoes)
         if categoria_regras is not None:

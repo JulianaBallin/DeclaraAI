@@ -16,7 +16,14 @@ class DocumentoBase(BaseModel):
     nome_arquivo: str
     tipo_arquivo: str
     categoria: Optional[str] = None
+    tipo_leiaute: Optional[str] = None
     tipo_documento: Optional[str] = None
+    tipo_documento_detalhado: Optional[str] = None
+    categoria_conteudo: Optional[str] = None
+    natureza_conteudo: Optional[str] = None
+    validade_fiscal_legenda: Optional[str] = None
+    status_irpf: Optional[str] = None
+    motivo_status_irpf: Optional[str] = None
     referencia_irpf: Optional[str] = None
     validade_fiscal: Optional[bool] = None
     confianca_classificacao: Optional[str] = None
@@ -24,8 +31,11 @@ class DocumentoBase(BaseModel):
     valor_detectado: Optional[str] = None
     emitente_detectado: Optional[str] = None
     chave_acesso: Optional[str] = None
+    codigo_verificacao: Optional[str] = None
+    identificador_fiscal: Optional[str] = None
     cnpj_emitente: Optional[str] = None
     nome_beneficiario: Optional[str] = None
+    nome_tomador_nfs_e: Optional[str] = None
 
 
 class DocumentoSalvar(DocumentoBase):
@@ -65,9 +75,20 @@ class DocumentoProcessado(BaseModel):
     valor_detectado: Optional[str] = None
     emitente_detectado: Optional[str] = None
     chave_acesso: Optional[str] = None
+    codigo_verificacao: Optional[str] = None
+    identificador_fiscal: Optional[str] = None
     cnpj_emitente: Optional[str] = None
     nome_beneficiario: Optional[str] = None
+    nome_tomador_nfs_e: Optional[str] = None
     caminho_arquivo: Optional[str] = None
+    categoria_conteudo: Optional[str] = None
+    natureza_conteudo: Optional[str] = None
+    status_irpf: Optional[str] = None
+    motivo_status_irpf: Optional[str] = None
+    tipo_leiaute: Optional[str] = None
+    tipo_documento_detalhado: Optional[str] = None
+    validade_fiscal_legenda: Optional[str] = None
+    resumo_informe_valores: Optional[str] = None
 
 
 # ---------------------------------------------------------------------------

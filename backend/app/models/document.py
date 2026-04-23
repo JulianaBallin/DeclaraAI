@@ -28,6 +28,11 @@ class Documento(Base):
     categoria = Column(String(100), nullable=True, index=True)
 
     tipo_documento = Column(String(200), nullable=True)
+    tipo_leiaute = Column(String(30), nullable=True)
+    categoria_conteudo = Column(String(200), nullable=True)
+    status_irpf = Column(String(200), nullable=True)
+    motivo_status_irpf = Column(Text, nullable=True)
+    validade_fiscal_legenda = Column(String(500), nullable=True)
     referencia_irpf = Column(String(500), nullable=True)
 
     # M1: validade fiscal e confiança da classificação
@@ -42,10 +47,13 @@ class Documento(Base):
     valor_detectado = Column(String(50), nullable=True)
     emitente_detectado = Column(String(255), nullable=True)
 
-    # M2: campos estruturados para NF-e
-    chave_acesso = Column(String(44), nullable=True)     # chave 44 dígitos
+    # M2: campos estruturados para NF-e / identificador NFS-e municipal
+    chave_acesso = Column(String(44), nullable=True)
+    codigo_verificacao = Column(String(64), nullable=True)
+    identificador_fiscal = Column(String(64), nullable=True)
     cnpj_emitente = Column(String(20), nullable=True)    # CNPJ ou CPF do emitente
     nome_beneficiario = Column(String(255), nullable=True)  # destinatário/paciente/aluno
+    nome_tomador_nfs_e = Column(String(255), nullable=True)  # tomador/pagador (NFS-e)
 
     # Localização do arquivo no servidor
     caminho_arquivo = Column(String(500), nullable=True)

@@ -55,6 +55,14 @@ def _migrar_colunas_documentos():
             ("chave_acesso", "VARCHAR(44)"),
             ("cnpj_emitente", "VARCHAR(20)"),
             ("nome_beneficiario", "VARCHAR(255)"),
+            ("nome_tomador_nfs_e", "VARCHAR(255)"),
+            ("codigo_verificacao", "VARCHAR(64)"),
+            ("identificador_fiscal", "VARCHAR(64)"),
+            ("tipo_leiaute", "VARCHAR(30)"),
+            ("categoria_conteudo", "VARCHAR(200)"),
+            ("status_irpf", "VARCHAR(200)"),
+            ("motivo_status_irpf", "TEXT"),
+            ("validade_fiscal_legenda", "VARCHAR(500)"),
         ]
         with motor.begin() as conn:
             for coluna, tipo_sql in novas_colunas:

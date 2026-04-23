@@ -11,7 +11,9 @@ Organizada em 6 abas:
 """
 
 import base64
+import html
 import os
+import re
 from datetime import datetime
 
 import requests
@@ -679,6 +681,99 @@ def _salvar_documento(dados: dict) -> bool:
     return False
 
 
+def _fingerprint_documento_upload(dados: dict) -> str:
+    return f"{dados.get('caminho_arquivo', '')}|{dados.get('nome_arquivo', '')}"
+
+
+def _exibir_motivo_classificacao_irpf(status: str, motivo: str) -> None:
+    """Exibe o motivo da classificação com realce de cor conforme a situação no IRPF."""
+    m = (motivo or "").strip()
+    s = (status or "").strip()
+    if not m:
+        return
+    st.markdown("**Motivo da classificação**")
+    if s == "Dedutível":
+        st.success(m)
+    elif s.startswith("Potencialmente dedutível"):
+        st.warning(m)
+    elif s == "Não dedutível":
+        st.error(m)
+    elif "Lançar em Rendimentos" in s:
+        st.info(m)
+    else:
+        seguro = html.escape(m)
+        st.markdown(
+            f'<p style="border-left:4px solid #9e9e9e;padding:0.5rem 0.75rem;'
+            f"background-color:#f5f5f5;border-radius:4px;margin:0.25rem 0 0.75rem 0;font-size:0.95rem\">{seguro}</p>",
+            unsafe_allow_html=True,
+        )
+
+
+def _natureza_eh_aluguel(dados: dict) -> bool:
+    n = (
+        (dados.get("categoria_conteudo") or "")
+        or (dados.get("natureza_conteudo") or "")
+        or (st.session_state.get("conf_natureza") or "")
+    )
+    return (n or "").strip() == "Aluguel"
+
+
+def _exibir_campo_chave_fiscal(dados: dict) -> bool:
+    td = (st.session_state.get("conf_tipo") or dados.get("tipo_documento") or "")
+    t = re.sub(r"[\s_\-/]", "", (td or "").lower())
+    if t in ("recibo", "comprovante", "comprovant"):
+        return False
+    if dados.get("validade_fiscal") is True:
+        return True
+    if t in ("nfe", "nfce", "nfse", "nfeletron", "nfeletrôn"):
+        return True
+    if t.startswith("nfse") or t.startswith("nfce") or t.startswith("nfe"):
+        return not t.startswith("nfer")
+    return False
+
+
+def _sincronizar_formulario_confirmacao(dados: dict) -> None:
+    fp = _fingerprint_documento_upload(dados)
+    if st.session_state.get("_doc_confirm_fp") == fp:
+        return
+    st.session_state["_doc_confirm_fp"] = fp
+    st.session_state["conf_tipo"] = dados.get("tipo_documento", "") or ""
+    st.session_state["conf_emit"] = dados.get("emitente_detectado", "") or ""
+    st.session_state["conf_cnpj"] = dados.get("cnpj_emitente", "") or ""
+    st.session_state["conf_data"] = dados.get("data_detectada", "") or ""
+    st.session_state["conf_valor"] = dados.get("valor_detectado", "") or ""
+    st.session_state["conf_benef"] = dados.get("nome_beneficiario", "") or ""
+    st.session_state["conf_tomador_nfs_e"] = dados.get("nome_tomador_nfs_e", "") or ""
+    ident = (
+        dados.get("identificador_fiscal")
+        or dados.get("codigo_verificacao")
+        or dados.get("chave_acesso")
+        or ""
+    )
+    st.session_state["conf_ident"] = ident
+    st.session_state["conf_natureza"] = (
+        dados.get("natureza_conteudo")
+        or dados.get("categoria_conteudo", "")
+        or ""
+    )
+    st.session_state["conf_status_irpf"] = dados.get("status_irpf", "") or ""
+    st.session_state["conf_motivo_status_irpf"] = dados.get("motivo_status_irpf", "") or ""
+    st.session_state["conf_val_leg"] = dados.get("validade_fiscal_legenda", "") or ""
+
+
+def _aplicar_identificador_salvar(dados: dict, texto_campo: str) -> None:
+    only = re.sub(r"\D", "", texto_campo or "")
+    dados["chave_acesso"] = None
+    dados["codigo_verificacao"] = None
+    dados["identificador_fiscal"] = only or None
+    if not only:
+        return
+    if len(only) >= 45:
+        dados["codigo_verificacao"] = only
+    else:
+        dados["chave_acesso"] = only
+
+
 with aba_upload:
     st.header("Upload de Documento Fiscal")
     msg_info(
@@ -707,6 +802,8 @@ with aba_upload:
 
     if "documento_processado" in st.session_state and st.session_state.documento_processado:
         dados = st.session_state.documento_processado
+        _sincronizar_formulario_confirmacao(dados)
+        exibir_campo_chave = _exibir_campo_chave_fiscal(dados)
 
         st.subheader("Confirme os Dados Extraídos")
         msg_info(
@@ -717,69 +814,100 @@ with aba_upload:
         # --- Campos editáveis pelo usuário ---
         col1, col2 = st.columns(2)
         with col1:
-            cat_opcoes = [
-                "Recibo Médico", "Comprovante Educacional", "Informe de Rendimentos",
-                "Nota Fiscal", "Previdência Privada", "Doações",
-                "Pensão Alimentícia", "Aluguel", "Documento Não Classificado",
-            ]
-            cat_atual = dados.get("categoria", "Documento Não Classificado")
-            idx_cat = cat_opcoes.index(cat_atual) if cat_atual in cat_opcoes else len(cat_opcoes) - 1
-            categoria_editada = st.selectbox("Categoria fiscal", cat_opcoes, index=idx_cat, key="conf_cat")
             tipo_doc_editado = st.text_input(
-                "Tipo do documento", value=dados.get("tipo_documento", "") or "", key="conf_tipo"
+                "1. Tipo do documento",
+                key="conf_tipo",
+                help="Forma do documento (ex.: NFS-e ou recibo) — não é a mesma coisa que ‘categoria’ do IRPF.",
             )
+            natureza_edit = st.text_input(
+                "2. Natureza do conteúdo",
+                key="conf_natureza",
+            )
+            status_irpf_edit = st.text_input(
+                "3. Situação no IRPF",
+                key="conf_status_irpf",
+            )
+            _exibir_motivo_classificacao_irpf(
+                status_irpf_edit,
+                dados.get("motivo_status_irpf", "") or "",
+            )
+            st.text_input(
+                "4. Validade fiscal do documento",
+                key="conf_val_leg",
+                disabled=True,
+                help="Distingue nota eletrônica com consulta fiscal de comprovante simples.",
+            )
+            st.caption(
+                "A categoria usada internamente no histórico (ex.: nota x recibo) é definida "
+                "automaticamente a partir do **tipo** e da **validade** acima, não da natureza do gasto."
+            )
+            det = dados.get("tipo_documento_detalhado") or ""
+            if det:
+                with st.expander("Descrição técnica automática (referência)", expanded=False):
+                    st.caption(det)
         with col2:
-            emitente_editado = st.text_input(
-                "Nome do emitente", value=dados.get("emitente_detectado", "") or "", key="conf_emit"
+            e_alug = _natureza_eh_aluguel(dados)
+            emit_lbl = (
+                "Locador(a) / recebedor(a)" if e_alug else "Nome do emitente"
             )
-            cnpj_editado = st.text_input(
-                "CNPJ / CPF do emitente", value=dados.get("cnpj_emitente", "") or "", key="conf_cnpj"
+            cnpj_lbl = (
+                "CPF ou CNPJ do(a) locador(a)"
+                if e_alug
+                else "CNPJ / CPF do emitente"
             )
+            emitente_editado = st.text_input(emit_lbl, key="conf_emit")
+            cnpj_editado = st.text_input(cnpj_lbl, key="conf_cnpj")
 
         col3, col4 = st.columns(2)
         with col3:
-            data_editada = st.text_input(
-                "Data do documento", value=dados.get("data_detectada", "") or "", key="conf_data"
+            data_editada = st.text_input("Data do documento", key="conf_data")
+            vlab = (
+                "Valor (total rend. tributáveis, se constar)"
+                if "informe" in (dados.get("tipo_documento") or "").lower()
+                else "Valor"
             )
-            valor_editado = st.text_input(
-                "Valor", value=dados.get("valor_detectado", "") or "", key="conf_valor"
-            )
+            valor_editado = st.text_input(vlab, key="conf_valor")
         with col4:
-            beneficiario_editado = st.text_input(
-                "Nome do beneficiário", value=dados.get("nome_beneficiario", "") or "", key="conf_benef"
+            benef_lbl = (
+                "Locatário / pagador"
+                if _natureza_eh_aluguel(dados)
+                else "Nome do beneficiário"
             )
-            chave_editada = st.text_input(
-                "Chave de acesso (44 dígitos)", value=dados.get("chave_acesso", "") or "", key="conf_chave"
+            beneficiario_editado = st.text_input(benef_lbl, key="conf_benef")
+            tnorm = re.sub(
+                r"[\s_\-/]", "", (tipo_doc_editado or dados.get("tipo_documento") or "").lower()
             )
+            if "nfse" in tnorm or "nfs" in tnorm:
+                st.text_input(
+                    "Pagador / tomador (NFS-e)",
+                    key="conf_tomador_nfs_e",
+                    help="Mensalidade: use o aluno em beneficiário; o tomador costuma ser o responsável pagador.",
+                )
+            if exibir_campo_chave:
+                ident_editado = st.text_input(
+                    "Chave (44) ou código de verificação municipal (NFS-e)",
+                    key="conf_ident",
+                )
+            else:
+                ident_editado = ""
+
+        if dados.get("resumo_informe_valores"):
+            with st.expander("Outros valores (informe de rendimentos)", expanded=False):
+                st.markdown(dados["resumo_informe_valores"])
 
         st.divider()
 
-        # --- M1: Alerta de validade fiscal ---
         validade = dados.get("validade_fiscal")
-        tipo_doc_val = dados.get("tipo_documento", "")
-        if validade is False:
-            st.markdown(
-                '<div class="msg-warning">'
-                "⚠️ <strong>Atenção:</strong> este documento (recibo ou declaração simples) "
-                "<strong>não tem validade fiscal direta</strong> na Receita Federal. "
-                "Ele comprova pagamento, mas não substitui uma nota fiscal eletrônica. "
-                "Guarde-o mesmo assim, mas prefira solicitar uma NF-e ao prestador."
-                "</div>",
-                unsafe_allow_html=True,
+        if validade is True:
+            id_fiscal_ui = (ident_editado or "").strip() or (
+                dados.get("identificador_fiscal") or ""
             )
-        elif validade is True:
-            chave_exib = dados.get("chave_acesso") or chave_editada
-            portal = "https://www.nfe.fazenda.gov.br/portal/consultaRecaptcha.aspx"
-            msg = (
-                "✅ Documento com validade fiscal (NF-e / NFC-e / NFS-e). "
-                "Consulte a autenticidade pela chave de acesso no "
-                f"[portal da Receita Federal]({portal})."
-            )
-            if chave_exib:
-                msg += f"  \nChave: `{chave_exib}`"
-            st.info(msg)
-        else:
-            msg_aviso("Tipo de documento não identificado com certeza. Verifique se é uma nota fiscal ou recibo.")
+            if id_fiscal_ui:
+                portal = "https://www.nfe.fazenda.gov.br/portal/consultaRecaptcha.aspx"
+                st.caption(
+                    f"Chave/identificador: `{id_fiscal_ui}`. "
+                    f"NF-e: [portal Receita]({portal}) | NFS-e: prefeitura emissora."
+                )
 
         # --- Aviso de dedutibilidade pelo conteúdo ---
         aviso_ded = dados.get("aviso_deducao")
@@ -839,8 +967,8 @@ with aba_upload:
         confianca = dados.get("confianca_classificacao", "")
         if confianca == "baixa":
             msg_aviso(
-                "A classificação automática teve baixa confiança. "
-                "Revise a categoria selecionada antes de salvar."
+                "A classificação automática (interna) teve baixa confiança. "
+                "Revise os quatro campos de identificação acima antes de salvar."
             )
 
         st.divider()
@@ -861,14 +989,30 @@ with aba_upload:
                 disabled=not confirmado,
             ):
                 # Aplica edições do usuário antes de salvar
-                dados["categoria"] = categoria_editada
                 dados["tipo_documento"] = tipo_doc_editado
+                dados["tipo_leiaute"] = tipo_doc_editado
+                dados["natureza_conteudo"] = natureza_edit
+                dados["categoria_conteudo"] = natureza_edit
+                dados["validade_fiscal_legenda"] = st.session_state.get(
+                    "conf_val_leg", ""
+                )
+                dados["status_irpf"] = status_irpf_edit
+                dados["motivo_status_irpf"] = (
+                    st.session_state.get("conf_motivo_status_irpf")
+                    or dados.get("motivo_status_irpf")
+                )
                 dados["emitente_detectado"] = emitente_editado
                 dados["cnpj_emitente"] = cnpj_editado
                 dados["data_detectada"] = data_editada
                 dados["valor_detectado"] = valor_editado
                 dados["nome_beneficiario"] = beneficiario_editado
-                dados["chave_acesso"] = chave_editada
+                dados["nome_tomador_nfs_e"] = (
+                    st.session_state.get("conf_tomador_nfs_e") or None
+                )
+                _aplicar_identificador_salvar(
+                    dados,
+                    ident_editado if exibir_campo_chave else "",
+                )
                 with st.spinner("Salvando e indexando no histórico…"):
                     if _salvar_documento(dados):
                         st.session_state.documento_processado = None

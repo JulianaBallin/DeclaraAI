@@ -3,11 +3,13 @@ Utilitários para extração de texto de diferentes formatos de arquivo.
 Suporta PDF, TXT, HTML, XML (NF-e SEFAZ) e imagens JPG/PNG (via OCR).
 """
 
+import re
 import pdfplumber
 from bs4 import BeautifulSoup
 from pathlib import Path
 import logging
 import xml.etree.ElementTree as ET
+from typing import Any, Optional
 
 logger = logging.getLogger(__name__)
 
@@ -94,6 +96,106 @@ def extrair_texto_html(caminho: str) -> str:
 def _tag(local: str) -> str:
     """Retorna tag qualificada com namespace NF-e."""
     return f"{{{_NFE_NS}}}{local}"
+
+
+def _dh_ou_demi_para_data_br(s: str) -> str:
+    s = (s or "").strip()
+    m = re.match(r"^(\d{4})-(\d{2})-(\d{2})", s)
+    if m:
+        return f"{m.group(3)}/{m.group(2)}/{m.group(1)}"
+    m2 = re.match(
+        r"^(\d{2})/(\d{2})/(\d{4})",
+        s,
+    )
+    if m2:
+        return s
+    return ""
+
+
+def _v_nf_para_exibicao_br(v: str) -> str:
+    v = (v or "").strip().replace(" ", "")
+    if not v:
+        return ""
+    if re.fullmatch(r"\d+,\d{2}", v):
+        return f"R$ {v}"
+    if re.fullmatch(r"\d+\.\d{2}", v):
+        inteiro, frac = v.split(".")
+        return f"R$ {inteiro},{frac}"
+    if re.fullmatch(r"\d+", v):
+        return f"R$ {v},00"
+    if re.fullmatch(r"\d{1,3}(?:\.\d{3})+,\d{2}", v):
+        return f"R$ {v}"
+    return f"R$ {v}"
+
+
+def extrair_metadados_xml_fiscal(
+    caminho: str,
+) -> Optional[dict[str, str]]:
+    """
+    Lê NF-e/variantes pelo leiaute SEFAZ (tags), sem depender de regex no texto.
+    Usado para preencher data, destinatário, valor e chave de forma fiel ao XML.
+    """
+    try:
+        tree = ET.parse(caminho)
+        root = tree.getroot()
+    except (ET.ParseError, OSError) as e:
+        logger.debug("Metadados XML indisponíveis para %s: %s", caminho, e)
+        return None
+
+    inf = root.find(f".//{_tag('infNFe')}") or root.find(".//infNFe")
+    if inf is None:
+        return None
+
+    def txt(el: Any, tag: str) -> str:
+        if el is None:
+            return ""
+        n = el.find(_tag(tag))
+        if n is None:
+            n = el.find(tag)
+        return (n.text or "").strip() if n is not None else ""
+
+    ide = inf.find(f".//{_tag('ide')}") or inf.find(".//ide")
+    dest = inf.find(f".//{_tag('dest')}") or inf.find(".//dest")
+    total = inf.find(f".//{_tag('ICMSTot')}") or inf.find(".//ICMSTot")
+
+    raw_dh = ""
+    if ide is not None:
+        raw_dh = txt(ide, "dhEmi") or txt(ide, "dEmi")
+    data_br = _dh_ou_demi_para_data_br(raw_dh)
+
+    nome_dest = ""
+    if dest is not None:
+        nome_dest = (txt(dest, "xNome") or "").strip()
+
+    vnf = ""
+    if total is not None:
+        vnf = (txt(total, "vNF") or txt(total, "vProd") or "").strip()
+    if not vnf and inf is not None:
+        for el in inf.iter():
+            if el.text and (el.tag.endswith("vNF") or el.tag == "vNF"):
+                c = (el.text or "").strip()
+                if c:
+                    vnf = c
+                    break
+
+    chave_raw = (inf.get("Id") or "").replace("NFe", "")
+    chave_d = re.sub(r"\D", "", chave_raw) if chave_raw else ""
+    chave_44 = chave_d if len(chave_d) == 44 else ""
+
+    out: dict[str, str] = {}
+    if data_br:
+        out["data_documento"] = data_br
+    if nome_dest and len(nome_dest) >= 3:
+        out["nome_beneficiario"] = nome_dest
+    if vnf:
+        ex = _v_nf_para_exibicao_br(vnf)
+        if ex:
+            out["valor_detectado"] = ex
+    if chave_44:
+        out["chave_44"] = chave_44
+    if not out:
+        return None
+    return out
 
 
 def extrair_texto_xml_nfe(caminho: str) -> str:
