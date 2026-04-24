@@ -25,7 +25,7 @@ import streamlit as st
 
 API_URL = os.getenv("API_URL", "http://localhost:8000")
 TIMEOUT_CHAT = 180
-TIMEOUT_UPLOAD = 90
+TIMEOUT_UPLOAD = 180  # inclui geração de justificativa LLM+RAG
 TIMEOUT_PADRAO = 30
 TIMEOUT_SAVE = 180  # /documents/save pode indexar no RAG — precisa de margem
 
@@ -957,6 +957,23 @@ with aba_upload:
                             )
             except Exception:
                 pass  # Falha na verificação não bloqueia o fluxo
+
+        # --- Justificativa enriquecida: RAG + LLM ---
+        justificativa = dados.get("justificativa_enriquecida", "")
+        if justificativa:
+            with st.expander("Análise do assistente DeclaraAI (base de conhecimento)", expanded=True):
+                st.markdown(
+                    '<div style="border-left:4px solid #C04A00;padding:0.6rem 1rem;'
+                    'background:#FFF8F4;border-radius:0 8px 8px 0;margin-bottom:0.5rem;">'
+                    f"{html.escape(justificativa).replace(chr(10), '<br>')}"
+                    "</div>",
+                    unsafe_allow_html=True,
+                )
+                st.caption(
+                    "Gerado pelo assistente com base nos documentos de referência indexados "
+                    "na base de conhecimento do DeclaraAI. Sempre confirme com a Receita Federal "
+                    "ou um contador antes de enviar sua declaração."
+                )
 
         # --- M5: Regras de dedutibilidade ---
         ref_irpf = dados.get("referencia_irpf", "")

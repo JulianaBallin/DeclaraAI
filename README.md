@@ -37,6 +37,7 @@ O **DeclaraAI** é um Micro SaaS com pipeline **RAG (Retrieval-Augmented Generat
 | **Chat RAG** | Perguntas em linguagem natural respondidas com base na base de conhecimento tributário |
 | **Upload de documentos** | Processamento de PDF, TXT, HTML, XML, JPG e PNG com extração automática de dados |
 | **Classificação tributária** | Categorização inteligente por tipo de documento fiscal (8 categorias) |
+| **Justificativa enriquecida por RAG** | Após a classificação, a LLM recupera trechos relevantes da base de conhecimento e gera uma explicação personalizada e fundamentada sobre a classificação e o que verificar na declaração |
 | **Validação de dedutibilidade** | Detecta automaticamente gastos não dedutíveis (roupas, eletrônicos, farmácia, academia etc.) e alerta o usuário |
 | **Verificação de titularidade** | Identifica se o beneficiário do documento é o declarante ou um dependente |
 | **Base de Conhecimento** | Gerenciamento dos documentos de referência do assistente diretamente pela interface |
@@ -64,6 +65,39 @@ O **DeclaraAI** é um Micro SaaS com pipeline **RAG (Retrieval-Augmented Generat
 | **temperatura = 0.3** | Respostas conservadoras e precisas, domínio fiscal exige mínimo de alucinação |
 | **Singleton embeddings** | Evita recarregar o modelo (~110 MB) a cada requisição |
 | **SQLite** | Zero configuração, suficiente para protótipo sem dados distribuídos |
+
+---
+
+<h2 align="center">📝 Justificativa Enriquecida por RAG</h2>
+
+Ao processar um documento fiscal, o sistema executa um segundo pipeline RAG exclusivo para gerar uma **justificativa personalizada e fundamentada** na base de conhecimento:
+
+```
+Documento enviado
+       │
+       ▼
+Classificação tributária (regras + LLM)
+       │
+       ▼
+Consulta semântica à base de conhecimento
+  (query otimizada por categoria tributária)
+       │
+       ▼
+Re-ranking com cross-encoder multilíngue
+  (top-3 chunks mais relevantes)
+       │
+       ▼
+Prompt estruturado → Mistral 7B
+  (documento + contexto RAG → justificativa)
+       │
+       ▼
+Justificativa exibida na interface
+  com ficha/código da Receita Federal
+```
+
+**Por que isso importa:** as classificações baseadas em regras retornam motivos estáticos e genéricos. A justificativa enriquecida é gerada de forma dinâmica com o contexto real da legislação indexada, produzindo explicações específicas para cada documento — emitente, valor, beneficiário e situação no IRPF.
+
+**Implementação:** `backend/app/services/justificativa_service.py`
 
 ---
 

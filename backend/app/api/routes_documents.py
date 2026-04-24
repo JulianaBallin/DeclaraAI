@@ -27,6 +27,7 @@ from app.services.document_kind_service import (
 )
 from app.services.extraction_service import ServicoExtracao
 from app.services.history_service import ServicoHistorico
+from app.services.justificativa_service import ServicoJustificativa
 from app.services.rag_service import ServicoRAG
 import logging
 
@@ -137,6 +138,19 @@ async def upload_documento(arquivo: UploadFile = File(...)):
         )
         dados["status_irpf"] = st_irpf["status_irpf"]
         dados["motivo_status_irpf"] = st_irpf.get("motivo_status_irpf", "")
+
+        # Justificativa enriquecida: RAG + LLM fundamentada na base de conhecimento.
+        # Executada após a classificação principal; falha silenciosa não bloqueia o upload.
+        servico_justificativa = ServicoJustificativa()
+        dados["justificativa_enriquecida"] = await servico_justificativa.gerar(
+            categoria=categoria,
+            tipo_documento=tipo_exib,
+            emitente=dados.get("emitente_detectado") or "",
+            beneficiario=dados.get("nome_beneficiario") or "",
+            valor=dados.get("valor_detectado") or "",
+            status_irpf=st_irpf["status_irpf"],
+            categoria_conteudo=natureza,
+        )
 
         return {
             "mensagem": "Documento processado com sucesso.",
