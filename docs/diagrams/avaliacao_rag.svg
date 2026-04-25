@@ -1,0 +1,128 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 900 480" width="900" height="480">
+  <defs>
+    <linearGradient id="bgAv" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#0D0D0D"/>
+      <stop offset="100%" style="stop-color:#141414"/>
+    </linearGradient>
+    <linearGradient id="barGreen" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%" style="stop-color:#1a6b3c"/>
+      <stop offset="100%" style="stop-color:#50C878"/>
+    </linearGradient>
+    <linearGradient id="barOrange" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%" style="stop-color:#8b3a00"/>
+      <stop offset="100%" style="stop-color:#FF6B35"/>
+    </linearGradient>
+    <linearGradient id="barYellow" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%" style="stop-color:#6b5800"/>
+      <stop offset="100%" style="stop-color:#FFD700"/>
+    </linearGradient>
+  </defs>
+
+  <!-- Background -->
+  <rect width="900" height="480" fill="url(#bgAv)"/>
+  <rect width="900" height="480" fill="none" stroke="#FF6B35" stroke-width="1.2" opacity="0.3"/>
+
+  <!-- Title -->
+  <text x="450" y="30" text-anchor="middle" font-family="'Segoe UI',Arial,sans-serif" font-size="16" font-weight="700" fill="#FFD700">Avaliação do Pipeline RAG — DeclaraAI</text>
+  <line x1="50" y1="40" x2="850" y2="40" stroke="#FF6B35" stroke-width="0.8" opacity="0.4"/>
+
+  <!-- Subtitle -->
+  <text x="450" y="58" text-anchor="middle" font-family="'Segoe UI',Arial,sans-serif" font-size="10.5" fill="#777">8 casos de teste cobrindo: Obrigatoriedade • Deduções Médicas • Educação • Previdência • Penalidades • Autônomos • Dependentes</text>
+
+  <!-- ===== METRIC 1: TAXA DE RECUPERAÇÃO ===== -->
+  <rect x="40" y="72" width="810" height="68" rx="8" fill="#1a1a1a" stroke="#50C878" stroke-width="1.6"/>
+
+  <!-- Label -->
+  <text x="62" y="96" font-family="'Segoe UI',Arial,sans-serif" font-size="12" font-weight="700" fill="#50C878">Taxa de Recuperação</text>
+  <text x="62" y="112" font-family="'Segoe UI',Arial,sans-serif" font-size="9.5" fill="#777">% de perguntas com ao menos 1 chunk relevante recuperado</text>
+
+  <!-- Bar track -->
+  <rect x="290" y="82" width="440" height="22" rx="4" fill="#111" stroke="#333" stroke-width="1"/>
+  <!-- Bar fill: 100% -->
+  <rect x="290" y="82" width="440" height="22" rx="4" fill="url(#barGreen)" opacity="0.85"/>
+  <!-- Value label -->
+  <text x="742" y="98" font-family="'Segoe UI',Arial,sans-serif" font-size="13" font-weight="700" fill="#50C878">100%</text>
+  <text x="742" y="124" font-family="'Segoe UI',Arial,sans-serif" font-size="9" fill="#555">8/8 casos</text>
+  <!-- Stars -->
+  <text x="820" y="103" font-size="18">🟢</text>
+
+  <!-- ===== METRIC 2: SCORE MÉDIO DE CONTEXTO ===== -->
+  <rect x="40" y="156" width="810" height="68" rx="8" fill="#1a1a1a" stroke="#FF6B35" stroke-width="1.6"/>
+
+  <text x="62" y="180" font-family="'Segoe UI',Arial,sans-serif" font-size="12" font-weight="700" fill="#FF6B35">Score Médio de Contexto</text>
+  <text x="62" y="196" font-family="'Segoe UI',Arial,sans-serif" font-size="9.5" fill="#777">Similaridade cosseno média dos chunks retornados (0–1)</text>
+
+  <!-- Bar track -->
+  <rect x="290" y="166" width="440" height="22" rx="4" fill="#111" stroke="#333" stroke-width="1"/>
+  <!-- Bar fill: ~0.61 of 1.0 = 268px -->
+  <rect x="290" y="166" width="268" height="22" rx="4" fill="url(#barOrange)" opacity="0.85"/>
+  <!-- Tick marks -->
+  <line x1="378" y1="163" x2="378" y2="191" stroke="#333" stroke-width="0.8"/>
+  <line x1="466" y1="163" x2="466" y2="191" stroke="#333" stroke-width="0.8"/>
+  <line x1="554" y1="163" x2="554" y2="191" stroke="#333" stroke-width="0.8"/>
+  <line x1="642" y1="163" x2="642" y2="191" stroke="#333" stroke-width="0.8"/>
+  <text x="378" y="199" text-anchor="middle" font-family="'Segoe UI',Arial,sans-serif" font-size="8" fill="#555">0.2</text>
+  <text x="466" y="199" text-anchor="middle" font-family="'Segoe UI',Arial,sans-serif" font-size="8" fill="#555">0.4</text>
+  <text x="554" y="199" text-anchor="middle" font-family="'Segoe UI',Arial,sans-serif" font-size="8" fill="#555">0.6</text>
+  <text x="642" y="199" text-anchor="middle" font-family="'Segoe UI',Arial,sans-serif" font-size="8" fill="#555">0.8</text>
+  <text x="742" y="182" font-family="'Segoe UI',Arial,sans-serif" font-size="13" font-weight="700" fill="#FF6B35">~0.61</text>
+  <text x="742" y="200" font-family="'Segoe UI',Arial,sans-serif" font-size="9" fill="#555">média geral</text>
+  <text x="820" y="187" font-size="18">🟡</text>
+
+  <!-- ===== METRIC 3: COBERTURA DE KEYWORDS ===== -->
+  <rect x="40" y="240" width="810" height="68" rx="8" fill="#1a1a1a" stroke="#FFD700" stroke-width="1.6"/>
+
+  <text x="62" y="264" font-family="'Segoe UI',Arial,sans-serif" font-size="12" font-weight="700" fill="#FFD700">Cobertura de Keywords</text>
+  <text x="62" y="280" font-family="'Segoe UI',Arial,sans-serif" font-size="9.5" fill="#777">% de termos-chave esperados presentes na resposta gerada pelo LLM</text>
+
+  <!-- Bar track -->
+  <rect x="290" y="250" width="440" height="22" rx="4" fill="#111" stroke="#333" stroke-width="1"/>
+  <!-- Bar fill: ~75% = 330px -->
+  <rect x="290" y="250" width="330" height="22" rx="4" fill="url(#barYellow)" opacity="0.85"/>
+  <line x1="378" y1="247" x2="378" y2="275" stroke="#333" stroke-width="0.8"/>
+  <line x1="466" y1="247" x2="466" y2="275" stroke="#333" stroke-width="0.8"/>
+  <line x1="554" y1="247" x2="554" y2="275" stroke="#333" stroke-width="0.8"/>
+  <line x1="642" y1="247" x2="642" y2="275" stroke="#333" stroke-width="0.8"/>
+  <text x="378" y="283" text-anchor="middle" font-family="'Segoe UI',Arial,sans-serif" font-size="8" fill="#555">25%</text>
+  <text x="466" y="283" text-anchor="middle" font-family="'Segoe UI',Arial,sans-serif" font-size="8" fill="#555">50%</text>
+  <text x="554" y="283" text-anchor="middle" font-family="'Segoe UI',Arial,sans-serif" font-size="8" fill="#555">75%</text>
+  <text x="642" y="283" text-anchor="middle" font-family="'Segoe UI',Arial,sans-serif" font-size="8" fill="#555">100%</text>
+  <text x="742" y="266" font-family="'Segoe UI',Arial,sans-serif" font-size="13" font-weight="700" fill="#FFD700">~75%</text>
+  <text x="742" y="284" font-family="'Segoe UI',Arial,sans-serif" font-size="9" fill="#555">pipeline LLM</text>
+  <text x="820" y="271" font-size="18">🟡</text>
+
+  <!-- ===== ANÁLISE DE CASOS ===== -->
+  <rect x="40" y="326" width="810" height="114" rx="8" fill="#1a1a1a" stroke="#444" stroke-width="1.2"/>
+  <text x="62" y="348" font-family="'Segoe UI',Arial,sans-serif" font-size="11" font-weight="700" fill="#aaa">Casos de Teste (8 perguntas)</text>
+  <line x1="60" y1="354" x2="828" y2="354" stroke="#333" stroke-width="0.8"/>
+
+  <!-- Case rows -->
+  <text x="70" y="370" font-family="'Segoe UI',Arial,sans-serif" font-size="9.5" fill="#50C878">✅</text>
+  <text x="88" y="370" font-family="'Segoe UI',Arial,sans-serif" font-size="9.5" fill="#ccc">Obrigatoriedade de declarar</text>
+  <text x="70" y="385" font-family="'Segoe UI',Arial,sans-serif" font-size="9.5" fill="#50C878">✅</text>
+  <text x="88" y="385" font-family="'Segoe UI',Arial,sans-serif" font-size="9.5" fill="#ccc">Deduções médicas e dentistas</text>
+  <text x="70" y="400" font-family="'Segoe UI',Arial,sans-serif" font-size="9.5" fill="#50C878">✅</text>
+  <text x="88" y="400" font-family="'Segoe UI',Arial,sans-serif" font-size="9.5" fill="#ccc">Limite de educação (R$ 3.561,50)</text>
+  <text x="70" y="415" font-family="'Segoe UI',Arial,sans-serif" font-size="9.5" fill="#50C878">✅</text>
+  <text x="88" y="415" font-family="'Segoe UI',Arial,sans-serif" font-size="9.5" fill="#ccc">Simplificada vs. Completa</text>
+
+  <text x="340" y="370" font-family="'Segoe UI',Arial,sans-serif" font-size="9.5" fill="#50C878">✅</text>
+  <text x="358" y="370" font-family="'Segoe UI',Arial,sans-serif" font-size="9.5" fill="#ccc">Como funciona o PGBL</text>
+  <text x="340" y="385" font-family="'Segoe UI',Arial,sans-serif" font-size="9.5" fill="#50C878">✅</text>
+  <text x="358" y="385" font-family="'Segoe UI',Arial,sans-serif" font-size="9.5" fill="#ccc">Multas e penalidades por atraso</text>
+  <text x="340" y="400" font-family="'Segoe UI',Arial,sans-serif" font-size="9.5" fill="#50C878">✅</text>
+  <text x="358" y="400" font-family="'Segoe UI',Arial,sans-serif" font-size="9.5" fill="#ccc">Carnê-leão para autônomos</text>
+  <text x="340" y="415" font-family="'Segoe UI',Arial,sans-serif" font-size="9.5" fill="#50C878">✅</text>
+  <text x="358" y="415" font-family="'Segoe UI',Arial,sans-serif" font-size="9.5" fill="#ccc">Como incluir dependentes</text>
+
+  <!-- Nota sobre avaliação -->
+  <rect x="600" y="362" width="228" height="64" rx="6" fill="#111" stroke="#FFD700" stroke-width="0.8" opacity="0.9"/>
+  <text x="714" y="378" text-anchor="middle" font-family="'Segoe UI',Arial,sans-serif" font-size="9.5" font-weight="700" fill="#FFD700">Inspirado no RAGAS</text>
+  <text x="614" y="394" font-family="'Segoe UI',Arial,sans-serif" font-size="9" fill="#aaa">• Context Precision (bi-encoder)</text>
+  <text x="614" y="408" font-family="'Segoe UI',Arial,sans-serif" font-size="9" fill="#aaa">• Answer Relevancy (keywords)</text>
+  <text x="614" y="422" font-family="'Segoe UI',Arial,sans-serif" font-size="9" fill="#aaa">• Faithfulness (sem LLM judge)</text>
+
+  <!-- Footer note -->
+  <rect x="40" y="450" width="810" height="18" rx="4" fill="#111" stroke="#2a2a2a" stroke-width="0.8"/>
+  <text x="450" y="463" text-anchor="middle" font-family="'Segoe UI',Arial,sans-serif" font-size="9" fill="#555">Avaliação executada via POST /evaluation/recuperacao (sem LLM) e POST /evaluation/completa (com LLM) — endpoint disponível na interface</text>
+</svg>

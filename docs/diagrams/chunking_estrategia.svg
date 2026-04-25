@@ -1,0 +1,112 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 900 460" width="900" height="460">
+  <defs>
+    <marker id="aCh" markerWidth="8" markerHeight="6" refX="7" refY="3" orient="auto">
+      <polygon points="0 0, 8 3, 0 6" fill="#C04A00"/>
+    </marker>
+  </defs>
+
+  <!-- Background branco -->
+  <rect width="900" height="460" fill="#FFFFFF"/>
+  <rect width="900" height="460" fill="none" stroke="#FF6B35" stroke-width="1.5" opacity="0.4"/>
+
+  <!-- Title -->
+  <text x="450" y="30" text-anchor="middle" font-family="'Segoe UI',Arial,sans-serif" font-size="16" font-weight="700" fill="#C04A00">Estratégia de Chunking — DeclaraAI</text>
+  <line x1="50" y1="40" x2="850" y2="40" stroke="#FF6B35" stroke-width="0.8" opacity="0.5"/>
+
+  <!-- ---- Documento original ---- -->
+  <rect x="40" y="56" width="820" height="68" rx="8" fill="#FFF8F4" stroke="#FF6B35" stroke-width="1.8"/>
+  <text x="60" y="74" font-family="'Segoe UI',Arial,sans-serif" font-size="10" font-weight="700" fill="#C04A00">DOCUMENTO ORIGINAL</text>
+
+  <!-- Simulated text blocks inside doc -->
+  <rect x="60" y="80" width="80" height="10" rx="2" fill="#DDDDDD"/>
+  <rect x="148" y="80" width="110" height="10" rx="2" fill="#DDDDDD"/>
+  <rect x="266" y="80" width="90" height="10" rx="2" fill="#DDDDDD"/>
+  <rect x="364" y="80" width="120" height="10" rx="2" fill="#DDDDDD"/>
+  <rect x="492" y="80" width="80" height="10" rx="2" fill="#DDDDDD"/>
+  <rect x="580" y="80" width="100" height="10" rx="2" fill="#DDDDDD"/>
+  <rect x="688" y="80" width="90" height="10" rx="2" fill="#DDDDDD"/>
+  <rect x="786" y="80" width="54" height="10" rx="2" fill="#DDDDDD"/>
+  <rect x="60" y="96" width="130" height="10" rx="2" fill="#DDDDDD"/>
+  <rect x="198" y="96" width="80" height="10" rx="2" fill="#DDDDDD"/>
+  <rect x="286" y="96" width="110" height="10" rx="2" fill="#DDDDDD"/>
+  <rect x="404" y="96" width="90" height="10" rx="2" fill="#DDDDDD"/>
+  <rect x="502" y="96" width="120" height="10" rx="2" fill="#DDDDDD"/>
+  <rect x="630" y="96" width="70" height="10" rx="2" fill="#DDDDDD"/>
+  <rect x="708" y="96" width="130" height="10" rx="2" fill="#DDDDDD"/>
+
+  <!-- Arrow down -->
+  <line x1="450" y1="124" x2="450" y2="148" stroke="#C04A00" stroke-width="1.8" marker-end="url(#aCh)"/>
+  <rect x="396" y="126" width="108" height="16" rx="3" fill="#FFFFFF" stroke="#FF6B35" stroke-width="0.8"/>
+  <text x="450" y="138" text-anchor="middle" font-family="'Segoe UI',Arial,sans-serif" font-size="9.5" fill="#C04A00">divide em chunks</text>
+
+  <!-- ---- CHUNK 1 ---- -->
+  <rect x="40" y="152" width="268" height="76" rx="8" fill="#FFF8F4" stroke="#FF6B35" stroke-width="2"/>
+  <rect x="40" y="152" width="268" height="22" rx="8" fill="#FF6B35" opacity="0.15"/>
+  <text x="174" y="167" text-anchor="middle" font-family="'Segoe UI',Arial,sans-serif" font-size="10" font-weight="700" fill="#C04A00">CHUNK 1 — 600 chars</text>
+  <rect x="56" y="180" width="240" height="8" rx="2" fill="#DDDDDD"/>
+  <rect x="56" y="194" width="220" height="8" rx="2" fill="#DDDDDD"/>
+  <rect x="56" y="208" width="180" height="8" rx="2" fill="#DDDDDD"/>
+
+  <!-- ---- CHUNK 2 ---- -->
+  <rect x="316" y="152" width="268" height="76" rx="8" fill="#FFF3E0" stroke="#E07B00" stroke-width="2"/>
+  <rect x="316" y="152" width="268" height="22" rx="8" fill="#E07B00" opacity="0.15"/>
+  <text x="450" y="167" text-anchor="middle" font-family="'Segoe UI',Arial,sans-serif" font-size="10" font-weight="700" fill="#8B4500">CHUNK 2 — 600 chars</text>
+  <rect x="332" y="180" width="240" height="8" rx="2" fill="#DDDDDD"/>
+  <rect x="332" y="194" width="220" height="8" rx="2" fill="#DDDDDD"/>
+  <rect x="332" y="208" width="180" height="8" rx="2" fill="#DDDDDD"/>
+
+  <!-- ---- CHUNK 3 ---- -->
+  <rect x="592" y="152" width="268" height="76" rx="8" fill="#FFF8F4" stroke="#FF6B35" stroke-width="2"/>
+  <rect x="592" y="152" width="268" height="22" rx="8" fill="#FF6B35" opacity="0.15"/>
+  <text x="726" y="167" text-anchor="middle" font-family="'Segoe UI',Arial,sans-serif" font-size="10" font-weight="700" fill="#C04A00">CHUNK 3 — 600 chars</text>
+  <rect x="608" y="180" width="240" height="8" rx="2" fill="#DDDDDD"/>
+  <rect x="608" y="194" width="220" height="8" rx="2" fill="#DDDDDD"/>
+  <rect x="608" y="208" width="180" height="8" rx="2" fill="#DDDDDD"/>
+
+  <!-- ---- SOBREPOSIÇÃO: overlap highlight CHUNK1/2 ---- -->
+  <rect x="264" y="170" width="44" height="50" rx="3" fill="#FF6B35" opacity="0.22"/>
+  <rect x="316" y="170" width="44" height="50" rx="3" fill="#FF6B35" opacity="0.22"/>
+  <!-- Brace/label for overlap -->
+  <line x1="264" y1="226" x2="264" y2="236" stroke="#C04A00" stroke-width="1"/>
+  <line x1="360" y1="226" x2="360" y2="236" stroke="#C04A00" stroke-width="1"/>
+  <line x1="264" y1="236" x2="360" y2="236" stroke="#C04A00" stroke-width="1"/>
+  <line x1="312" y1="236" x2="312" y2="246" stroke="#C04A00" stroke-width="1"/>
+  <rect x="245" y="248" width="134" height="16" rx="3" fill="#FFF0E8" stroke="#FF6B35" stroke-width="0.8"/>
+  <text x="312" y="260" text-anchor="middle" font-family="'Segoe UI',Arial,sans-serif" font-size="9.5" fill="#C04A00">sobreposição: 80 chars</text>
+
+  <!-- ---- SOBREPOSIÇÃO: CHUNK2/3 ---- -->
+  <rect x="540" y="170" width="44" height="50" rx="3" fill="#E07B00" opacity="0.22"/>
+  <rect x="592" y="170" width="44" height="50" rx="3" fill="#E07B00" opacity="0.22"/>
+  <line x1="540" y1="226" x2="540" y2="236" stroke="#8B4500" stroke-width="1"/>
+  <line x1="636" y1="226" x2="636" y2="236" stroke="#8B4500" stroke-width="1"/>
+  <line x1="540" y1="236" x2="636" y2="236" stroke="#8B4500" stroke-width="1"/>
+  <line x1="588" y1="236" x2="588" y2="246" stroke="#8B4500" stroke-width="1"/>
+  <rect x="521" y="248" width="134" height="16" rx="3" fill="#FFF3E0" stroke="#E07B00" stroke-width="0.8"/>
+  <text x="588" y="260" text-anchor="middle" font-family="'Segoe UI',Arial,sans-serif" font-size="9.5" fill="#8B4500">sobreposição: 80 chars</text>
+
+  <!-- ---- JUSTIFICATIVAS ---- -->
+  <!-- Box Justificativa Chunk Size -->
+  <rect x="40" y="296" width="390" height="120" rx="8" fill="#FFF8F4" stroke="#FF6B35" stroke-width="1.5"/>
+  <rect x="40" y="296" width="390" height="28" rx="8" fill="#FF6B35" opacity="0.12"/>
+  <text x="235" y="315" text-anchor="middle" font-family="'Segoe UI',Arial,sans-serif" font-size="11" font-weight="700" fill="#C04A00">Por que 600 chars?</text>
+  <line x1="60" y1="325" x2="410" y2="325" stroke="#FF6B35" stroke-width="0.6" opacity="0.4"/>
+  <text x="60" y="343" font-family="'Segoe UI',Arial,sans-serif" font-size="10" fill="#333333">• Captura um comprovante/recibo completo em 1 chunk</text>
+  <text x="60" y="361" font-family="'Segoe UI',Arial,sans-serif" font-size="10" fill="#333333">• Evita diluição semântica de chunks muito longos</text>
+  <text x="60" y="379" font-family="'Segoe UI',Arial,sans-serif" font-size="10" fill="#333333">• Mantém valor, emitente e data no mesmo trecho</text>
+  <text x="60" y="397" font-family="'Segoe UI',Arial,sans-serif" font-size="10" fill="#666666">• Equilibra precisão × recall no ChromaDB</text>
+
+  <!-- Box Justificativa Overlap -->
+  <rect x="470" y="296" width="390" height="120" rx="8" fill="#FFF3E0" stroke="#E07B00" stroke-width="1.5"/>
+  <rect x="470" y="296" width="390" height="28" rx="8" fill="#E07B00" opacity="0.12"/>
+  <text x="665" y="315" text-anchor="middle" font-family="'Segoe UI',Arial,sans-serif" font-size="11" font-weight="700" fill="#8B4500">Por que 80 chars de sobreposição?</text>
+  <line x1="490" y1="325" x2="840" y2="325" stroke="#E07B00" stroke-width="0.6" opacity="0.4"/>
+  <text x="490" y="343" font-family="'Segoe UI',Arial,sans-serif" font-size="10" fill="#333333">• Preserva frases cortadas na fronteira do chunk</text>
+  <text x="490" y="361" font-family="'Segoe UI',Arial,sans-serif" font-size="10" fill="#333333">• Evita perder valores monetários (ex: "R$ 350,00")</text>
+  <text x="490" y="379" font-family="'Segoe UI',Arial,sans-serif" font-size="10" fill="#333333">• Contexto de transição entre parágrafos mantido</text>
+  <text x="490" y="397" font-family="'Segoe UI',Arial,sans-serif" font-size="10" fill="#666666">• ~13% de sobreposição (equilíbrio padrão NLP)</text>
+
+  <!-- Stats bar -->
+  <rect x="40" y="432" width="820" height="18" rx="4" fill="#F5F5F5" stroke="#DDDDDD" stroke-width="0.8"/>
+  <text x="60" y="445" font-family="'Segoe UI',Arial,sans-serif" font-size="9" fill="#555555">Resultado: guia_imposto_renda.txt (357 linhas) + pr-irpf-2024.pdf → 31 chunks indexados no ChromaDB</text>
+  <text x="800" y="445" text-anchor="end" font-family="'Segoe UI',Arial,sans-serif" font-size="9" fill="#C04A00">chunker.py</text>
+</svg>
