@@ -23,6 +23,15 @@ import logging
 
 logger = logging.getLogger(__name__)
 
+_instancia_global: "ServicoRAG | None" = None
+
+
+def get_servico_rag() -> "ServicoRAG":
+    global _instancia_global
+    if _instancia_global is None:
+        _instancia_global = ServicoRAG()
+    return _instancia_global
+
 
 class ServicoRAG:
     """

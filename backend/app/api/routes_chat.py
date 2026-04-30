@@ -4,7 +4,7 @@ Rotas da API para o chat com RAG e gerenciamento da base de conhecimento.
 
 from fastapi import APIRouter, HTTPException
 from app.schemas.document import RequisicaoChat, RespostaChat
-from app.services.rag_service import ServicoRAG
+from app.services.rag_service import ServicoRAG, get_servico_rag
 import logging
 
 logger = logging.getLogger(__name__)
@@ -34,7 +34,7 @@ async def chat(requisicao: RequisicaoChat) -> RespostaChat:
         raise HTTPException(status_code=422, detail="A pergunta não pode ser vazia.")
 
     try:
-        servico = ServicoRAG()
+        servico = get_servico_rag()
         resultado = await servico.responder_pergunta(requisicao.pergunta)
         return RespostaChat(**resultado)
     except Exception as erro:
@@ -56,7 +56,7 @@ async def chat(requisicao: RequisicaoChat) -> RespostaChat:
 async def ingerir_base():
     """Reindexar todos os documentos da base de conhecimento no ChromaDB."""
     try:
-        servico = ServicoRAG()
+        servico = get_servico_rag()
         total = servico.ingerir_base_conhecimento()
         return {
             "mensagem": "Ingestão concluída com sucesso.",
@@ -75,7 +75,7 @@ async def ingerir_base():
 async def status_rag():
     """Diagnóstico e métricas do sistema RAG."""
     try:
-        servico = ServicoRAG()
+        servico = get_servico_rag()
         status = servico.obter_status()
 
         # Verifica disponibilidade do Ollama
