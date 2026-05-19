@@ -28,7 +28,7 @@ from app.services.document_kind_service import (
 from app.services.extraction_service import ServicoExtracao
 from app.services.history_service import ServicoHistorico
 from app.services.justificativa_service import ServicoJustificativa
-from app.services.rag_service import ServicoRAG
+from app.services.rag_service import get_servico_rag
 import logging
 
 logger = logging.getLogger(__name__)
@@ -195,7 +195,7 @@ async def salvar_documento(
         # Indexa no RAG para permitir consultas futuras sobre os documentos salvos
         if dados.texto_extraido and dados.texto_extraido.strip():
             try:
-                servico_rag = ServicoRAG()
+                servico_rag = get_servico_rag()
                 chunks_indexados = servico_rag.ingerir_documento(
                     texto=dados.texto_extraido,
                     fonte=dados.nome_arquivo,

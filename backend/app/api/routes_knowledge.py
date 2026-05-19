@@ -12,7 +12,7 @@ from fastapi import APIRouter, HTTPException, UploadFile, File
 from fastapi.responses import FileResponse
 
 from app.core.config import configuracoes
-from app.services.rag_service import ServicoRAG
+from app.services.rag_service import get_servico_rag
 import logging
 
 logger = logging.getLogger(__name__)
@@ -46,7 +46,7 @@ async def listar_arquivos_base():
             })
 
     try:
-        servico = ServicoRAG()
+        servico = get_servico_rag()
         chunks_total = servico.banco_vetorial.total_chunks()
     except Exception:
         chunks_total = 0
@@ -108,7 +108,7 @@ async def adicionar_a_base(arquivo: UploadFile = File(...)):
     # Re-indexa toda a base para incluir o novo documento
     # IMPORTANTE: limpar antes de re-indexar evita duplicação de chunks no ChromaDB
     try:
-        servico = ServicoRAG()
+        servico = get_servico_rag()
         servico.banco_vetorial.limpar()
         total_chunks = servico.ingerir_base_conhecimento()
         logger.info(f"Re-indexação concluída após upload de '{nome_destino}': {total_chunks} chunks.")
@@ -185,7 +185,7 @@ async def remover_arquivo_base(nome_arquivo: str):
     logger.info(f"Arquivo removido da base de conhecimento: {nome_arquivo}")
 
     try:
-        servico = ServicoRAG()
+        servico = get_servico_rag()
         # Limpa o ChromaDB e re-indexa apenas os arquivos restantes
         servico.banco_vetorial.limpar()
         total_chunks = servico.ingerir_base_conhecimento()

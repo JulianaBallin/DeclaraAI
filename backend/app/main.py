@@ -63,15 +63,13 @@ async def ciclo_de_vida(app: FastAPI):
     # Inicializa banco de dados relacional
     criar_tabelas()
 
-    # Auto-ingestão da base de conhecimento apenas se o ChromaDB estiver vazio
+    # Inicializa o singleton do ServicoRAG e auto-ingere se necessário
     try:
-        from app.services.rag_service import ServicoRAG
-        from app.rag.vector_store import BancoVetorial
+        from app.services.rag_service import get_servico_rag
 
-        banco_vetorial = BancoVetorial()
-        if banco_vetorial.total_chunks() == 0:
+        servico_rag = get_servico_rag()
+        if servico_rag.banco_vetorial.total_chunks() == 0:
             logger.info("ChromaDB vazio — iniciando ingestão automática da base de conhecimento...")
-            servico_rag = ServicoRAG()
             total = servico_rag.ingerir_base_conhecimento()
             if total > 0:
                 logger.info(f"Ingestão automática concluída: {total} chunk(s) indexado(s).")
@@ -82,7 +80,7 @@ async def ciclo_de_vida(app: FastAPI):
                 )
         else:
             logger.info(
-                f"ChromaDB já inicializado: {banco_vetorial.total_chunks()} chunk(s) disponíveis."
+                f"ChromaDB já inicializado: {servico_rag.banco_vetorial.total_chunks()} chunk(s) disponíveis."
             )
     except Exception as erro:
         logger.warning(
@@ -90,15 +88,19 @@ async def ciclo_de_vida(app: FastAPI):
             "Use POST /ingest para indexar manualmente."
         )
 
-    # Pré-aquece o modelo LLM em segundo plano para eliminar latência na primeira consulta.
-    # Sem isso, a primeira mensagem do chat sempre excede o tempo limite enquanto o Ollama
-    # carrega o modelo (~4 GB) na memória após o cold start.
-    async def _aquecer_modelo():
+    # Pré-aquece embeddings e modelo LLM em segundo plano para eliminar latência na primeira consulta.
+    async def _aquecer_tudo():
+        import asyncio
+        from app.rag.embeddings import GeradorEmbeddings
         from app.rag.generator import GeradorResposta
+        logger.info("Aquecendo modelo de embeddings...")
+        loop = asyncio.get_event_loop()
+        await loop.run_in_executor(None, GeradorEmbeddings().gerar, "aquecimento")
+        logger.info("Modelo de embeddings pré-carregado.")
         await GeradorResposta().aquecer()
 
-    asyncio.create_task(_aquecer_modelo())
-    logger.info("Aquecimento do modelo Ollama iniciado em segundo plano.")
+    asyncio.create_task(_aquecer_tudo())
+    logger.info("Aquecimento de modelos iniciado em segundo plano.")
 
     yield  # Aplicação em execução
 

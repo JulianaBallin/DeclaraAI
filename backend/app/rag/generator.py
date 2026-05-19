@@ -145,7 +145,7 @@ class GeradorResposta:
         try:
             logger.info(f"Aquecendo modelo '{self.modelo}' no Ollama...")
             async with httpx.AsyncClient(timeout=300.0) as cliente:
-                await cliente.post(
+                resposta = await cliente.post(
                     self.url_geracao,
                     json={
                         "model": self.modelo,
@@ -154,7 +154,13 @@ class GeradorResposta:
                         "stream": False,
                     },
                 )
-            logger.info(f"Modelo '{self.modelo}' pré-carregado com sucesso.")
+                if resposta.status_code == 200:
+                    logger.info(f"Modelo '{self.modelo}' pré-carregado com sucesso.")
+                else:
+                    logger.warning(
+                        f"Aquecimento do Ollama retornou status {resposta.status_code}. "
+                        f"Execute: docker exec declaraai-ollama ollama pull {self.modelo}"
+                    )
         except Exception as erro:
             logger.warning(f"Aquecimento do Ollama falhou (não crítico): {erro}")
 
