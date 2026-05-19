@@ -1,5 +1,20 @@
 """
-Classificação híbrida: regras (score + margem) → LLM (JSON) → Requer Revisão.
+Classificação por regras de documentos fiscais — fallback do pipeline LLM-first.
+
+Este serviço é chamado pelo ServicoClassificacaoLLM (llm_classification_service.py)
+quando o LLM falha ou retorna JSON inválido. Não deve ser usado como classificador
+primário — para isso, use ServicoClassificacaoLLM.
+
+Arquitetura de chamada:
+    ServicoClassificacaoLLM.classificar()
+        → LLM (primário)
+        → ServicoClassificacao.classificar_com_confianca() ← este arquivo (fallback)
+        → "Requer Revisão" (último recurso)
+
+Mantido para:
+    1. Compatibilidade com código legado que importa ServicoClassificacao diretamente.
+    2. Fallback quando Ollama está indisponível ou retorna JSON inválido.
+    3. Experimento de ablation no artigo: comparação "regras puras vs. LLM-first".
 """
 
 import json
@@ -16,7 +31,6 @@ logger = logging.getLogger(__name__)
 
 LIMIAR_SCORE: float = 4.0
 MARGEM_MINIMA: float = 2.0
-# Quando DANFE/NFC-e/etc. estão presentes, “Recibo Médico” não deve ganhar só por termos de saúde.
 BONUS_NOTA_FISCAL_DFE: float = 4.0
 
 
@@ -72,31 +86,11 @@ CATEGORIAS_TRIBUTARIAS: dict[str, dict] = {
     },
     "Nota Fiscal": {
         "palavras": [
-            "nota fiscal",
-            "NF-e",
-            "NFC-e",
-            "NF-Se",
-            "NFe",
-            "DANFE",
-            "chave de acesso",
-            "valor dos serviços",
-            "protocolo de autorização",
-            "ICMS",
-            "IPI",
-            "ISS",
-            "produto",
-            "produtos",
-            "mercadoria",
-            "compra",
-            "venda",
-            "série",
-            "número NF",
-            "emissão fiscal",
-            "SEFAZ",
-            "supermercado",
-            "restaurante",
-            "loja",
-            "comércio",
+            "nota fiscal", "NF-e", "NFC-e", "NF-Se", "NFe", "DANFE",
+            "chave de acesso", "valor dos serviços", "protocolo de autorização",
+            "ICMS", "IPI", "ISS", "produto", "produtos", "mercadoria",
+            "compra", "venda", "série", "número NF", "emissão fiscal",
+            "SEFAZ", "supermercado", "restaurante", "loja", "comércio",
         ],
         "peso": 1.0,
     },
@@ -156,7 +150,7 @@ REGRAS OBRIGATÓRIAS:
 3. O campo "motivo" deve ser uma frase curta (máx 15 palavras).
 4. Se não conseguir classificar com segurança, use "Documento Não Classificado".
 5. Não invente categorias fora da lista acima.
-6. DANFE, NFC-e, NF-e ou chave de acesso (44 dígitos) indicam Nota Fiscal, inclusive de clínica ou odontologia.
+6. DANFE, NFC-e, NF-e ou chave de acesso (44 dígitos) indicam Nota Fiscal.
 
 Formato obrigatório:
 {{"categoria": "Nome Exato da Categoria", "confianca": "alta", "motivo": "Justificativa breve."}}
@@ -168,8 +162,15 @@ RESPOSTA JSON:"""
 
 
 class ServicoClassificacao:
+    """
+    Classificador por regras (score de palavras-chave + margem).
+
+    ATENÇÃO: Este serviço é o FALLBACK do pipeline.
+    Para uso em produção, use ServicoClassificacaoLLM (llm_classification_service.py).
+    Para experimentos de ablation (regras puras), use classificar_por_regras_puro().
+    """
+
     def _documento_fiscal_eletronico_evidente(self, texto: str, nome_arquivo: str) -> bool:
-        """True se o texto é claramente NF-e/NFC-e (DANFE, chave, etc.)."""
         if texto_eh_recibo_aluguel(f"{texto}\n{nome_arquivo}"):
             return False
         blob = f"{texto}\n{nome_arquivo}"
@@ -212,7 +213,6 @@ class ServicoClassificacao:
 
     def _avaliar_regras(self, pontuacoes: dict[str, float]) -> Optional[str]:
         if not pontuacoes:
-            logger.info("Regras: sem palavras-chave → fallback LLM.")
             return None
 
         scores_ordenados = sorted(pontuacoes.values(), reverse=True)
@@ -220,29 +220,16 @@ class ServicoClassificacao:
         categoria_vencedora = max(pontuacoes, key=pontuacoes.get)
 
         if score_max < LIMIAR_SCORE:
-            logger.info(
-                "Regras: score %.1f < limiar %.1f → fallback LLM.",
-                score_max,
-                LIMIAR_SCORE,
-            )
             return None
 
         if len(scores_ordenados) >= 2:
             diferenca = score_max - scores_ordenados[1]
             if diferenca < MARGEM_MINIMA:
-                logger.info(
-                    "Regras: diferença %.1f entre '%s' (%.1f) e 2º (%.1f) < margem %.1f → LLM.",
-                    diferenca,
-                    categoria_vencedora,
-                    score_max,
-                    scores_ordenados[1],
-                    MARGEM_MINIMA,
-                )
                 return None
 
         segundo = scores_ordenados[1] if len(scores_ordenados) >= 2 else 0.0
-        logger.info(
-            "Regras aceitas: '%s' score=%.1f margem=%.1f",
+        logger.debug(
+            "Regras: '%s' score=%.1f margem=%.1f",
             categoria_vencedora,
             score_max,
             score_max - segundo,
@@ -250,10 +237,9 @@ class ServicoClassificacao:
         return categoria_vencedora
 
     def _classificar_com_llm(self, texto: str) -> tuple[Optional[str], str]:
-        """Retorna (categoria, confianca). confianca pode ser 'alta', 'media', 'baixa' ou 'desconhecida'."""
+        """Chamada LLM interna — mantida para compatibilidade com código legado."""
         texto_limitado = texto[:3000] if len(texto) > 3000 else texto
         prompt = PROMPT_CLASSIFICACAO.format(texto=texto_limitado)
-
         payload = {
             "model": configuracoes.OLLAMA_MODELO,
             "prompt": prompt,
@@ -265,87 +251,95 @@ class ServicoClassificacao:
                 "num_predict": 200,
             },
         }
-
         try:
             url = f"{configuracoes.OLLAMA_BASE_URL.rstrip('/')}/api/generate"
             resposta = httpx.post(url, json=payload, timeout=60.0)
             resposta.raise_for_status()
             texto_resposta = resposta.json().get("response", "").strip()
             texto_resposta = re.sub(r"```json|```", "", texto_resposta).strip()
-
             match = re.search(r"\{.*\}", texto_resposta, re.DOTALL)
             if match:
                 texto_resposta = match.group()
-
             dados = json.loads(texto_resposta)
             categoria = str(dados.get("categoria", "")).strip()
             confianca = str(dados.get("confianca", "desconhecida")).strip()
-            motivo = str(dados.get("motivo", "")).strip()
-
             if categoria not in CATEGORIAS_VALIDAS:
-                logger.warning("LLM categoria inválida: '%s'", categoria)
                 return None, "baixa"
-
-            logger.info("LLM: '%s' | %s | %s", categoria, confianca, motivo)
             return categoria, confianca
-
-        except json.JSONDecodeError as e:
-            logger.warning("LLM JSON inválido: %s", e)
-            return None, "baixa"
-        except httpx.ConnectError:
-            logger.warning("Ollama indisponível (conexão).")
-            return None, "baixa"
-        except httpx.TimeoutException:
-            logger.warning("Timeout ao chamar Ollama.")
-            return None, "baixa"
-        except httpx.HTTPStatusError as e:
-            logger.warning("Ollama HTTP %s", e.response.status_code)
-            return None, "baixa"
         except Exception as e:
-            logger.error("Erro ao chamar LLM: %s", e, exc_info=True)
+            logger.warning("LLM interno: %s", e)
             return None, "baixa"
-
-    def classificar(self, texto: str, nome_arquivo: str = "") -> str:
-        """Mantido por compatibilidade — retorna apenas a categoria."""
-        categoria, _ = self.classificar_com_confianca(texto, nome_arquivo)
-        return categoria
 
     def classificar_com_confianca(self, texto: str, nome_arquivo: str = "") -> tuple[str, str]:
-        """Retorna (categoria, confianca). confianca: 'alta' | 'media' | 'baixa'."""
+        """
+        Classifica usando regras e, se inconclusivo, LLM interno.
+        Chamado pelo ServicoClassificacaoLLM como fallback.
+        """
         if not texto and not nome_arquivo:
             return CATEGORIA_PADRAO, "baixa"
 
         if texto_eh_recibo_aluguel(f"{texto}\n{nome_arquivo}"):
-            logger.info("Recibo de aluguel detectado → categoria 'Aluguel' (alta).")
             return "Aluguel", "alta"
 
         if _evidencia_nfse(texto, nome_arquivo):
-            logger.info("NFS-e detectada no texto → categoria 'Nota Fiscal' com confiança alta.")
             return "Nota Fiscal", "alta"
 
         pontuacoes = self._calcular_pontuacoes(texto, nome_arquivo)
+
         if self._documento_fiscal_eletronico_evidente(texto, nome_arquivo):
             pontuacoes.pop("Recibo Médico", None)
             pontuacoes.pop("Comprovante Educacional", None)
             nf = pontuacoes.get("Nota Fiscal", 0.0) + BONUS_NOTA_FISCAL_DFE
             pontuacoes["Nota Fiscal"] = max(nf, LIMIAR_SCORE)
-            logger.info("Prioridade DFE: fora de competição recibo/ensino; reforço em Nota Fiscal.")
 
         categoria_regras = self._avaliar_regras(pontuacoes)
         if categoria_regras is not None:
             scores = sorted(pontuacoes.values(), reverse=True)
             margem = (scores[0] - scores[1]) if len(scores) >= 2 else scores[0]
             confianca = "alta" if margem >= 4.0 else "media"
-            logger.info("Classificação final (regras): '%s' | %s", categoria_regras, confianca)
             return categoria_regras, confianca
 
-        logger.info("Acionando fallback LLM…")
         categoria_llm, confianca_llm = self._classificar_com_llm(texto)
         if categoria_llm is not None:
-            logger.info("Classificação final (LLM): '%s' | %s", categoria_llm, confianca_llm)
             return categoria_llm, confianca_llm
 
-        logger.warning("Inconclusivo. Pontuações: %s → Requer Revisão.", pontuacoes)
+        return CATEGORIA_REVISAO, "baixa"
+
+    def classificar(self, texto: str, nome_arquivo: str = "") -> str:
+        categoria, _ = self.classificar_com_confianca(texto, nome_arquivo)
+        return categoria
+
+    def classificar_por_regras_puro(
+        self, texto: str, nome_arquivo: str = ""
+    ) -> tuple[str, str]:
+        """
+        Classifica usando APENAS regras, sem nenhuma chamada ao LLM.
+        Usado nos experimentos de ablation do artigo.
+        """
+        if not texto and not nome_arquivo:
+            return CATEGORIA_PADRAO, "baixa"
+
+        if texto_eh_recibo_aluguel(f"{texto}\n{nome_arquivo}"):
+            return "Aluguel", "alta"
+
+        if _evidencia_nfse(texto, nome_arquivo):
+            return "Nota Fiscal", "alta"
+
+        pontuacoes = self._calcular_pontuacoes(texto, nome_arquivo)
+
+        if self._documento_fiscal_eletronico_evidente(texto, nome_arquivo):
+            pontuacoes.pop("Recibo Médico", None)
+            pontuacoes.pop("Comprovante Educacional", None)
+            nf = pontuacoes.get("Nota Fiscal", 0.0) + BONUS_NOTA_FISCAL_DFE
+            pontuacoes["Nota Fiscal"] = max(nf, LIMIAR_SCORE)
+
+        categoria_regras = self._avaliar_regras(pontuacoes)
+        if categoria_regras is not None:
+            scores = sorted(pontuacoes.values(), reverse=True)
+            margem = (scores[0] - scores[1]) if len(scores) >= 2 else scores[0]
+            confianca = "alta" if margem >= 4.0 else "media"
+            return categoria_regras, confianca
+
         return CATEGORIA_REVISAO, "baixa"
 
     def listar_categorias(self) -> list[str]:

@@ -13,6 +13,7 @@ from app.core.config import configuracoes
 from app.core.database import obter_db
 from app.schemas.document import DocumentoSalvar
 from app.services.classification_service import ServicoClassificacao
+from app.services.llm_classification_service import ServicoClassificacaoLLM
 from app.services.document_kind_service import (
     ajustar_categoria_irpf_por_tipo_documento,
     inferir_tipo_documento,
@@ -84,11 +85,19 @@ async def upload_documento(arquivo: UploadFile = File(...)):
         servico_extracao = ServicoExtracao()
         dados = servico_extracao.processar_arquivo(str(caminho_arquivo))
 
-        # Classificação tributária com nível de confiança
-        servico_classificacao = ServicoClassificacao()
-        categoria, confianca = servico_classificacao.classificar_com_confianca(
+        # Classificação LLM-first (fallback por regras se o LLM falhar)
+        resultado_cls = ServicoClassificacaoLLM().classificar(
             texto=dados["texto_extraido"],
             nome_arquivo=arquivo.filename or "",
+        )
+        categoria = resultado_cls.categoria
+        confianca = resultado_cls.confianca
+        logger.info(
+            "Classificação: '%s' | origem=%s | latencia_llm=%.0fms | tentativas=%d",
+            categoria,
+            resultado_cls.origem,
+            resultado_cls.latencia_ms,
+            resultado_cls.tentativas_llm,
         )
 
         tipo_detalhe = inferir_tipo_documento(
@@ -112,6 +121,10 @@ async def upload_documento(arquivo: UploadFile = File(...)):
         dados["nome_arquivo"] = arquivo.filename or nome_unico
         dados["categoria"] = categoria
         dados["confianca_classificacao"] = confianca
+        dados["origem_classificacao"] = resultado_cls.origem
+        dados["motivo_classificacao"] = resultado_cls.motivo
+        dados["latencia_classificacao_ms"] = resultado_cls.latencia_ms
+        dados["tentativas_llm_classificacao"] = resultado_cls.tentativas_llm
         dados["tipo_documento"] = tipo_exib
         dados["tipo_documento_detalhado"] = tipo_detalhe
         dados["validade_fiscal"] = val_ok
